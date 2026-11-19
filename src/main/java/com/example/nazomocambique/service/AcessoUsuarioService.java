@@ -1,6 +1,7 @@
 package com.example.nazomocambique.service;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,7 +26,9 @@ public class AcessoUsuarioService  implements UserDetailsService {
 	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		Usuario usuario = usuarioRepository.findByUsername(username) 
+		// E-mails são gravados em minúsculas: quem digita "Maria@Email.com" no login também entra
+		Usuario usuario = usuarioRepository.findByUsername(username)
+				.or(() -> usuarioRepository.findByUsername(username == null ? "" : username.trim().toLowerCase(Locale.ROOT)))
 				.orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + username));
 		 return new AcessoUsuario(usuario);
 	}  

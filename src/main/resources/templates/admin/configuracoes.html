@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=11)}">
+    <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
+
+    <title>Configurações - Estilo London Store</title>
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png}">
+</head>
+
+<body class="admin-ui">
+
+    <!-- Barra de anúncios -->
+    <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
+
+    <!-- Barra branca com menu -->
+    <div class="barrabranca">
+        <button class="menu-btn" id="menuBtn" aria-label="Abrir menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
+    </div>
+
+    <main class="cadastro-container">
+
+        <!-- Mensagens de retorno -->
+        <div th:if="${sucesso}" class="cadastro-alerta cadastro-alerta-ok" role="status" th:text="${sucesso}"></div>
+        <div th:if="${erro}" class="cadastro-alerta cadastro-alerta-erro" role="alert" th:text="${erro}"></div>
+
+        <section class="cadastro-form-box">
+            <h2>Aparência do site</h2>
+            <p class="adm-ajuda" style="margin-bottom: 22px;">
+                Defina a cor principal e a logo da loja. O que for salvo aqui vale para todo o site: loja, login e painel.
+            </p>
+
+            <form th:action="@{/admin/configuracoes/salvar}" method="post" enctype="multipart/form-data"
+                  class="cadastro-form" id="formAparencia"
+                  th:attr="data-logo-personalizada=${site.logoPersonalizada}">
+
+                <!-- Cor principal -->
+                <div class="cadastro-campo adm-c6">
+                    <span class="adm-rotulo" id="rotuloCor">Cor principal</span>
+                    <p class="adm-ajuda">Usada em botões, etiquetas, barra de avisos, menu lateral, painel do login e rodapé.</p>
+
+                    <div class="tema-cores">
+                        <input type="color" id="corSeletor" class="tema-seletor" th:value="${#strings.toLowerCase(site.corPrimaria)}"
+                               aria-labelledby="rotuloCor">
+                        <input type="text" id="corPrimaria" name="corPrimaria" class="tema-hex" th:value="${site.corPrimaria}"
+                               maxlength="7" pattern="#[0-9A-Fa-f]{6}" placeholder="#0A0A0A" required
+                               aria-label="Código da cor em hexadecimal" autocomplete="off" spellcheck="false">
+                    </div>
+
+                    <div class="tema-amostras" role="group" aria-label="Cores sugeridas">
+                        <button type="button" class="tema-amostra" th:each="cor : ${coresPredefinidas}"
+                                th:attr="data-cor=${cor.value},title=${cor.key},aria-label=${cor.key}"
+                                th:style="'--cor:' + ${cor.value}" aria-pressed="false"></button>
+                    </div>
+                </div>
+
+                <!-- Prévia -->
+                <div class="cadastro-campo adm-c6">
+                    <span class="adm-rotulo">Prévia</span>
+                    <p class="adm-ajuda">A página inteira (menu lateral e barra de avisos inclusive) mostra a cor escolhida antes de você salvar.</p>
+                    <div class="tema-previa">
+                        <span class="tema-previa-btn">Comprar</span>
+                        <span class="tema-previa-badge">-20%</span>
+                        <span class="tema-previa-tag">Novidade</span>
+                    </div>
+                </div>
+
+                <!-- Logo -->
+                <div class="cadastro-campo adm-c6">
+                    <label class="adm-rotulo" for="logo">Logo da loja</label>
+                    <p class="adm-ajuda">Aparece no cabeçalho, no menu lateral e na tela de login.</p>
+
+                    <div class="tema-logos">
+                        <div>
+                            <div class="tema-logo-caixa tema-logo-clara">
+                                <img id="logoPreviaClara" alt="Logo sobre fundo claro"
+                                     th:src="${site.logoPersonalizada} ? @{'/logo-site/' + ${site.logoArquivo}} : @{/brand/logo-el.png}">
+                            </div>
+                            <p class="tema-logo-legenda">Cabeçalho</p>
+                        </div>
+                        <div>
+                            <div class="tema-logo-caixa tema-logo-escura">
+                                <img id="logoPreviaEscura" alt="Logo sobre a cor principal"
+                                     th:src="${site.logoPersonalizada} ? @{'/logo-site/' + ${site.logoArquivo}} : @{/brand/logo-el-branca.png}">
+                            </div>
+                            <p class="tema-logo-legenda">Menu lateral e login</p>
+                        </div>
+                    </div>
+
+                    <input type="file" id="logo" name="logo" accept="image/png,image/jpeg,image/webp,image/gif">
+                    <p class="adm-ajuda"
+                       th:text="${site.logoPersonalizada} ? 'Para trocar a logo, escolha um novo arquivo. Sem arquivo, a logo atual é mantida.' : 'Opcional. Sem arquivo, continua a logo padrão da loja.'"></p>
+                    <p class="tema-aviso">
+                        Prefira PNG ou WEBP com fundo transparente, de pelo menos 1000 px de altura e até 2 MB. Sobre áreas coloridas
+                        (menu lateral e login) a logo aparece em uma cor só, clara ou escura, para ficar legível.
+                    </p>
+                </div>
+
+                <div class="adm-acoes">
+                    <button type="submit" class="adm-btn adm-btn-sec" th:formaction="@{/admin/configuracoes/restaurar}" formnovalidate
+                            onclick="return confirm('Restaurar a cor e a logo originais? A logo enviada será removida.');">
+                        Restaurar padrão
+                    </button>
+                    <button type="submit" class="btn-comprar cadastro-btn-salvar adm-btn">Salvar alterações</button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
+    <div class="overlay" id="overlay"></div>
+
+    <script th:src="@{/jshome.js(v=5)}"></script>
+    <script>
+        (function () {
+            var raiz = document.documentElement;
+            var form = document.getElementById('formAparencia');
+            var seletor = document.getElementById('corSeletor');
+            var campoHex = document.getElementById('corPrimaria');
+            var amostras = document.querySelectorAll('.tema-amostra');
+            var entrada = document.getElementById('logo');
+            var claraImg = document.getElementById('logoPreviaClara');
+            var escuraImg = document.getElementById('logoPreviaEscura');
+            var HEX = /^#[0-9A-Fa-f]{6}$/;
+            var logoPersonalizada = form.getAttribute('data-logo-personalizada') === 'true';
+            var urlTemp = null;
+
+            // Mesma regra do servidor (Aparencia.getCorContraste): vence o texto com maior contraste WCAG
+            function canal(v) { v = v / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }
+            function luminancia(hex) {
+                return 0.2126 * canal(parseInt(hex.substr(1, 2), 16))
+                     + 0.7152 * canal(parseInt(hex.substr(3, 2), 16))
+                     + 0.0722 * canal(parseInt(hex.substr(5, 2), 16));
+            }
+            function textoClaro(hex) {
+                var l = luminancia(hex);
+                return 1.05 / (l + 0.05) >= (l + 0.05) / (luminancia('#0A0A0A') + 0.05);
+            }
+
+            function aplicarCor(hex) {
+                var claro = textoClaro(hex);
+                raiz.style.setProperty('--primary-color', hex);
+                raiz.style.setProperty('--primary-contrast', claro ? '#FFFFFF' : '#0A0A0A');
+                // Logo enviada vira silhueta de uma cor; a padrão (branca) só inverte se a cor for clara
+                var custom = logoPersonalizada || (entrada.files && entrada.files.length > 0);
+                var filtro = custom ? (claro ? 'brightness(0) invert(1)' : 'brightness(0)') : (claro ? 'none' : 'invert(1)');
+                raiz.style.setProperty('--logo-filtro', filtro);
+                amostras.forEach(function (a) {
+                    a.setAttribute('aria-pressed', a.getAttribute('data-cor').toUpperCase() === hex.toUpperCase() ? 'true' : 'false');
+                });
+            }
+
+            seletor.addEventListener('input', function () {
+                campoHex.value = seletor.value.toUpperCase();
+                aplicarCor(campoHex.value);
+            });
+            campoHex.addEventListener('input', function () {
+                var v = campoHex.value.trim();
+                if (v.charAt(0) !== '#') { v = '#' + v; }
+                if (HEX.test(v)) {
+                    seletor.value = v.toLowerCase();
+                    aplicarCor(v.toUpperCase());
+                }
+            });
+            campoHex.addEventListener('blur', function () {
+                var v = campoHex.value.trim();
+                if (v && v.charAt(0) !== '#') { v = '#' + v; }
+                campoHex.value = v.toUpperCase();
+            });
+            amostras.forEach(function (a) {
+                a.addEventListener('click', function () {
+                    var hex = a.getAttribute('data-cor').toUpperCase();
+                    campoHex.value = hex;
+                    seletor.value = hex.toLowerCase();
+                    aplicarCor(hex);
+                });
+            });
+
+            // Prévia da logo escolhida (se cancelar a escolha, volta ao estado salvo)
+            var srcClaraOriginal = claraImg.getAttribute('src');
+            var srcEscuraOriginal = escuraImg.getAttribute('src');
+            entrada.addEventListener('change', function () {
+                if (urlTemp) { URL.revokeObjectURL(urlTemp); urlTemp = null; }
+                var arquivo = entrada.files[0];
+                if (arquivo && arquivo.type.indexOf('image/') === 0 && arquivo.type !== 'image/svg+xml') {
+                    urlTemp = URL.createObjectURL(arquivo);
+                    claraImg.src = urlTemp;
+                    escuraImg.src = urlTemp;
+                } else {
+                    entrada.value = '';
+                    claraImg.src = srcClaraOriginal;
+                    escuraImg.src = srcEscuraOriginal;
+                }
+                aplicarCor(campoHex.value.toUpperCase());
+            });
+
+            if (HEX.test(campoHex.value)) { aplicarCor(campoHex.value.toUpperCase()); }
+        })();
+
+        // Aviso de sucesso some sozinho
+        var ok = document.querySelector('.cadastro-alerta-ok');
+        if (ok) {
+            setTimeout(function () {
+                ok.style.transition = 'opacity .4s';
+                ok.style.opacity = '0';
+                setTimeout(function () { ok.remove(); }, 400);
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

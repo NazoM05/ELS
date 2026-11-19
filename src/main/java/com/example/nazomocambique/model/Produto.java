@@ -1,17 +1,33 @@
 package com.example.nazomocambique.model;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapKeyColumn;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,7 +54,49 @@ public class Produto {
 	private String tamanho;
 	private float preco;
 	private String tipo;
-	private String imagem; // nome do arquivo em static/img (ex.: camisa-militar.svg)
+
+	// Classificação da peça (obrigatória nas telas de cadastro e edição). Gravadas pelo nome da constante.
+	@Enumerated(EnumType.STRING)
+	@Column(length = 20)
+	private Categoria categoria;
+
+	@Enumerated(EnumType.STRING)
+	@Column(length = 20)
+	private Genero genero;
+	// Nomes dos arquivos de imagem (colunas imagem_frente e imagem_costas). Resolvidos em /img/{nome}:
+	// primeiro em uploads/img (enviados pelo admin), depois em static/img (ex.: camisa-militar.svg).
+	private String imagemFrente;
+	private String imagemCostas;
+
+	@Column(length = 1000)
+	private String descricao;
+
+	// Estoque por tamanho (ex.: P=10, M=3). Só guarda tamanhos que o admin informou a quantidade.
+	@ElementCollection(fetch = FetchType.EAGER)
+	@CollectionTable(name = "produto_estoque", joinColumns = @JoinColumn(name = "produto_id"))
+	@MapKeyColumn(name = "tamanho", length = 20)
+	@Column(name = "quantidade")
+	private Map<String, Integer> estoque = new HashMap<>();
+
+	// Métricas. Ainda não existe módulo de pedidos: "vendidas" fica em 0 até ele existir.
+	@Column(columnDefinition = "INTEGER DEFAULT 0")
+	private Integer vendidas = 0;
+
+	// Incrementada a cada acesso à página do produto na loja (/detalhes/{id}).
+	@Column(columnDefinition = "INTEGER DEFAULT 0")
+	private Integer visualizacoes = 0;
+
+	private LocalDateTime criadoEm;
+	private LocalDateTime atualizadoEm;
+
+	// Tamanhos oferecidos nas telas de cadastro e edição (letras + numeração)
+	public static final List<String> TAMANHOS_PADRAO = List.of("PP", "P", "M", "G", "GG", "XG", "Único",
+			"36", "38", "40", "42", "44", "46");
+
+	// Abaixo (ou igual) a esse número o tamanho é sinalizado como "poucas unidades"
+	public static final int ESTOQUE_BAIXO = 5;
+
+	private static final DateTimeFormatter FORMATO_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm");
 
 	// Cores conhecidas (nome em minúsculas -> hexadecimal usado na amostra da tela de detalhes)
 	private static final Map<String, String> CORES_CSS = Map.ofEntries(
@@ -67,7 +125,7 @@ public class Produto {
 	}
 
 	public Produto(Long id, String nome, String cor, boolean status, String tamanho, float preco, String tipo,
-			String imagem) {
+			String imagemFrente) {
 		super();
 		this.id = id;
 		this.nome = nome;
@@ -76,7 +134,7 @@ public class Produto {
 		this.tamanho = tamanho;
 		this.preco = preco;
 		this.tipo = tipo;
-		this.imagem = imagem;
+		this.imagemFrente = imagemFrente;
 	}
 
 	/**
@@ -105,5 +163,119 @@ public class Produto {
 			return List.of();
 		}
 		return Arrays.stream(tamanho.split(",")).map(String::trim).filter(t -> !t.isEmpty()).toList();
+	}
+
+	/** Resumo para listagens, ex.: "Camiseta · Unissex"; null quando nenhum dos dois foi informado. */
+	@Transient
+	public String getClassificacao() {
+		if (categoria != null && genero != null) {
+			return categoria.getRotulo() + " · " + genero.getRotulo();
+		}
+		if (categoria != null) {
+			return categoria.getRotulo();
+		}
+		return genero != null ? genero.getRotulo() : null;
+	}
+
+	@PrePersist
+	void aoCriar() {
+		LocalDateTime agora = LocalDateTime.now();
+		this.criadoEm = agora;
+		this.atualizadoEm = agora;
+	}
+
+	@PreUpdate
+	void aoAtualizar() {
+		this.atualizadoEm = LocalDateTime.now();
+	}
+
+	/**
+	 * Tamanhos mostrados como flags nas telas de cadastro/edição: os padrões mais
+	 * qualquer tamanho já salvo no produto que não esteja na lista (assim nada se perde).
+	 */
+	@Transient
+	public List<String> getTamanhosOpcoes() {
+		Set<String> todos = new LinkedHashSet<>(TAMANHOS_PADRAO);
+		todos.addAll(getTamanhosDisponiveis());
+		return new ArrayList<>(todos);
+	}
+
+	// ---------- Insights da tela "Visualizar produto" ----------
+
+	/** Soma do estoque informado; null quando nenhum tamanho tem estoque informado. */
+	@Transient
+	public Integer getEstoqueTotal() {
+		if (estoque == null || estoque.isEmpty()) {
+			return null;
+		}
+		return estoque.values().stream().filter(q -> q != null).mapToInt(Integer::intValue).sum();
+	}
+
+	/** Uma linha por tamanho disponível, com a situação do estoque (OK / BAIXO / ESGOTADO / NAO_INFORMADO). */
+	@Transient
+	public List<EstoqueTamanho> getEstoquePorTamanho() {
+		List<EstoqueTamanho> linhas = new ArrayList<>();
+		for (String t : getTamanhosDisponiveis()) {
+			Integer q = estoque == null ? null : estoque.get(t);
+			String situacao = q == null ? "NAO_INFORMADO" : q <= 0 ? "ESGOTADO" : q <= ESTOQUE_BAIXO ? "BAIXO" : "OK";
+			linhas.add(new EstoqueTamanho(t, q, situacao));
+		}
+		return linhas;
+	}
+
+	@Transient
+	public boolean isTemAlertaEstoque() {
+		return getEstoquePorTamanho().stream()
+				.anyMatch(l -> l.getSituacao().equals("ESGOTADO") || l.getSituacao().equals("BAIXO"));
+	}
+
+	@Transient
+	public int getVendidasTotal() {
+		return vendidas == null ? 0 : vendidas;
+	}
+
+	@Transient
+	public int getVisualizacoesTotal() {
+		return visualizacoes == null ? 0 : visualizacoes;
+	}
+
+	/** Receita estimada = unidades vendidas x preço atual (não há histórico de pedidos). */
+	@Transient
+	public BigDecimal getReceita() {
+		return BigDecimal.valueOf(preco).multiply(BigDecimal.valueOf(getVendidasTotal()));
+	}
+
+	/** Conversão em % (vendidas / visualizações); null quando ainda não há visualizações. */
+	@Transient
+	public Double getTaxaConversao() {
+		int views = getVisualizacoesTotal();
+		return views == 0 ? null : getVendidasTotal() * 100.0 / views;
+	}
+
+	@Transient
+	public String getCriadoEmFormatado() {
+		return criadoEm == null ? null : criadoEm.format(FORMATO_DATA);
+	}
+
+	@Transient
+	public String getAtualizadoEmFormatado() {
+		return atualizadoEm == null ? null : atualizadoEm.format(FORMATO_DATA);
+	}
+
+	/** Linha da tabela de estoque por tamanho. */
+	public static class EstoqueTamanho {
+		private final String tamanho;
+		private final Integer quantidade;
+		private final String situacao;
+
+		public EstoqueTamanho(String tamanho, Integer quantidade, String situacao) {
+			this.tamanho = tamanho;
+			this.quantidade = quantidade;
+			this.situacao = situacao;
+		}
+
+		public String getTamanho() { return tamanho; }
+		public Integer getQuantidade() { return quantidade; }
+		public String getSituacao() { return situacao; }
 	}
 }

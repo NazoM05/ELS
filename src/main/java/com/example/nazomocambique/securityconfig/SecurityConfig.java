@@ -25,8 +25,9 @@ public class SecurityConfig {
 		http 
 		.csrf(csrf -> csrf.disable())
 		.authorizeHttpRequests(auth -> auth 
-				.requestMatchers("/login", "/css/**").permitAll()
+				.requestMatchers("/login", "/criar-conta", "/css/**", "/brand/**", "/logo-site/**", "/favicon.ico").permitAll()
 				.requestMatchers(PathRequest.toH2Console()).hasRole("ADMIN")
+				.requestMatchers("/admin/**").hasRole("ADMIN")
 				.requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
 				.anyRequest().authenticated()
 				
@@ -68,4 +69,4 @@ public class SecurityConfig {
 		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 		IO.println(encoder.encode("senha"));
 	}
-} 
+} 
