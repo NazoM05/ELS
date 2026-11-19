@@ -12,10 +12,12 @@ overlay.addEventListener('click', toggleSidebar);
 
 const searchInput = document.querySelector('input[name="search"]');
 const searchForm = document.querySelector('.search-form');
+// Busca da loja (data-servidor) é enviada ao servidor junto com os filtros; as demais continuam filtrando na página
+const buscaNoServidor = searchForm && searchForm.hasAttribute('data-servidor');
 
 const produtos = document.querySelectorAll('.produto-card');
 
-if (searchInput) searchInput.addEventListener('input', function() {
+if (searchInput && !buscaNoServidor) searchInput.addEventListener('input', function() {
 
 const termoBusca = searchInput.value.toLowerCase();
 
@@ -33,7 +35,7 @@ produtos.forEach(produto => {
 });
 });
 
-if (searchForm) searchForm.addEventListener('submit', function(event) {
+if (searchForm && !buscaNoServidor) searchForm.addEventListener('submit', function(event) {
 event.preventDefault();
 });
 

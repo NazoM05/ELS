@@ -1,6 +1,10 @@
 <!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
+
+    <!-- Tema: sobrescreve --primary-color etc. com o que o admin escolheu em Configurações (valores já validados no servidor) -->
+    <style th:fragment="tema" th:utext="${site.cssTema}"></style>
 
     <!-- Para mudar os avisos, edite/adicione/remova os <p> abaixo (o primeiro precisa ter class="anuncio ativo") -->
     <div th:fragment="anuncios" class="barra-anuncios" role="region" aria-label="Avisos da loja">
@@ -15,12 +19,21 @@
 
 
 <div class="sidebar" id="sidebar" th:fragment="sidebar">
+	<a class="sidebar-logo" th:href="@{/}" aria-label="Estilo London - página inicial">
+		<img th:src="${site.logoPersonalizada} ? @{'/logo-site/' + ${site.logoArquivo}} : @{/brand/logo-el-branca.png}" alt="Estilo London">
+	</a>
 	<nav>
         <a th:href="@{/home}">Início</a>
-        <a th:href="@{/admin/produto/listar}" sec:authorize="hasRole('ADMIN')">Produtos</a>
-        <a th:href="@{/admin/produto/cadastrar}" sec:authorize="hasRole('ADMIN')" >Novo produto</a>
-		<a href="#" sec:authorize="isAuthenticated()"> Perfil</a>
-        <a href="#" sec:authorize="hasRole('ADMIN')">Configurações</a>
+		<a th:href="@{/perfil}" sec:authorize="isAuthenticated()">Perfil</a>
+
+        <!-- Só ADMIN enxerga esta divisão (o servidor também bloqueia /admin/** para os demais) -->
+        <div class="sidebar-admin" sec:authorize="hasRole('ADMIN')">
+            <p class="sidebar-admin-titulo">Opções de administrador</p>
+            <a th:href="@{/admin/configuracoes}">Configurações</a>
+            <a th:href="@{/admin/produto/listar}">Listagem</a>
+            <a th:href="@{/admin/produto/cadastrar}">Novo produto</a>
+        </div>
+
         <a th:href="@{/logout}" sec:authorize="isAuthenticated()">Sair</a>
     </nav>
        
@@ -31,3 +44,55 @@
     <span></span>
     <span></span>
 </button>
+
+<!-- Logo da barra do topo (versão preta, fundo transparente) -->
+<a class="barra-logo" th:fragment="logo" th:href="@{/}" aria-label="Estilo London - página inicial">
+    <img th:src="${site.logoPersonalizada} ? @{'/logo-site/' + ${site.logoArquivo}} : @{/brand/logo-el.png}" alt="Estilo London">
+</a>
+
+<!-- Busca da barra do topo (loja). É o único formulário do catálogo: os filtros de Gênero e Categoria
+     ficam fora dele, mas apontam para ele com form="formBusca", então tudo vai junto na mesma URL. -->
+<form class="search-form" id="formBusca" th:fragment="busca-loja" th:action="@{/home}" method="get" data-servidor>
+    <input type="text" name="busca" th:value="${busca}" placeholder="Pesquisar..." aria-label="Pesquisar produtos" autocomplete="off">
+    <button type="submit">Buscar</button>
+</form>
+
+<!-- Filtros combináveis do catálogo: Gênero + Categoria (+ termo de busca do formulário acima) -->
+<div th:fragment="filtros-catalogo">
+    <div class="filtros-loja" role="group" aria-label="Filtros do catálogo">
+        <div class="filtro-grupo">
+            <span class="filtro-rotulo" id="rotuloFiltroGenero">Gênero</span>
+            <div class="adm-chips filtro-chips" role="radiogroup" aria-labelledby="rotuloFiltroGenero">
+                <label class="adm-chip">
+                    <input type="radio" name="genero" value="" form="formBusca"
+                           th:checked="${generoSelecionado == null}" onchange="this.form.submit()">
+                    <span>Todos</span>
+                </label>
+                <label class="adm-chip" th:each="g : ${generosFiltro}">
+                    <input type="radio" name="genero" th:value="${g.name()}" form="formBusca"
+                           th:checked="${generoSelecionado == g}" onchange="this.form.submit()">
+                    <span th:text="${g.rotulo}">Masculino</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="filtro-grupo">
+            <label class="filtro-rotulo" for="filtroCategoria">Categoria</label>
+            <select id="filtroCategoria" name="categoria" form="formBusca" onchange="this.form.submit()">
+                <option value="">Todas as categorias</option>
+                <option th:each="c : ${categorias}" th:value="${c.name()}" th:text="${c.rotulo}"
+                        th:selected="${categoriaSelecionada == c}">Camiseta</option>
+            </select>
+        </div>
+
+        <a class="filtro-limpar" th:if="${filtrosAtivos}" th:href="@{/home}">Limpar filtros</a>
+    </div>
+
+    <p class="filtro-resultado" role="status"
+       th:text="${#lists.size(listaProdutos) == 1} ? '1 produto encontrado' : ${#lists.size(listaProdutos)} + ' produtos encontrados'">0 produtos</p>
+
+    <p class="filtro-vazio" th:if="${#lists.isEmpty(listaProdutos)}">
+        Nenhum produto encontrado com esses filtros.
+        <a th:href="@{/home}">Limpar filtros</a>
+    </p>
+</div>

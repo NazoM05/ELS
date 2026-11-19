@@ -4,11 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" th:href="@{/css/global.css(v=1)}">
-    <!-- Ajustes de layout e usabilidade das telas de administração -->
-    <link rel="stylesheet" th:href="@{/css/admin.css(v=1)}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=11)}">
+    <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
+
     <title>Editar produto - Estilo London Store</title>
-    <link rel="icon" type="image/png" href="/Gemini_Generated_Image_kujj8zkujj8zkujj-removebg-preview.png">
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png}">
 </head>
 
 <body class="admin-ui">
@@ -23,6 +29,7 @@
             <span></span>
             <span></span>
         </button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
     </div>
 
     <main class="cadastro-container">
@@ -40,7 +47,8 @@
 
                 <!-- Campos preservados: sem o id o Spring criaria um produto novo -->
                 <input type="hidden" th:field="*{id}">
-                <input type="hidden" th:field="*{imagem}">
+                <input type="hidden" th:field="*{imagemFrente}">
+                <input type="hidden" th:field="*{imagemCostas}">
 
                 <div class="cadastro-campo adm-c4">
                     <label for="nome">Nome do produto</label>
@@ -65,17 +73,13 @@
                     <input type="text" id="tipo" th:field="*{tipo}">
                 </div>
 
-                <div class="cadastro-campo adm-c3">
-                    <label for="tamanhoDisponivel">Tamanhos disponíveis</label>
-                    <!-- Guarda a lista completa (ex.: "P,M,G") para não perder tamanhos ao salvar -->
-                    <input type="hidden" th:field="*{tamanho}">
-                    <select id="tamanhoDisponivel">
-                        <option th:each="t : ${produto.tamanhosDisponiveis}" th:value="${t}" th:text="${t}"></option>
-                        <option th:if="${#lists.isEmpty(produto.tamanhosDisponiveis)}" value="">Nenhum tamanho cadastrado</option>
-                    </select>
-                </div>
+                <div th:replace="~{fragments/campos-produto :: categoria(${produto})}"></div>
+                <div th:replace="~{fragments/campos-produto :: genero(${produto})}"></div>
 
-                <div class="cadastro-campo adm-c3">
+                <div th:replace="~{fragments/campos-produto :: descricao(${produto})}"></div>
+                <div th:replace="~{fragments/campos-produto :: tamanhos(${produto})}"></div>
+
+                <div class="cadastro-campo adm-c6">
                     <span class="adm-rotulo" id="rotuloStatus">Situação</span>
                     <div class="adm-chips" role="radiogroup" aria-labelledby="rotuloStatus">
                         <label class="adm-chip">
@@ -89,13 +93,7 @@
                     </div>
                 </div>
 
-                <div class="cadastro-campo cadastro-campo-imagem adm-c6">
-                    <span class="adm-rotulo" id="rotuloImagem">Imagem</span>
-                    <img id="imagemAtual" class="cadastro-previa" alt="Imagem do produto"
-                         th:src="*{imagem != null} ? @{'/img/' + *{imagem}} : 'https://placehold.co/400x500/ffb6c1/ffffff?text=Sem+foto'">
-                    <label for="arquivoImagem" class="adm-ajuda">Para trocar a imagem, escolha um novo arquivo (opcional).</label>
-                    <input type="file" id="arquivoImagem" name="arquivoImagem" accept="image/*">
-                </div>
+                <div th:replace="~{fragments/campos-produto :: imagens(${produto})}"></div>
 
                 <div class="adm-acoes">
                     <a th:href="@{/admin/produto/listar}" class="adm-btn adm-btn-sec">Cancelar</a>
@@ -108,15 +106,6 @@
    <div th:replace="~{fragments/fragmentos :: sidebar}" ></div>
     <div class="overlay" id="overlay"></div>
 
-    <script th:src="@{/jshome.js(v=4)}"></script>
-    <script>
-        // Mostra a nova imagem escolhida no lugar da atual, antes de salvar
-        const entrada = document.getElementById('arquivoImagem');
-        const atual = document.getElementById('imagemAtual');
-        entrada.addEventListener('change', () => {
-            const arquivo = entrada.files[0];
-            if (arquivo) { atual.src = URL.createObjectURL(arquivo); }
-        });
-    </script>
+    <script th:src="@{/jshome.js(v=5)}"></script>
 </body>
 </html>
