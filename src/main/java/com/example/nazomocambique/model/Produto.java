@@ -68,6 +68,14 @@ public class Produto {
 	private String imagemFrente;
 	private String imagemCostas;
 
+	// Outras duas posições da galeria (colunas imagem_modelo e imagem_guia_tamanhos), mesma resolução em /img/{nome}:
+	// foto da peça vestida em um modelo e imagem com a tabela/guia de medidas.
+	@Column(name = "imagem_modelo")
+	private String imagemModelo;
+
+	@Column(name = "imagem_guia_tamanhos")
+	private String imagemGuiaTamanhos;
+
 	@Column(length = 1000)
 	private String descricao;
 
@@ -177,6 +185,28 @@ public class Produto {
 		return genero != null ? genero.getRotulo() : null;
 	}
 
+	/**
+	 * Galeria da tela de detalhes, na ordem Frente, Verso, Modelo e Guia de tamanhos.
+	 * Só entram as posições com nome de arquivo preenchido (nulo ou em branco é ignorado),
+	 * então a tela nunca monta uma miniatura com src vazio.
+	 */
+	@Transient
+	public List<ImagemGaleria> getGaleria() {
+		List<ImagemGaleria> itens = new ArrayList<>();
+		adicionarNaGaleria(itens, "frente", "Frente", "Frente", imagemFrente);
+		adicionarNaGaleria(itens, "verso", "Verso", "Verso", imagemCostas);
+		adicionarNaGaleria(itens, "modelo", "Foto com modelo", "Modelo", imagemModelo);
+		adicionarNaGaleria(itens, "guia", "Guia de tamanhos (medidas em cm)", "Guia", imagemGuiaTamanhos);
+		return itens;
+	}
+
+	private void adicionarNaGaleria(List<ImagemGaleria> itens, String chave, String rotulo, String rotuloCurto,
+			String arquivo) {
+		if (arquivo != null && !arquivo.isBlank()) {
+			itens.add(new ImagemGaleria(chave, rotulo, rotuloCurto, arquivo.trim()));
+		}
+	}
+
 	@PrePersist
 	void aoCriar() {
 		LocalDateTime agora = LocalDateTime.now();
@@ -260,6 +290,26 @@ public class Produto {
 	@Transient
 	public String getAtualizadoEmFormatado() {
 		return atualizadoEm == null ? null : atualizadoEm.format(FORMATO_DATA);
+	}
+
+	/** Uma foto da galeria da tela de detalhes (frente, verso, modelo ou guia de tamanhos). */
+	public static class ImagemGaleria {
+		private final String chave;
+		private final String rotulo;
+		private final String rotuloCurto;
+		private final String arquivo;
+
+		public ImagemGaleria(String chave, String rotulo, String rotuloCurto, String arquivo) {
+			this.chave = chave;
+			this.rotulo = rotulo;
+			this.rotuloCurto = rotuloCurto;
+			this.arquivo = arquivo;
+		}
+
+		public String getChave() { return chave; }
+		public String getRotulo() { return rotulo; }
+		public String getRotuloCurto() { return rotuloCurto; }
+		public String getArquivo() { return arquivo; }
 	}
 
 	/** Linha da tabela de estoque por tamanho. */
