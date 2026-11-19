@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=11)}">
+    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=12)}">
     <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
 
 
@@ -48,8 +48,23 @@
         <nav class="detalhes-voltar">
             <a th:href="@{/}">Voltar</a>
             <span>›</span>
-            <span>Roupas</span>
-            <span>›</span>
+
+            <!-- Gênero › Categoria do produto (cada um leva ao catálogo já filtrado); sem nenhum dos dois, "Roupas" -->
+            <th:block th:if="${produto.genero == null and produto.categoria == null}">
+                <span>Roupas</span>
+                <span>›</span>
+            </th:block>
+            <th:block th:if="${produto.genero != null}">
+                <a class="detalhes-voltar-filtro" th:href="@{/home(genero=${produto.genero.name()})}"
+                   th:text="${produto.genero.rotulo}">Masculino</a>
+                <span>›</span>
+            </th:block>
+            <th:block th:if="${produto.categoria != null}">
+                <a class="detalhes-voltar-filtro"
+                   th:href="${produto.genero != null} ? @{/home(genero=${produto.genero.name()},categoria=${produto.categoria.name()})} : @{/home(categoria=${produto.categoria.name()})}"
+                   th:text="${produto.categoria.rotulo}">Camisa</a>
+                <span>›</span>
+            </th:block>
             <span th:text="${produto.nome}">Produto</span>
         </nav>
 

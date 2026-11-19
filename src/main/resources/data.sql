@@ -44,3 +44,6 @@ VALUES
     ('Camisa Xadrez Flanela', 'G', 52.90, 'Flanela', 'camisa-xadrez-flanela.svg', 'camisa-xadrez-flanela-costas.svg', FALSE, 'Vermelho', 'CAMISA', 'UNISSEX');
     
     insert into USUARIO (username, senha, role, ativo) values ('admin', '$2a$10$oz8mJWjsca2yd5hdU5pvzO123repm3JNyZ9fxbFzMs5wVaaccsiZG', 'ROLE_ADMIN', TRUE);
+
+    -- Cliente de teste (login: user). Mesma senha do admin.
+    insert into USUARIO (nome, username, senha, role, ativo) values ('Usuário', 'user', '$2a$10$oz8mJWjsca2yd5hdU5pvzO123repm3JNyZ9fxbFzMs5wVaaccsiZG', 'ROLE_USUARIO', TRUE);

@@ -329,6 +329,9 @@ a.produto-media:focus-visible { outline: 2px solid var(--ink); outline-offset: 3
     color: var(--muted);
 }
 .detalhes-voltar a { color: var(--ink); font-weight: 700; text-decoration: underline; }
+/* Gênero e categoria no caminho: discretos, sublinham ao passar o mouse */
+.detalhes-voltar .detalhes-voltar-filtro { color: var(--muted); font-weight: 500; text-decoration: none; }
+.detalhes-voltar .detalhes-voltar-filtro:hover { color: var(--ink); text-decoration: underline; }
 
 .detalhes-box {
     --cor-produto: var(--line);   /* o HTML sobrescreve com a cor do produto */

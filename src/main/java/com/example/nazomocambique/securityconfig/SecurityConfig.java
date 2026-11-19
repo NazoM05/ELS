@@ -25,7 +25,10 @@ public class SecurityConfig {
 		http 
 		.csrf(csrf -> csrf.disable())
 		.authorizeHttpRequests(auth -> auth 
-				.requestMatchers("/login", "/criar-conta", "/css/**", "/brand/**", "/logo-site/**", "/favicon.ico").permitAll()
+				// Públicas: login/cadastro, a vitrine (home, busca e detalhes do produto) e os arquivos que ela usa
+				.requestMatchers("/login", "/criar-conta").permitAll()
+				.requestMatchers("/", "/home", "/london", "/pesquisa", "/detalhes/**").permitAll()
+				.requestMatchers("/css/**", "/jshome.js", "/img/**", "/brand/**", "/logo-site/**", "/favicon.ico").permitAll()
 				.requestMatchers(PathRequest.toH2Console()).hasRole("ADMIN")
 				.requestMatchers("/admin/**").hasRole("ADMIN")
 				.requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
