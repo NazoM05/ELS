@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.nazomocambique.model.Categoria;
 import com.example.nazomocambique.model.Genero;
+import com.example.nazomocambique.model.Ordenacao;
 import com.example.nazomocambique.model.Produto;
 import com.example.nazomocambique.repository.ProdutoRepository;
 
@@ -62,15 +63,21 @@ public class ProdutoService {
 	 * quando inválido: negativo vira a primeira página e além do fim vira a última.
 	 */
 	public Page<Produto> filtrar(String termo, Categoria categoria, Genero genero, int pagina) {
+		return filtrar(termo, categoria, genero, Ordenacao.PADRAO, pagina);
+	}
+
+	/** Igual ao anterior, com a ordem da vitrine (padrão, novidades ou menor preço). */
+	public Page<Produto> filtrar(String termo, Categoria categoria, Genero genero, Ordenacao ordenacao, int pagina) {
+		Ordenacao ordem = ordenacao == null ? Ordenacao.PADRAO : ordenacao;
 		String termoLimpo = (termo == null || termo.isBlank()) ? null : termo.trim();
 		Genero g1 = genero;
 		Genero g2 = genero == null ? null : Genero.UNISSEX;
 		int indice = Math.max(pagina, 0);
 		Page<Produto> resultado = produtoRepository.filtrar(termoLimpo, categoria, g1, g2,
-				PageRequest.of(indice, PRODUTOS_POR_PAGINA));
+				PageRequest.of(indice, PRODUTOS_POR_PAGINA, ordem.getSort()));
 		if (resultado.getTotalPages() > 0 && indice >= resultado.getTotalPages()) {
 			resultado = produtoRepository.filtrar(termoLimpo, categoria, g1, g2,
-					PageRequest.of(resultado.getTotalPages() - 1, PRODUTOS_POR_PAGINA));
+					PageRequest.of(resultado.getTotalPages() - 1, PRODUTOS_POR_PAGINA, ordem.getSort()));
 		}
 		return resultado;
 	}

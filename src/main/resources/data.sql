@@ -20,6 +20,7 @@ ALTER TABLE produto ADD COLUMN IF NOT EXISTS genero VARCHAR(20);
 -- =====================================================================
 MERGE INTO produto (nome, tamanho, preco, tipo, imagem_frente, imagem_costas, status, cor, categoria, genero) KEY (nome)
 VALUES
+    ('Manto Imortal Tricolor', 'P,M,G,GG', 79.90, 'Poliéster', 'manto-imortal-tricolor.svg', 'manto-imortal-tricolor-costas.svg', TRUE, '#0d80bf', 'CAMISETA', 'UNISSEX'),
     ('Camisa Militar', 'GG', 24.90, 'Algodão', 'camisa-militar.svg', 'camisa-militar-costas.svg', TRUE, 'Verde Militar', 'CAMISA', 'MASCULINO'),
     ('Camisa Polo Listrada', 'M', 39.90, 'Algodão', 'camisa-polo-listrada.svg', 'camisa-polo-listrada-costas.svg', FALSE, 'Azul Marinho', 'CAMISA', 'MASCULINO'),
     ('Camiseta Básica Branca', 'G', 19.90, 'Algodão', 'camiseta-basica-branca.svg', 'camiseta-basica-branca-costas.svg', TRUE, 'Branco', 'CAMISETA', 'UNISSEX'),

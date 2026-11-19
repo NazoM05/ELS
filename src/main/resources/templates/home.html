@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=16)}">
+    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=17)}">
     <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
 
 
@@ -34,7 +34,7 @@
 
     <main class="container-produtos">
 
-        <h2 class="secao-titulo">Produtos</h2>
+        <h2 class="secao-titulo" th:text="${ordem != null} ? ${ordem.titulo} : 'Produtos'">Produtos</h2>
 
         <!-- Filtros combináveis: gênero + categoria + termo de busca -->
         <div th:replace="~{fragments/fragmentos :: filtros-catalogo}"></div>
@@ -125,12 +125,12 @@
 
                 <div class="rodape-col">
                     <h4>Coleções</h4>
-                    <a href="#">Novidades</a>
-                    <a href="#">Camisetas</a>
-                    <a href="#">Oversized</a>
-                    <a href="#">Calças</a>
-                    <a href="#">Acessórios</a>
-                    <a href="#">Outlet</a>
+                    <a th:href="@{/home(ordem='novidades')}">Novidades</a>
+                    <a th:href="@{/home(categoria='CAMISETA')}">Camisetas</a>
+                    <a th:href="@{/home(busca='oversized')}">Oversized</a>
+                    <a th:href="@{/home(categoria='CALCA')}">Calças</a>
+                    <a th:href="@{/home(categoria='ACESSORIOS')}">Acessórios</a>
+                    <a th:href="@{/home(ordem='menor-preco')}">Outlet</a>
                 </div>
             </div>
 
@@ -146,7 +146,7 @@
 
     <div class="overlay" id="overlay"></div>
 
-    <script th:src="@{/jshome.js(v=8)}"></script>
+    <script th:src="@{/jshome.js(v=9)}"></script>
 
 </body>
 </html>

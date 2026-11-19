@@ -23,14 +23,13 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 	/**
 	 * Catálogo da loja com filtros combináveis: cada parâmetro nulo significa "sem esse filtro".
 	 * Gênero usa dois valores (g1 ou g2) para o Unissex aparecer tanto em Masculino quanto em Feminino.
-	 * Paginado: a ordem (por id) fica na própria consulta para as páginas não se embaralharem.
+	 * Paginado: a ordem vem do Sort do Pageable (sempre termina em id, para as páginas não se embaralharem).
 	 */
 	@Query(value = """
 			select p from Produto p
 			where (:termo is null or lower(p.nome) like lower(concat('%', :termo, '%')))
 			  and (:categoria is null or p.categoria = :categoria)
 			  and (:g1 is null or p.genero = :g1 or p.genero = :g2)
-			order by p.id
 			""", countQuery = """
 			select count(p) from Produto p
 			where (:termo is null or lower(p.nome) like lower(concat('%', :termo, '%')))

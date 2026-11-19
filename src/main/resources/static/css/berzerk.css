@@ -1,3 +1,67 @@
+/* Página de favoritos: estado vazio + link do coração no topo */
+a.el-cart-trigger { text-decoration: none; }
+.favoritos-vazio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    max-width: 420px;
+    margin: 48px auto;
+    padding: 0 16px;
+    text-align: center;
+}
+.favoritos-vazio[hidden] { display: none; }
+.favoritos-vazio svg { width: 56px; height: 56px; fill: none; stroke: var(--muted); stroke-width: 1.6; stroke-linejoin: round; }
+.favoritos-vazio h2 { margin: 6px 0 0; font: 400 clamp(24px, 5vw, 32px)/1.1 var(--font-display); text-transform: uppercase; }
+.favoritos-vazio p { margin: 0; color: var(--muted); font: 500 14px/1.5 var(--font-body); }
+.favoritos-vazio .btn-comprar { display: inline-block; margin-top: 12px; padding: 12px 28px; text-decoration: none; text-align: center; }
+
+/* Botão de favorito (coração): flutua no canto superior direito da foto, nos cards e nos detalhes */
+.produto-media-box { position: relative; }
+.btn-favorito {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 3;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .92);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    color: #111;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .16);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
+}
+.btn-favorito:hover { transform: scale(1.1); background: #fff; box-shadow: 0 3px 12px rgba(0, 0, 0, .22); }
+.btn-favorito:active { transform: scale(.94); }
+.btn-favorito:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.btn-favorito svg {
+    width: 20px;
+    height: 20px;
+    fill: none;                    /* coração vazio por padrão */
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linejoin: round;
+    pointer-events: none;
+    transition: fill .2s ease, stroke .2s ease;
+}
+.btn-favorito.ativo svg { fill: #dc2626; stroke: #dc2626; }   /* coração cheio = favoritado */
+.btn-favorito.pulso svg { animation: favorito-pulso .35s ease; }
+@keyframes favorito-pulso { 0% { transform: scale(1); } 40% { transform: scale(1.35); } 100% { transform: scale(1); } }
+@media (hover: none) { .btn-favorito:hover { transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+    .btn-favorito, .btn-favorito svg { transition: none; }
+    .btn-favorito.pulso svg { animation: none; }
+}
+
 /* ==========================================================
    Tema Berzerk - Estilo London Store (CSS ÚNICO DO SITE)
    Substitui global.css e admin.css: todas as páginas carregam só este arquivo.
@@ -180,6 +244,225 @@ img { max-width: 100%; }
     transition: opacity .3s ease;
 }
 .overlay.active { display: block; opacity: 1; }
+
+/* ---------- Carrinho lateral flutuante (Drawer) ---------- */
+.el-cart-trigger {
+    position: relative;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 0 12px;
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--primary-color);
+    border-radius: 4px;
+    font: 800 12px var(--font-body);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+.el-cart-trigger:hover {
+    background: var(--primary-color);
+    color: var(--primary-contrast);
+}
+.el-cart-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--primary-color);
+    color: var(--primary-contrast);
+    font: 800 11px var(--font-body);
+    transition: background .15s, color .15s;
+}
+.el-cart-trigger:hover .el-cart-badge {
+    background: var(--primary-contrast);
+    color: var(--primary-color);
+}
+
+.el-cart-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1040;
+    background: rgba(0, 0, 0, .55);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .25s ease, visibility .25s ease;
+}
+.el-cart-backdrop.is-open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.el-cart-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    width: min(420px, 100vw);
+    height: 100dvh;
+    background: var(--bg);
+    color: var(--ink);
+    border-left: 1px solid var(--line);
+    box-shadow: -8px 0 28px rgba(0, 0, 0, .18);
+    transform: translateX(100%);
+    transition: transform .28s ease;
+}
+.el-cart-drawer.is-open {
+    transform: translateX(0);
+}
+
+.el-cart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+}
+.el-cart-title {
+    margin: 0;
+    font: 400 28px/1 var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: .01em;
+}
+.el-cart-close {
+    padding: 4px 8px;
+    background: transparent;
+    border: 0;
+    color: var(--ink);
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.el-cart-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 20px;
+    overflow-y: auto;
+}
+.el-cart-empty {
+    margin-top: 40px;
+    text-align: center;
+    font: 500 14px var(--font-body);
+    color: var(--muted);
+}
+
+.el-cart-item {
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg);
+}
+.el-cart-item img {
+    display: block;
+    width: 64px;
+    height: 80px;
+    object-fit: cover;
+    background: var(--tile);
+    border-radius: 4px;
+}
+.el-cart-item-info h4 {
+    margin: 0 0 4px;
+    font: 600 14px/1.3 var(--font-body);
+}
+.el-cart-item-meta {
+    margin-bottom: 4px;
+    font: 500 12px var(--font-body);
+    color: var(--muted);
+}
+.el-cart-item-price {
+    font: 700 14px var(--font-body);
+}
+
+.el-cart-item-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+.el-cart-qty-box {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.el-cart-qty-box button {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: var(--soft);
+    color: var(--ink);
+    border: 0;
+    font: 700 14px var(--font-body);
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+.el-cart-qty-box button:hover {
+    background: var(--primary-color);
+    color: var(--primary-contrast);
+}
+.el-cart-qty-box span {
+    min-width: 26px;
+    padding: 0 6px;
+    text-align: center;
+    font: 700 13px var(--font-body);
+}
+
+.el-cart-remove {
+    padding: 0;
+    background: transparent;
+    border: 0;
+    color: #b3202a;
+    font: 600 12px var(--font-body);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.el-cart-footer {
+    padding: 16px 20px;
+    background: var(--soft);
+    border-top: 1px solid var(--line);
+}
+.el-cart-subtotal-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font: 700 16px var(--font-body);
+}
+.el-cart-clear-btn {
+    width: 100%;
+    padding: 11px 12px;
+    background: var(--bg);
+    color: var(--ink);
+    border: 1px solid var(--primary-color);
+    border-radius: 4px;
+    font: 800 12px var(--font-body);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+.el-cart-clear-btn:hover {
+    background: var(--primary-color);
+    color: var(--primary-contrast);
+}
 
 /* ---------- Componentes compartilhados ---------- */
 .preco { margin: 0; font: 600 17px var(--font-body); }
@@ -1083,6 +1366,41 @@ th.listagem-col-acoes { text-align: right; }
     .filtro-grupo select { width: 100%; }
 }
 
+/* ---------- Loja: paginação da vitrine ---------- */
+.paginacao {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 40px 0 8px;
+}
+.paginacao-item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0 14px;
+    background: var(--soft);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    font: 700 13px var(--font-body);
+    text-decoration: none;
+    transition: background .15s;
+}
+a.paginacao-item:hover { background: var(--line); }
+a.paginacao-item:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.paginacao-item.atual { background: var(--primary-color); color: var(--primary-contrast); border-color: var(--primary-color); }
+.paginacao-item.desativado { opacity: .45; cursor: not-allowed; }
+.paginacao-reticencias { min-width: 24px; text-align: center; color: var(--muted); font: 700 14px var(--font-body); }
+.paginacao-resumo { flex-basis: 100%; margin: 6px 0 0; text-align: center; font: 500 12px var(--font-body); color: var(--muted); }
+@media (max-width: 600px) {
+    .paginacao { gap: 6px; }
+    .paginacao-item { min-width: 36px; min-height: 36px; padding: 0 10px; }
+}
+
 /* ---------- Conta: campos com erro/ajuda (criar conta e perfil) e dados do perfil ---------- */
 .login-campo { display: flex; flex-direction: column; margin-bottom: 18px; }
 .login-campo input { margin-bottom: 6px; }
@@ -1126,3 +1444,9 @@ body.zoom-aberto { overflow: hidden; }
     .zoom-modal { padding: 12px; gap: 4px; }
     .zoom-nav { width: 36px; height: 36px; font-size: 26px; }
 }
+
+/* ---------- Página de favoritos ---------- */
+/* Sem a busca no topo, o carrinho continua colado na direita, no mesmo ponto das outras telas */
+.el-top-actions-isolado { margin-left: auto; }
+/* O card inteiro leva aos detalhes do produto (o clique é tratado no jshome.js) */
+#listaFavoritos .produto-card { cursor: pointer; }
