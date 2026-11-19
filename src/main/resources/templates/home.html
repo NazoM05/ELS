@@ -9,11 +9,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=4)}">
+    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=8)}">
 
 
     <title>Estilo London Store</title>
-    <link rel="icon" type="image/png" href="/Gemini_Generated_Image_kujj8zkujj8zkujj-removebg-preview.png">
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png}">
 </head>
 
 <body>
@@ -24,6 +26,7 @@
     <!-- Barra fixa com menu e busca -->
     <div class="barrabranca">
         <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
 
         <form class="search-form" action="#" method="get">
             <input type="text" name="search" placeholder="Pesquisar...">
@@ -37,19 +40,26 @@
 
         <div class="produtos-grid">
 
-            <div th:each="produto : ${listaProdutos}" class="produto-card">
+            <div th:each="produto : ${listaProdutos}" class="produto-card"
+                 th:with="temCostas=${produto.imagemCostas != null and !#strings.isEmpty(produto.imagemCostas)}">
 
-                <div class="produto-media">
-                    <img th:src="${produto.imagem != null} ? @{'/img/' + ${produto.imagem}} : 'https://placehold.co/400x500/e5e5e5/0a0a0a?text=Sem+foto'"
+                <!-- Imagem clicável: leva aos detalhes. No hover, troca a frente pelas costas (se cadastrada) -->
+                <a class="produto-media" th:classappend="${temCostas} ? 'tem-costas'"
+                   th:href="@{'/detalhes/' + ${produto.id}}" th:aria-label="'Ver detalhes de ' + ${produto.nome}">
+                    <img class="img-frente"
+                         th:src="${produto.imagemFrente != null} ? @{'/img/' + ${produto.imagemFrente}} : 'https://placehold.co/400x500/e5e5e5/0a0a0a?text=Sem+foto'"
                          th:alt="${produto.nome}" alt="Produto" loading="lazy">
+                    <img class="img-costas" th:if="${temCostas}"
+                         th:src="@{'/img/' + ${produto.imagemCostas}}"
+                         alt="" aria-hidden="true" loading="lazy">
 
                     <!-- OPCIONAL: ative quando o Produto tiver esses campos
                     <span class="badge-desconto" th:text="${produto.desconto} + '% OFF'"></span>
                     <span class="badge-vendidas" th:text="'+' + ${produto.vendidasSemana} + ' vendidas na semana'"></span>
                     -->
-                </div>
+                </a>
 
-                <h3 th:text="${produto.nome}"></h3>
+                <h3><a class="produto-titulo" th:href="@{'/detalhes/' + ${produto.id}}" th:text="${produto.nome}"></a></h3>
 
                 <p class="preco">
                     <!-- OPCIONAL: <span class="preco-antigo" th:text="${produto.precoAntigo}"></span> -->
@@ -61,8 +71,6 @@
                    th:text="'Até 12x de R$ ' + ${#numbers.formatDecimal(produto.preco / 12, 1, 'POINT', 2, 'COMMA')}"></p>
 
                 <!-- OPCIONAL: <span class="tag-promo">Black November</span> -->
-
-                <button th:onclick="|window.location.href='/detalhes/' + ${produto.id}|" class="btn-comprar">Ver Detalhes</button>
             </div>
 
         </div>

@@ -10,12 +10,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=4)}">
+    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=8)}">
 
 
     <title>Listagem de produtos - Estilo London Store</title>
 
-    <link rel="icon" type="image/png" href="/Gemini_Generated_Image_kujj8zkujj8zkujj-removebg-preview.png">
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png}">
 </head>
 
 
@@ -31,6 +33,7 @@
             <span></span>
             <span></span>
         </button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
         <form class="search-form" action="#" method="get">
             <input type="text" name="search" id="filtroBusca" placeholder="Pesquisar...">
             <button type="submit">Buscar</button>
@@ -86,7 +89,7 @@
                 <tbody>
                     <tr th:each="produto : ${ativos}">
                         <td class="listagem-col-foto">
-                            <img th:src="${produto.imagem != null} ? @{'/img/' + ${produto.imagem}} : 'https://placehold.co/80x100/ffb6c1/ffffff?text=Sem+foto'"
+                            <img th:src="${produto.imagemFrente != null} ? @{'/img/' + ${produto.imagemFrente}} : 'https://placehold.co/80x100/ffb6c1/ffffff?text=Sem+foto'"
                                  th:alt="${produto.nome}" alt="Produto" width="56" height="70" loading="lazy">
                         </td>
                         <td class="listagem-col-nome" th:text="${produto.nome}">Nome</td>
@@ -94,7 +97,7 @@
                         <td class="listagem-col-acoes">
                             <div class="listagem-icones">
                                 <!-- Visualizar -->
-                                <a class="listagem-icone" th:href="@{'/detalhes/' + ${produto.id}}"
+                                <a class="listagem-icone" th:href="@{'/admin/produto/visualizar/' + ${produto.id}}"
                                    title="Visualizar" aria-label="Visualizar">
                                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
                                 </a>
@@ -134,14 +137,14 @@
                 <tbody>
                     <tr th:each="produto : ${inativos}" class="listagem-linha-inativa">
                         <td class="listagem-col-foto">
-                            <img th:src="${produto.imagem != null} ? @{'/img/' + ${produto.imagem}} : 'https://placehold.co/80x100/ffb6c1/ffffff?text=Sem+foto'"
+                            <img th:src="${produto.imagemFrente != null} ? @{'/img/' + ${produto.imagemFrente}} : 'https://placehold.co/80x100/ffb6c1/ffffff?text=Sem+foto'"
                                  th:alt="${produto.nome}" alt="Produto" width="56" height="70" loading="lazy">
                         </td>
                         <td class="listagem-col-nome" th:text="${produto.nome}">Nome</td>
                         <td class="listagem-col-preco preco" th:text="'R$ ' + ${#numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</td>
                         <td class="listagem-col-acoes">
                             <div class="listagem-icones">
-                                <a class="listagem-icone" th:href="@{'/detalhes/' + ${produto.id}}"
+                                <a class="listagem-icone" th:href="@{'/admin/produto/visualizar/' + ${produto.id}}"
                                    title="Visualizar" aria-label="Visualizar">
                                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
                                 </a>

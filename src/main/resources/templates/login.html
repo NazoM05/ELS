@@ -9,11 +9,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=4)}">
+    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=8)}">
 
 
     <title>Entrar | Estilo London Store</title>
-    <link rel="icon" type="image/png" href="/Gemini_Generated_Image_kujj8zkujj8zkujj-removebg-preview.png">
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png}">
 </head>
 
 <body>
@@ -22,6 +24,7 @@
 
         <!-- Painel escuro com a marca -->
         <section class="login-marca">
+            <img class="login-marca-fundo" th:src="@{/brand/logo-el-branca-hd.png}" alt="" aria-hidden="true">
             <a class="login-logo" th:href="@{/}">Estilo London</a>
             <h1 class="login-titulo">Acesse<br>sua conta</h1>
         </section>

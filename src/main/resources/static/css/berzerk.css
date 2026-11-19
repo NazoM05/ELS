@@ -244,6 +244,25 @@ img { max-width: 100%; }
 .produto-card:hover .produto-media img,
 .produto-card:hover > img { transform: scale(1.04); }
 
+/* Vitrine: a imagem inteira é um link para os detalhes */
+a.produto-media { display: block; cursor: pointer; color: inherit; text-decoration: none; }
+a.produto-media:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.produto-media img { transition: transform .5s ease, opacity .45s ease; }
+
+/* Hover: a imagem da frente some suavemente e as costas aparecem (só se houver foto das costas) */
+.produto-media .img-costas { position: absolute; inset: 0; height: 100%; opacity: 0; pointer-events: none; }
+@media (hover: hover) {
+    .produto-card:hover .produto-media.tem-costas .img-frente,
+    .produto-card:focus-within .produto-media.tem-costas .img-frente { opacity: 0; }
+    .produto-card:hover .produto-media.tem-costas .img-costas,
+    .produto-card:focus-within .produto-media.tem-costas .img-costas { opacity: 1; }
+}
+
+/* Título também é link, com feedback leve no hover */
+.produto-card h3 a { color: inherit; text-decoration: none; cursor: pointer; transition: color .2s ease; }
+.produto-card h3 a:hover,
+.produto-card h3 a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+
 .badge-desconto {
     position: absolute;
     top: 10px;
@@ -612,6 +631,17 @@ th.listagem-col-acoes { text-align: right; }
 .cadastro-previa { max-width: 200px; max-height: 250px; object-fit: cover; background: var(--tile); border-radius: 6px; }
 .cadastro-previa[hidden] { display: none; }
 
+/* Upload de imagens: Frente e Costas lado a lado */
+.upload-par { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.upload-card { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.upload-card .adm-rotulo { font-size: 14px; }
+.upload-previa { width: 100%; max-width: 260px; aspect-ratio: 4 / 5; display: flex; align-items: center; justify-content: center; background: var(--tile); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.upload-previa img { width: 100%; height: 100%; object-fit: cover; }
+.upload-previa img[hidden], .upload-vazio[hidden] { display: none; }
+.upload-vazio { padding: 12px; text-align: center; font: 500 13px var(--font-body); color: var(--muted); }
+.upload-card input[type="file"] { width: 100%; max-width: 100%; box-sizing: border-box; }
+@media (max-width: 480px) { .upload-par { grid-template-columns: 1fr; } }
+
 .adm-acoes {
     grid-column: 1 / -1;
     display: flex;
@@ -753,4 +783,141 @@ th.listagem-col-acoes { text-align: right; }
 
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition-duration: .01ms !important; }
+}
+
+/* ==========================================================
+   Logo EL (barra do topo, sidebar e login)
+   ========================================================== */
+.barra-logo { flex: 0 0 auto; display: inline-flex; align-items: center; }
+.barra-logo img { display: block; height: 44px; width: auto; }
+
+.sidebar-logo { display: block; padding: 0 28px 20px; margin-bottom: 8px; border-bottom: 1px solid #1F1F1F; }
+.sidebar-logo img { display: block; height: 64px; width: auto; }
+
+/* Logo branca (arquivo HD 1900x2048), bem sutil e integrada ao painel preto do login */
+.login-marca { position: relative; overflow: hidden; isolation: isolate; }
+.login-marca > :not(.login-marca-fundo) { position: relative; z-index: 1; }
+.login-marca-fundo {
+    position: absolute;
+    right: -4%;
+    bottom: -6%;
+    height: 92%;
+    width: auto;
+    max-width: none;
+    opacity: .055;
+    z-index: 0;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    image-rendering: auto;            /* suavização de alta qualidade ao reduzir o HD */
+    transform: translateZ(0);         /* evita borrão por sub-pixel no GPU */
+    /* esmaece as bordas para a marca se fundir ao fundo, sem corte seco */
+    -webkit-mask-image: linear-gradient(to top left, #000 35%, transparent 100%);
+            mask-image: linear-gradient(to top left, #000 35%, transparent 100%);
+}
+
+/* ==========================================================
+   Formulário de produto: descrição e estoque por tamanho
+   ========================================================== */
+.cadastro-campo textarea {
+    width: 100%;
+    min-height: 110px;
+    padding: 12px 14px;
+    background: var(--soft);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    font: 500 15px/1.5 var(--font-body);
+    resize: vertical;
+    transition: border-color .15s, background .15s;
+}
+.cadastro-campo textarea:focus { outline: none; border-color: var(--ink); background: #fff; }
+
+.adm-estoque { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 12px; margin-top: 6px; }
+.adm-estoque:not(:has(.adm-estoque-item:not(.oculto))) { display: none; }
+.adm-estoque-item { display: flex; flex-direction: column; gap: 6px; }
+.adm-estoque-item.oculto { display: none; }
+.adm-estoque-rotulo { font: 800 11px var(--font-body); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+
+/* ==========================================================
+   Tela "Visualizar produto" (admin)
+   ========================================================== */
+.vis-atalhos { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.vis-status {
+    display: inline-block;
+    margin-right: 8px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font: 800 10px var(--font-body);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+.vis-status-ativo { background: var(--ink); color: #fff; }
+.vis-status-inativo { background: #fff; color: var(--ink); border: 1px solid var(--ink); }
+
+.vis-grade { display: grid; grid-template-columns: minmax(220px, 340px) 1fr; gap: 24px; margin-bottom: 36px; }
+.vis-foto { background: var(--tile); border-radius: 6px; overflow: hidden; align-self: start; }
+.vis-foto img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
+.vis-info { margin-bottom: 0; }
+
+.vis-dados { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 24px; margin: 0; }
+.vis-dados > div { min-width: 0; }
+.vis-dados dt, .vis-datas dt {
+    margin-bottom: 6px;
+    font: 800 11px var(--font-body);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+.vis-dados dd, .vis-datas dd { margin: 0; font: 600 15px/1.5 var(--font-body); overflow-wrap: anywhere; }
+.vis-dados-largo { grid-column: 1 / -1; }
+.vis-preco { font: 700 26px var(--font-body) !important; }
+.vis-descricao { font-weight: 500 !important; white-space: pre-line; color: #333; }
+.vis-vazio { color: var(--muted); font-weight: 500; }
+
+.vis-cor { display: flex; align-items: center; gap: 8px; }
+.vis-cor-amostra { display: inline-block; width: 18px; height: 18px; border-radius: 50%; background: var(--line); border: 1px solid rgba(0, 0, 0, .25); }
+
+.vis-tamanhos { display: inline-flex; flex-wrap: wrap; gap: 8px; }
+.vis-tamanhos span { min-width: 44px; padding: 8px 12px; text-align: center; background: var(--ink); color: #fff; border-radius: 4px; font: 800 12px var(--font-body); }
+
+.vis-secao { margin: 0 0 16px; font: 400 28px/1 var(--font-display); text-transform: uppercase; }
+.vis-bloco { margin-top: 36px; }
+
+.vis-metricas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.vis-card { padding: 18px; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+.vis-card p { margin: 0; }
+.vis-card-rotulo { font: 800 11px var(--font-body); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.vis-card-valor { margin-top: 10px !important; font: 400 clamp(28px, 4vw, 38px)/1 var(--font-display); letter-spacing: .01em; }
+.vis-card-nota { margin-top: 8px !important; font: 500 12px var(--font-body); color: var(--muted); }
+.vis-nota { margin: 14px 0 0; font: 500 12px/1.6 var(--font-body); color: var(--muted); }
+
+/* Estoque por tamanho: esgotado em destaque, poucas unidades em alerta */
+.vis-badge { display: inline-block; padding: 4px 12px; border-radius: 999px; font: 800 10px var(--font-body); letter-spacing: .06em; text-transform: uppercase; }
+.vis-badge-ok { background: var(--soft); color: var(--ink); border: 1px solid var(--line); }
+.vis-badge-baixo { background: #fff; color: var(--ink); border: 2px solid var(--ink); }
+.vis-badge-esgotado { background: var(--ink); color: #fff; }
+.vis-badge-nao_informado { background: #fff; color: var(--muted); border: 1px dashed #B5B5B5; }
+.vis-linha-esgotado td { background: #FAFAFA; }
+.vis-linha-esgotado td:first-child { box-shadow: inset 4px 0 0 var(--ink); }
+.vis-linha-baixo td:first-child { box-shadow: inset 4px 0 0 #B5B5B5; }
+
+.vis-datas { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 0; padding: 20px; border: 1px solid var(--line); border-radius: 6px; }
+
+@media (min-width: 640px) {
+    .vis-metricas { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 1000px) {
+    .vis-metricas { grid-template-columns: repeat(5, 1fr); }
+}
+@media (max-width: 760px) {
+    .vis-grade { grid-template-columns: 1fr; }
+    .vis-foto { max-width: 340px; }
+    .vis-atalhos { width: 100%; }
+    .vis-atalhos .adm-btn { flex: 1 1 140px; }
+}
+@media (max-width: 640px) {
+    .vis-dados { grid-template-columns: 1fr; }
+    .barra-logo img { height: 38px; }
 }

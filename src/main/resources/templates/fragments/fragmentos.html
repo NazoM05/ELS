@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
 
     <!-- Para mudar os avisos, edite/adicione/remova os <p> abaixo (o primeiro precisa ter class="anuncio ativo") -->
@@ -15,6 +16,9 @@
 
 
 <div class="sidebar" id="sidebar" th:fragment="sidebar">
+	<a class="sidebar-logo" th:href="@{/}" aria-label="Estilo London - página inicial">
+		<img th:src="@{/brand/logo-el-branca.png}" alt="Estilo London">
+	</a>
 	<nav>
         <a th:href="@{/home}">Início</a>
         <a th:href="@{/admin/produto/listar}" sec:authorize="hasRole('ADMIN')">Produtos</a>
@@ -31,3 +35,8 @@
     <span></span>
     <span></span>
 </button>
+
+<!-- Logo da barra do topo (versão preta, fundo transparente) -->
+<a class="barra-logo" th:fragment="logo" th:href="@{/}" aria-label="Estilo London - página inicial">
+    <img th:src="@{/brand/logo-el.png}" alt="Estilo London" width="41" height="44">
+</a>
