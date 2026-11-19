@@ -27,7 +27,7 @@ public class SecurityConfig {
 		.authorizeHttpRequests(auth -> auth 
 				// Públicas: login/cadastro, a vitrine (home, busca e detalhes do produto) e os arquivos que ela usa
 				.requestMatchers("/login", "/criar-conta").permitAll()
-				.requestMatchers("/", "/home", "/london", "/pesquisa", "/detalhes/**").permitAll()
+				.requestMatchers("/", "/home", "/london", "/pesquisa", "/detalhes/**", "/favoritos").permitAll()
 				.requestMatchers("/css/**", "/jshome.js", "/img/**", "/brand/**", "/logo-site/**", "/favicon.ico").permitAll()
 				.requestMatchers(PathRequest.toH2Console()).hasRole("ADMIN")
 				.requestMatchers("/admin/**").hasRole("ADMIN")

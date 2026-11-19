@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +17,9 @@ import com.example.nazomocambique.repository.ProdutoRepository;
 
 @Service
 public class ProdutoService {
+
+    /** Máximo de produtos por página na vitrine. */
+    public static final int PRODUTOS_POR_PAGINA = 20;
    
     private ProdutoRepository produtoRepository;
     
@@ -53,12 +58,21 @@ public class ProdutoService {
 	/**
 	 * Catálogo da loja: termo (parte do nome), categoria e gênero, todos opcionais e combináveis.
 	 * Filtrar por Masculino ou Feminino também traz os produtos Unissex.
+	 * Devolve uma página de até {@value #PRODUTOS_POR_PAGINA} produtos. O índice é 0-based e é ajustado
+	 * quando inválido: negativo vira a primeira página e além do fim vira a última.
 	 */
-	public List<Produto> filtrar(String termo, Categoria categoria, Genero genero) {
+	public Page<Produto> filtrar(String termo, Categoria categoria, Genero genero, int pagina) {
 		String termoLimpo = (termo == null || termo.isBlank()) ? null : termo.trim();
 		Genero g1 = genero;
 		Genero g2 = genero == null ? null : Genero.UNISSEX;
-		return produtoRepository.filtrar(termoLimpo, categoria, g1, g2);
+		int indice = Math.max(pagina, 0);
+		Page<Produto> resultado = produtoRepository.filtrar(termoLimpo, categoria, g1, g2,
+				PageRequest.of(indice, PRODUTOS_POR_PAGINA));
+		if (resultado.getTotalPages() > 0 && indice >= resultado.getTotalPages()) {
+			resultado = produtoRepository.filtrar(termoLimpo, categoria, g1, g2,
+					PageRequest.of(resultado.getTotalPages() - 1, PRODUTOS_POR_PAGINA));
+		}
+		return resultado;
 	}
 
 	/**

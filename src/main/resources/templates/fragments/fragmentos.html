@@ -3,10 +3,8 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
 
-    <!-- Tema: sobrescreve --primary-color etc. com o que o admin escolheu em Configurações (valores já validados no servidor) -->
     <style th:fragment="tema" th:utext="${site.cssTema}"></style>
 
-    <!-- Para mudar os avisos, edite/adicione/remova os <p> abaixo (o primeiro precisa ter class="anuncio ativo") -->
     <div th:fragment="anuncios" class="barra-anuncios" role="region" aria-label="Avisos da loja">
         <p class="anuncio ativo">Frete grátis a partir de R$ 99 para a região Sul</p>
         <p class="anuncio">Novas estampas disponíveis</p>
@@ -14,89 +12,544 @@
         <p class="anuncio">Troca facilitada em até  30 dias</p>
     </div>
 
-</body>
-</html>
+    <div class="sidebar" id="sidebar" th:fragment="sidebar">
+        <a class="sidebar-logo" th:href="@{/}" aria-label="Estilo London - página inicial">
+            <img th:src="${site.logoPersonalizada} ? @{'/logo-site/' + ${site.logoArquivo}} : @{/brand/logo-el-branca.png}" alt="Estilo London">
+        </a>
+        <nav>
+            <a th:href="@{/home}">Início</a>
+            <a th:href="@{/perfil}" sec:authorize="isAuthenticated()">Perfil</a>
 
-
-<div class="sidebar" id="sidebar" th:fragment="sidebar">
-	<a class="sidebar-logo" th:href="@{/}" aria-label="Estilo London - página inicial">
-		<img th:src="${site.logoPersonalizada} ? @{'/logo-site/' + ${site.logoArquivo}} : @{/brand/logo-el-branca.png}" alt="Estilo London">
-	</a>
-	<nav>
-        <a th:href="@{/home}">Início</a>
-		<a th:href="@{/perfil}" sec:authorize="isAuthenticated()">Perfil</a>
-
-        <!-- Só ADMIN enxerga esta divisão (o servidor também bloqueia /admin/** para os demais) -->
-        <div class="sidebar-admin" sec:authorize="hasRole('ADMIN')">
-            <p class="sidebar-admin-titulo">Opções de administrador</p>
-            <a th:href="@{/admin/configuracoes}">Configurações</a>
-            <a th:href="@{/admin/produto/listar}">Listagem</a>
-            <a th:href="@{/admin/produto/cadastrar}">Novo produto</a>
-        </div>
-
-        <!-- Visitante (sem login): só entrar ou criar conta -->
-        <a th:href="@{/login}" sec:authorize="isAnonymous()">Entrar</a>
-        <a th:href="@{/criar-conta}" sec:authorize="isAnonymous()">Criar conta</a>
-
-        <a th:href="@{/logout}" sec:authorize="isAuthenticated()">Sair</a>
-    </nav>
-       
-</div>
-
-<button class="menu-btn" id="menuBtn" th:fragment="botao-sidebar">
-    <span></span>
-    <span></span>
-    <span></span>
-</button>
-
-<!-- Logo da barra do topo (versão preta, fundo transparente) -->
-<a class="barra-logo" th:fragment="logo" th:href="@{/}" aria-label="Estilo London - página inicial">
-    <img th:src="${site.logoPersonalizada} ? @{'/logo-site/' + ${site.logoArquivo}} : @{/brand/logo-el.png}" alt="Estilo London">
-</a>
-
-<!-- Busca da barra do topo (loja). É o único formulário do catálogo: os filtros de Gênero e Categoria
-     ficam fora dele, mas apontam para ele com form="formBusca", então tudo vai junto na mesma URL. -->
-<form class="search-form" id="formBusca" th:fragment="busca-loja" th:action="@{/home}" method="get" data-servidor>
-    <input type="text" name="busca" th:value="${busca}" placeholder="Pesquisar..." aria-label="Pesquisar produtos" autocomplete="off">
-    <button type="submit">Buscar</button>
-</form>
-
-<!-- Filtros combináveis do catálogo: Gênero + Categoria (+ termo de busca do formulário acima) -->
-<div th:fragment="filtros-catalogo">
-    <div class="filtros-loja" role="group" aria-label="Filtros do catálogo">
-        <div class="filtro-grupo">
-            <span class="filtro-rotulo" id="rotuloFiltroGenero">Gênero</span>
-            <div class="adm-chips filtro-chips" role="radiogroup" aria-labelledby="rotuloFiltroGenero">
-                <label class="adm-chip">
-                    <input type="radio" name="genero" value="" form="formBusca"
-                           th:checked="${generoSelecionado == null}" onchange="this.form.submit()">
-                    <span>Todos</span>
-                </label>
-                <label class="adm-chip" th:each="g : ${generosFiltro}">
-                    <input type="radio" name="genero" th:value="${g.name()}" form="formBusca"
-                           th:checked="${generoSelecionado == g}" onchange="this.form.submit()">
-                    <span th:text="${g.rotulo}">Masculino</span>
-                </label>
+            <div class="sidebar-admin" sec:authorize="hasRole('ADMIN')">
+                <p class="sidebar-admin-titulo">Opções de administrador</p>
+                <a th:href="@{/admin/configuracoes}">Configurações</a>
+                <a th:href="@{/admin/produto/listar}">Listagem</a>
+                <a th:href="@{/admin/produto/cadastrar}">Novo produto</a>
             </div>
-        </div>
 
-        <div class="filtro-grupo">
-            <label class="filtro-rotulo" for="filtroCategoria">Categoria</label>
-            <select id="filtroCategoria" name="categoria" form="formBusca" onchange="this.form.submit()">
-                <option value="">Todas as categorias</option>
-                <option th:each="c : ${categorias}" th:value="${c.name()}" th:text="${c.rotulo}"
-                        th:selected="${categoriaSelecionada == c}">Camiseta</option>
-            </select>
-        </div>
+            <a th:href="@{/login}" sec:authorize="isAnonymous()">Entrar</a>
+            <a th:href="@{/criar-conta}" sec:authorize="isAnonymous()">Criar conta</a>
 
-        <a class="filtro-limpar" th:if="${filtrosAtivos}" th:href="@{/home}">Limpar filtros</a>
+            <a th:href="@{/logout}" sec:authorize="isAuthenticated()">Sair</a>
+        </nav>
     </div>
 
-    <p class="filtro-resultado" role="status"
-       th:text="${#lists.size(listaProdutos) == 1} ? '1 produto encontrado' : ${#lists.size(listaProdutos)} + ' produtos encontrados'">0 produtos</p>
+    <button class="menu-btn" id="menuBtn" th:fragment="botao-sidebar">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
 
-    <p class="filtro-vazio" th:if="${#lists.isEmpty(listaProdutos)}">
-        Nenhum produto encontrado com esses filtros.
-        <a th:href="@{/home}">Limpar filtros</a>
-    </p>
-</div>
+    <!-- Botões do Topo: Wishlist (Coração) + Carrinho (Sacola) -->
+    <div class="el-top-actions" th:fragment="botao-carrinho" style="display: inline-flex; align-items: center; gap: 8px;">
+        <a class="el-cart-trigger" id="btnAbrirWishlist" th:href="@{/favoritos}" aria-label="Abrir lista de desejos" title="Lista de desejos">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+            <span class="el-cart-badge" id="wishlistQtdTotal">0</span>
+        </a>
+
+        <button type="button" class="el-cart-trigger" id="btnAbrirCarrinho" aria-label="Abrir carrinho de compras">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>
+            <span class="el-cart-badge" id="carrinhoQtdTotal">0</span>
+        </button>
+    </div>
+
+    <th:block th:fragment="carrinho-drawer">
+        <div id="carrinhoBackdrop" class="el-cart-backdrop" aria-hidden="true"></div>
+
+        <aside id="carrinhoDrawer" class="el-cart-drawer" aria-label="Carrinho de compras" aria-hidden="true">
+            <div class="el-cart-header">
+                <h2 class="el-cart-title">Seu Carrinho</h2>
+                <button type="button" id="btnFecharCarrinho" class="el-cart-close" aria-label="Fechar carrinho">&times;</button>
+            </div>
+
+            <div id="carrinhoItens" class="el-cart-body"></div>
+
+            <div class="el-cart-footer">
+                <div class="el-cart-subtotal-row">
+                    <span>Subtotal</span>
+                    <strong id="carrinhoSubtotal">R$ 0,00</strong>
+                </div>
+                <button type="button" id="btnLimparCarrinho" class="el-cart-clear-btn">Limpar carrinho</button>
+            </div>
+        </aside>
+
+        <style>
+            .el-cart-trigger {
+                position: relative;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                background: transparent;
+                border: 1px solid currentColor;
+                border-radius: 8px;
+                padding: 6px 12px;
+                cursor: pointer;
+                color: inherit;
+                font-weight: 600;
+            }
+            .el-cart-badge {
+                background: var(--primary-color, #111111);
+                color: #ffffff;
+                font-size: 0.75rem;
+                min-width: 20px;
+                height: 20px;
+                padding: 0 5px;
+                border-radius: 999px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .el-cart-backdrop {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 0.25s ease, visibility 0.25s ease;
+                z-index: 1040;
+            }
+            .el-cart-backdrop.is-open {
+                opacity: 1;
+                visibility: visible;
+            }
+            .el-cart-drawer {
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: min(420px, 100vw);
+                height: 100dvh;
+                background: #ffffff;
+                color: #111111;
+                box-shadow: -8px 0 28px rgba(0, 0, 0, 0.18);
+                display: flex;
+                flex-direction: column;
+                transform: translateX(100%);
+                transition: transform 0.28s ease;
+                z-index: 1050;
+            }
+            .el-cart-drawer.is-open {
+                transform: translateX(0);
+            }
+            .el-cart-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 16px 20px;
+                border-bottom: 1px solid #e5e7eb;
+            }
+            .el-cart-title {
+                margin: 0;
+                font-size: 1.125rem;
+            }
+            .el-cart-close {
+                background: transparent;
+                border: none;
+                font-size: 1.6rem;
+                line-height: 1;
+                cursor: pointer;
+                color: inherit;
+                padding: 4px 8px;
+            }
+            .el-cart-body {
+                flex: 1;
+                overflow-y: auto;
+                padding: 16px 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+            .el-cart-empty {
+                text-align: center;
+                color: #6b7280;
+                margin-top: 40px;
+            }
+            .el-cart-item {
+                display: grid;
+                grid-template-columns: 64px 1fr auto;
+                gap: 12px;
+                align-items: center;
+                padding: 10px;
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+            }
+            .el-cart-item img {
+                width: 64px;
+                height: 64px;
+                object-fit: cover;
+                border-radius: 6px;
+                background: #f3f4f6;
+            }
+            .el-cart-item-info h4 {
+                margin: 0 0 4px;
+                font-size: 0.95rem;
+            }
+            .el-cart-item-meta {
+                font-size: 0.82rem;
+                color: #4b5563;
+                margin-bottom: 4px;
+            }
+            .el-cart-item-price {
+                font-size: 0.9rem;
+                font-weight: 600;
+            }
+            .el-cart-item-controls {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 6px;
+            }
+            .el-cart-qty-box {
+                display: inline-flex;
+                align-items: center;
+                border: 1px solid #d1d5db;
+                border-radius: 6px;
+                overflow: hidden;
+            }
+            .el-cart-qty-box button {
+                background: #f9fafb;
+                border: none;
+                width: 26px;
+                height: 26px;
+                cursor: pointer;
+                font-weight: 700;
+            }
+            .el-cart-qty-box span {
+                padding: 0 8px;
+                font-size: 0.88rem;
+                min-width: 24px;
+                text-align: center;
+            }
+            .el-cart-remove {
+                background: transparent;
+                border: none;
+                color: #dc2626;
+                font-size: 0.78rem;
+                cursor: pointer;
+                padding: 0;
+                text-decoration: underline;
+            }
+            .el-cart-footer {
+                padding: 16px 20px;
+                border-top: 1px solid #e5e7eb;
+                background: #fafafa;
+            }
+            .el-cart-subtotal-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 1.05rem;
+                margin-bottom: 12px;
+            }
+            .el-cart-clear-btn {
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #d1d5db;
+                background: #ffffff;
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: 500;
+            }
+        </style>
+
+        <script>
+            (() => {
+                if (window.__carrinhoInicializado) return;
+                window.__carrinhoInicializado = true;
+
+                const STORAGE_KEY = "estilo_london_carrinho_v1";
+
+                const drawer = document.getElementById("carrinhoDrawer");
+                const backdrop = document.getElementById("carrinhoBackdrop");
+                const btnAbrir = document.getElementById("btnAbrirCarrinho");
+                const btnFechar = document.getElementById("btnFecharCarrinho");
+                const btnLimpar = document.getElementById("btnLimparCarrinho");
+                const listaEl = document.getElementById("carrinhoItens");
+                const subtotalEl = document.getElementById("carrinhoSubtotal");
+                const qtdTotalEl = document.getElementById("carrinhoQtdTotal");
+
+                if (!drawer || !backdrop || !listaEl || !subtotalEl) return;
+
+                const formatarBRL = (valor) =>
+                    Number(valor || 0).toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                    });
+
+                function lerCarrinho() {
+                    try {
+                        const raw = localStorage.getItem(STORAGE_KEY);
+                        const parsed = raw ? JSON.parse(raw) : [];
+                        return Array.isArray(parsed) ? parsed : [];
+                    } catch {
+                        return [];
+                    }
+                }
+
+                function salvarCarrinho(itens) {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(itens));
+                }
+
+                function construirChave(id, tamanho) {
+                    return `${String(id).trim()}__${String(tamanho || "UNICO").trim().toUpperCase()}`;
+                }
+
+                function abrirCarrinho() {
+                    drawer.classList.add("is-open");
+                    backdrop.classList.add("is-open");
+                    drawer.setAttribute("aria-hidden", "false");
+                    backdrop.setAttribute("aria-hidden", "false");
+                }
+
+                function fecharCarrinho() {
+                    drawer.classList.remove("is-open");
+                    backdrop.classList.remove("is-open");
+                    drawer.setAttribute("aria-hidden", "true");
+                    backdrop.setAttribute("aria-hidden", "true");
+                }
+
+                function adicionarItem({ id, nome, preco, tamanho, imagem, quantidade = 1 }) {
+                    const precoNum = Number(String(preco).replace(",", "."));
+                    const qtdAdd = Math.max(1, parseInt(quantidade, 10) || 1);
+                    const tamNorm = String(tamanho || "UNICO").trim().toUpperCase();
+
+                    if (!id || !nome || Number.isNaN(precoNum)) return;
+
+                    const chave = construirChave(id, tamNorm);
+                    const itens = lerCarrinho();
+                    const existente = itens.find((item) => item.chave === chave);
+
+                    if (existente) {
+                        existente.quantidade += qtdAdd;
+                    } else {
+                        itens.push({
+                            chave,
+                            id: String(id),
+                            nome: String(nome),
+                            preco: precoNum,
+                            tamanho: tamNorm,
+                            imagem: imagem || "",
+                            quantidade: qtdAdd,
+                        });
+                    }
+
+                    salvarCarrinho(itens);
+                    renderizarCarrinho();
+                    abrirCarrinho();
+                }
+
+                function alterarQuantidade(chave, delta) {
+                    const itens = lerCarrinho();
+                    const idx = itens.findIndex((item) => item.chave === chave);
+                    if (idx === -1) return;
+
+                    const novaQtd = itens[idx].quantidade + delta;
+                    if (novaQtd <= 0) {
+                        itens.splice(idx, 1);
+                    } else {
+                        itens[idx].quantidade = novaQtd;
+                    }
+
+                    salvarCarrinho(itens);
+                    renderizarCarrinho();
+                }
+
+                function removerItem(chave) {
+                    const itens = lerCarrinho().filter((item) => item.chave !== chave);
+                    salvarCarrinho(itens);
+                    renderizarCarrinho();
+                }
+
+                function limparCarrinho() {
+                    salvarCarrinho([]);
+                    renderizarCarrinho();
+                }
+
+                function renderizarCarrinho() {
+                    const itens = lerCarrinho();
+                    const totalQtd = itens.reduce((acc, item) => acc + item.quantidade, 0);
+                    const subtotal = itens.reduce((acc, item) => acc + item.preco * item.quantidade, 0);
+
+                    if (qtdTotalEl) {
+                        qtdTotalEl.textContent = String(totalQtd);
+                    }
+                    subtotalEl.textContent = formatarBRL(subtotal);
+
+                    if (itens.length === 0) {
+                        listaEl.innerHTML = `<p class="el-cart-empty">Seu carrinho está vazio.</p>`;
+                        return;
+                    }
+
+                    listaEl.innerHTML = itens
+                        .map((item) => {
+                            const totalItem = item.preco * item.quantidade;
+                            const imgHtml = item.imagem
+                                ? `<img src="${item.imagem}" alt="${item.nome}">`
+                                : `<div style="width:64px;height:64px;background:#f3f4f6;border-radius:6px;"></div>`;
+
+                            return `
+                                <div class="el-cart-item" data-chave="${item.chave}">
+                                    ${imgHtml}
+                                    <div class="el-cart-item-info">
+                                        <h4>${item.nome}</h4>
+                                        <div class="el-cart-item-meta">Tamanho: <strong>${item.tamanho}</strong> · Unit.: ${formatarBRL(item.preco)}</div>
+                                        <div class="el-cart-item-price">${formatarBRL(totalItem)}</div>
+                                    </div>
+                                    <div class="el-cart-item-controls">
+                                        <div class="el-cart-qty-box">
+                                            <button type="button" class="js-qty-menos" aria-label="Diminuir quantidade">-</button>
+                                            <span>${item.quantidade}</span>
+                                            <button type="button" class="js-qty-mais" aria-label="Aumentar quantidade">+</button>
+                                        </div>
+                                        <button type="button" class="el-cart-remove js-remover-item">Remover</button>
+                                    </div>
+                                </div>
+                            `;
+                        })
+                        .join("");
+                }
+
+                btnAbrir?.addEventListener("click", abrirCarrinho);
+                btnFechar?.addEventListener("click", fecharCarrinho);
+                backdrop.addEventListener("click", fecharCarrinho);
+                btnLimpar?.addEventListener("click", limparCarrinho);
+
+                document.addEventListener("keydown", (e) => {
+                    if (e.key === "Escape" && drawer.classList.contains("is-open")) {
+                        fecharCarrinho();
+                    }
+                });
+
+                listaEl.addEventListener("click", (e) => {
+                    const card = e.target.closest(".el-cart-item");
+                    if (!card) return;
+                    const chave = card.getAttribute("data-chave");
+                    if (!chave) return;
+
+                    if (e.target.closest(".js-qty-mais")) {
+                        alterarQuantidade(chave, 1);
+                    } else if (e.target.closest(".js-qty-menos")) {
+                        alterarQuantidade(chave, -1);
+                    } else if (e.target.closest(".js-remover-item")) {
+                        removerItem(chave);
+                    }
+                });
+
+                document.addEventListener("click", (e) => {
+                    const btn = e.target.closest(".js-add-carrinho");
+                    if (!btn) return;
+
+                    const container = btn.closest("[data-produto-id]");
+                    if (!container) return;
+
+                    const selectTamanho = container.querySelector(".js-tamanho-select");
+                    const inputTamanhoChecked = container.querySelector('input[name^="tamanho"]:checked');
+                    const tamanhoAtivoBtn = container.querySelector('.detalhes-tamanhos button.ativo');
+                    
+                    const tamanho =
+                        selectTamanho?.value ||
+                        inputTamanhoChecked?.value ||
+                        tamanhoAtivoBtn?.getAttribute("data-tamanho") ||
+                        btn.getAttribute("data-tamanho") ||
+                        "UNICO";
+
+                    const inputQtd = container.querySelector(".js-qtd-input");
+                    const quantidade = inputQtd ? parseInt(inputQtd.value, 10) || 1 : 1;
+
+                    adicionarItem({
+                        id: container.getAttribute("data-produto-id"),
+                        nome: container.getAttribute("data-produto-nome"),
+                        preco: container.getAttribute("data-produto-preco"),
+                        imagem: container.getAttribute("data-produto-imagem"),
+                        tamanho,
+                        quantidade,
+                    });
+                });
+
+                window.EstiloLondonCarrinho = {
+                    adicionar: adicionarItem,
+                    abrir: abrirCarrinho,
+                    fechar: fecharCarrinho,
+                    limpar: limparCarrinho,
+                };
+
+                renderizarCarrinho();
+            })();
+        </script>
+    </th:block>
+
+    <a class="barra-logo" th:fragment="logo" th:href="@{/}" aria-label="Estilo London - página inicial">
+        <img th:src="${site.logoPersonalizada} ? @{'/logo-site/' + ${site.logoArquivo}} : @{/brand/logo-el.png}" alt="Estilo London">
+    </a>
+
+    <form class="search-form" id="formBusca" th:fragment="busca-loja" th:action="@{/home}" method="get" data-servidor>
+        <input type="text" name="busca" th:value="${busca}" placeholder="Pesquisar..." aria-label="Pesquisar produtos" autocomplete="off">
+        <button type="submit">Buscar</button>
+    </form>
+
+    <div th:fragment="filtros-catalogo">
+        <div class="filtros-loja" role="group" aria-label="Filtros do catálogo">
+            <div class="filtro-grupo">
+                <span class="filtro-rotulo" id="rotuloFiltroGenero">Gênero</span>
+                <div class="adm-chips filtro-chips" role="radiogroup" aria-labelledby="rotuloFiltroGenero">
+                    <label class="adm-chip">
+                        <input type="radio" name="genero" value="" form="formBusca"
+                               th:checked="${generoSelecionado == null}" onchange="this.form.submit()">
+                        <span>Todos</span>
+                    </label>
+                    <label class="adm-chip" th:each="g : ${generosFiltro}">
+                        <input type="radio" name="genero" th:value="${g.name()}" form="formBusca"
+                               th:checked="${generoSelecionado == g}" onchange="this.form.submit()">
+                        <span th:text="${g.rotulo}">Masculino</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="filtro-grupo">
+                <label class="filtro-rotulo" for="filtroCategoria">Categoria</label>
+                <select id="filtroCategoria" name="categoria" form="formBusca" onchange="this.form.submit()">
+                    <option value="">Todas as categorias</option>
+                    <option th:each="c : ${categorias}" th:value="${c.name()}" th:text="${c.rotulo}"
+                            th:selected="${categoriaSelecionada == c}">Camiseta</option>
+                </select>
+            </div>
+
+            <a class="filtro-limpar" th:if="${filtrosAtivos}" th:href="@{/home}">Limpar filtros</a>
+        </div>
+
+        <p class="filtro-resultado" role="status"
+           th:text="${paginacao.totalItens == 1} ? '1 produto encontrado' : ${paginacao.totalItens} + ' produtos encontrados'">0 produtos</p>
+
+        <p class="filtro-vazio" th:if="${#lists.isEmpty(listaProdutos)}">
+            Nenhum produto encontrado com esses filtros.
+            <a th:href="@{/home}">Limpar filtros</a>
+        </p>
+    </div>
+
+    <nav class="paginacao" th:fragment="paginacao" th:if="${paginacao.temVariasPaginas}" aria-label="Paginação dos produtos">
+        <a class="paginacao-item paginacao-seta" th:if="${paginacao.temAnterior}"
+           th:href="@{${paginacao.urlAnterior}}" rel="prev" aria-label="Página anterior">&lsaquo; Anterior</a>
+        <span class="paginacao-item paginacao-seta desativado" th:unless="${paginacao.temAnterior}" aria-disabled="true">&lsaquo; Anterior</span>
+
+        <th:block th:each="item : ${paginacao.itens}">
+            <span class="paginacao-reticencias" th:if="${item.reticencias}" aria-hidden="true">&hellip;</span>
+            <span class="paginacao-item atual" th:if="${item.atual}" aria-current="page"
+                  th:text="${item.numero}" th:aria-label="'Página ' + ${item.numero} + ', página atual'">1</span>
+            <a class="paginacao-item" th:if="${!item.reticencias and !item.atual}"
+               th:href="@{${item.url}}" th:text="${item.numero}" th:aria-label="'Ir para a página ' + ${item.numero}">2</a>
+        </th:block>
+
+        <a class="paginacao-item paginacao-seta" th:if="${paginacao.temProxima}"
+           th:href="@{${paginacao.urlProxima}}" rel="next" aria-label="Próxima página">Próxima &rsaquo;</a>
+        <span class="paginacao-item paginacao-seta desativado" th:unless="${paginacao.temProxima}" aria-disabled="true">Próxima &rsaquo;</span>
+
+        <p class="paginacao-resumo" th:text="'Página ' + ${paginacao.paginaAtual} + ' de ' + ${paginacao.totalPaginas}">Página 1 de 2</p>
+    </nav>
+
+</body>
+</html>

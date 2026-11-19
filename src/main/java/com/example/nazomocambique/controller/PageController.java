@@ -129,6 +129,12 @@ public class PageController {
 		return "detalhes";
 	}
 	
+	// Lista de desejos: a página só entrega o esqueleto; os itens vêm do localStorage (jshome.js)
+	@GetMapping("/favoritos")
+	public String favoritos() {
+		return "favoritos";
+	}
+
 	@GetMapping("/login")
 	public String login(Model model) {
 		return "login";

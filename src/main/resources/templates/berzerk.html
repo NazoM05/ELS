@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=12)}">
+    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=16)}">
     <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
 
 
@@ -24,12 +24,14 @@
     <!-- Barra de anúncios -->
     <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
 
-    <!-- Barra fixa com menu e busca -->
+    <!-- Barra fixa com menu, busca e carrinho -->
     <div class="barrabranca">
         <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
         <a th:replace="~{fragments/fragmentos :: logo}"></a>
 
         <form th:replace="~{fragments/fragmentos :: busca-loja}"></form>
+
+        <button th:replace="~{fragments/fragmentos :: botao-carrinho}"></button>
     </div>
 
     <main class="container-produtos">
@@ -42,23 +44,31 @@
         <div class="produtos-grid">
 
             <div th:each="produto : ${listaProdutos}" class="produto-card"
-                 th:with="temCostas=${produto.imagemCostas != null and !#strings.isEmpty(produto.imagemCostas)}">
+                 th:with="temCostas=${produto.imagemCostas != null and !#strings.isEmpty(produto.imagemCostas)},
+                          imgCard=${produto.imagemFrente != null} ? @{'/img/' + ${produto.imagemFrente}} : @{/img/sem-foto.svg}"
+                 th:attr="data-produto-id=${produto.id},data-produto-nome=${produto.nome},data-produto-preco=${produto.preco},data-produto-imagem=${imgCard},data-produto-link=@{'/detalhes/' + ${produto.id}}">
 
                 <!-- Imagem clicável: leva aos detalhes. No hover, troca a frente pelas costas (se cadastrada) -->
-                <a class="produto-media" th:classappend="${temCostas} ? 'tem-costas'"
-                   th:href="@{'/detalhes/' + ${produto.id}}" th:aria-label="'Ver detalhes de ' + ${produto.nome}">
-                    <img class="img-frente"
-                         th:src="${produto.imagemFrente != null} ? @{'/img/' + ${produto.imagemFrente}} : 'https://placehold.co/400x500/e5e5e5/0a0a0a?text=Sem+foto'"
-                         th:alt="${produto.nome}" alt="Produto" loading="lazy">
-                    <img class="img-costas" th:if="${temCostas}"
-                         th:src="@{'/img/' + ${produto.imagemCostas}}"
-                         alt="" aria-hidden="true" loading="lazy">
+                <div class="produto-media-box">
+                    <a class="produto-media" th:classappend="${temCostas} ? 'tem-costas'"
+                       th:href="@{'/detalhes/' + ${produto.id}}" th:aria-label="'Ver detalhes de ' + ${produto.nome}">
+                        <img class="img-frente"
+                             th:src="${produto.imagemFrente != null} ? @{'/img/' + ${produto.imagemFrente}} : 'https://placehold.co/400x500/e5e5e5/0a0a0a?text=Sem+foto'"
+                             th:alt="${produto.nome}" alt="Produto" loading="lazy">
+                        <img class="img-costas" th:if="${temCostas}"
+                             th:src="@{'/img/' + ${produto.imagemCostas}}"
+                             alt="" aria-hidden="true" loading="lazy">
 
-                    <!-- OPCIONAL: ative quando o Produto tiver esses campos
-                    <span class="badge-desconto" th:text="${produto.desconto} + '% OFF'"></span>
-                    <span class="badge-vendidas" th:text="'+' + ${produto.vendidasSemana} + ' vendidas na semana'"></span>
-                    -->
-                </a>
+                        <!-- OPCIONAL: ative quando o Produto tiver esses campos
+                        <span class="badge-desconto" th:text="${produto.desconto} + '% OFF'"></span>
+                        <span class="badge-vendidas" th:text="'+' + ${produto.vendidasSemana} + ' vendidas na semana'"></span>
+                        -->
+                    </a>
+                    <button type="button" class="btn-favorito js-btn-favorito" aria-pressed="false"
+                            aria-label="Adicionar aos favoritos" title="Adicionar aos favoritos">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    </button>
+                </div>
 
                 <h3><a class="produto-titulo" th:href="@{'/detalhes/' + ${produto.id}}" th:text="${produto.nome}"></a></h3>
 
@@ -75,6 +85,9 @@
             </div>
 
         </div>
+
+        <!-- Paginação: aparece só com mais de uma página (mantém os filtros ativos) -->
+        <nav th:replace="~{fragments/fragmentos :: paginacao}"></nav>
     </main>
 
     <!-- Rodapé (textos, links e dados da empresa são genéricos: troque pelos seus) -->
@@ -133,9 +146,11 @@
 
     <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
 
+    <th:block th:replace="~{fragments/fragmentos :: carrinho-drawer}"></th:block>
+
     <div class="overlay" id="overlay"></div>
 
-    <script th:src="@{/jshome.js(v=5)}"></script>
+    <script th:src="@{/jshome.js(v=8)}"></script>
 
 </body>
 </html>

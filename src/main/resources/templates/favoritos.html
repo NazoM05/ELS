@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=16)}">
+    <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
+
+    <title>Lista de desejos - Estilo London Store</title>
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png}">
+</head>
+
+<body>
+    <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
+
+    <div class="barrabranca">
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
+        <button th:replace="~{fragments/fragmentos :: botao-carrinho}"></button>
+    </div>
+
+    <main class="container-produtos">
+        <h1 class="secao-titulo">Lista de desejos</h1>
+
+        <!-- Mesmo grid da vitrine; os cards são desenhados pelo jshome.js a partir do localStorage -->
+        <div id="listaFavoritos" class="produtos-grid" aria-live="polite"></div>
+
+        <!-- Estado vazio (só aparece quando não há favoritos) -->
+        <section id="vazioFavoritos" class="favoritos-vazio" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            <h2>Sua lista de favoritos está vazia</h2>
+            <p>Toque no coração dos produtos que você gostar e eles aparecem aqui.</p>
+            <a class="btn-comprar" th:href="@{/home}">Voltar para a loja</a>
+        </section>
+    </main>
+
+    <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
+    <th:block th:replace="~{fragments/fragmentos :: carrinho-drawer}"></th:block>
+    <div class="overlay" id="overlay"></div>
+
+    <script th:src="@{/jshome.js(v=8)}"></script>
+    <script>
+        window.EstiloLondonWishlist.renderizar(
+            document.getElementById('listaFavoritos'),
+            document.getElementById('vazioFavoritos'));
+    </script>
+</body>
+</html>
