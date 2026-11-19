@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <!-- Para mudar os avisos, edite/adicione/remova os <p> abaixo (o primeiro precisa ter class="anuncio ativo") -->
+    <div th:fragment="anuncios" class="barra-anuncios" role="region" aria-label="Avisos da loja">
+        <p class="anuncio ativo">Frete grátis a partir de R$ 99 para a região Sul</p>
+        <p class="anuncio">Novas estampas disponíveis</p>
+        <p class="anuncio">Parcele em até 3x sem juros em toda a loja</p>
+        <p class="anuncio">Troca facilitada em até  30 dias</p>
+    </div>
+
+</body>
+</html>
+
+
+<div class="sidebar" id="sidebar" th:fragment="sidebar">
+	<nav>
+        <a th:href="@{/home}">Início</a>
+        <a th:href="@{/admin/produto/listar}" sec:authorize="hasRole('ADMIN')">Produtos</a>
+        <a th:href="@{/admin/produto/cadastrar}" sec:authorize="hasRole('ADMIN')" >Novo produto</a>
+		<a href="#" sec:authorize="isAuthenticated()"> Perfil</a>
+        <a href="#" sec:authorize="hasRole('ADMIN')">Configurações</a>
+        <a th:href="@{/logout}" sec:authorize="isAuthenticated()">Sair</a>
+    </nav>
+       
+</div>
+
+<button class="menu-btn" id="menuBtn" th:fragment="botao-sidebar">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>

@@ -10,7 +10,7 @@
 
 
 
-    <link rel="stylesheet" th:href="@{/global.css(v=1)}">
+    <link rel="stylesheet" th:href="@{/css/global.css(v=1)}">
 
     <title>Estilo London Store</title>
 
@@ -29,20 +29,12 @@
 
 
     <!-- Barra de anúncios -->
-    <div th:replace="~{fragments/anuncios :: anuncios}"></div>
+    <div th:replace="~{fragmentos/fragmentos :: anuncios}"></div>
 
     <!-- Barra branca com menu e busca -->
     <div class="barrabranca">
 
-    <button class="menu-btn" id="menuBtn">
-
-        <span></span>
-
-        <span></span>
-
-        <span></span>
-
-    </button>
+    <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
 
     <form class="search-form" action="#" method="get">
 
@@ -76,21 +68,7 @@
 
 </main>
 
-    <div class="sidebar" id="sidebar">
-
-        <nav>
-
-            <a href="#">Início</a>
-
-            <a href="#">Perfil</a>
-
-            <a href="#">Configurações</a>
-
-            <a href="#">Sair</a>
-
-        </nav>
-
-    </div>
+    <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
 
     <div class="overlay" id="overlay"></div>
 
