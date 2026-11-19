@@ -34,6 +34,10 @@
             <a th:href="@{/admin/produto/cadastrar}">Novo produto</a>
         </div>
 
+        <!-- Visitante (sem login): só entrar ou criar conta -->
+        <a th:href="@{/login}" sec:authorize="isAnonymous()">Entrar</a>
+        <a th:href="@{/criar-conta}" sec:authorize="isAnonymous()">Criar conta</a>
+
         <a th:href="@{/logout}" sec:authorize="isAuthenticated()">Sair</a>
     </nav>
        
