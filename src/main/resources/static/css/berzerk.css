@@ -347,6 +347,36 @@ a.produto-media:focus-visible { outline: 2px solid var(--ink); outline-offset: 3
 .detalhes-mini {
     display: flex;
     flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font: 500 14px var(--font-body);
+}
+.detalhes-compra p { margin: 0; }
+.detalhes-frete strong { font-weight: 800; }
+.detalhes-estoque { margin-top: 6px !important; font-weight: 800; }
+.detalhes-compra label { font-weight: 600; }
+.detalhes-compra select {
+    padding: 11px;
+    background: var(--soft);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    font: 500 14px var(--font-body);
+}
+.detalhes-compra .btn-comprar { margin-top: 4px; }
+.detalhes-vendedor { margin-top: 6px !important; color: var(--muted); }
+
+/* ---------- Admin: estrutura, títulos e botões ---------- */
+.listagem-container,
+.cadastro-container { max-width: 1080px; margin: 0 auto; padding: 28px 20px 72px; }
+
+.adm-topo { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.adm-titulo { margin: 0; font: 400 clamp(32px, 6vw, 48px)/1 var(--font-display); text-transform: uppercase; }
+.adm-sub { margin: 6px 0 0; font: 500 13px var(--font-body); color: var(--muted); }
+
+.adm-voltar {
+    display: inline-flex;
     align-items: center;
     gap: 4px;
     padding: 0;
@@ -438,6 +468,8 @@ a.produto-media:focus-visible { outline: 2px solid var(--ink); outline-offset: 3
     background: var(--cor-produto);
     border: 1px solid rgba(0, 0, 0, .25);
 }
+.listagem-aba:hover,
+.listagem-aba.ativa { background: var(--primary-color); color: var(--primary-contrast); }
 
 .detalhes-tamanhos { display: flex; flex-wrap: wrap; gap: 8px; }
 .detalhes-tamanhos button {
@@ -1126,3 +1158,59 @@ body.zoom-aberto { overflow: hidden; }
     .zoom-modal { padding: 12px; gap: 4px; }
     .zoom-nav { width: 36px; height: 36px; font-size: 26px; }
 }
+
+/* ---------- Conta: campos com erro/ajuda (criar conta e perfil) e dados do perfil ---------- */
+.login-campo { display: flex; flex-direction: column; margin-bottom: 18px; }
+.login-campo input { margin-bottom: 6px; }
+.campo-erro { margin: 0; color: #b3202a; font: 600 12px var(--font-body); }
+.campo-ajuda { margin: 0; color: var(--muted); font: 500 12px var(--font-body); }
+input[aria-invalid="true"] { border-color: #b3202a; }
+.perfil-container { max-width: 760px; }
+.perfil-dados { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 24px; margin: 0; }
+.perfil-dados dt { margin: 0 0 4px; color: var(--muted); font: 800 11px var(--font-body); letter-spacing: .08em; text-transform: uppercase; }
+.perfil-dados dd { margin: 0; font: 600 15px var(--font-body); overflow-wrap: anywhere; }
+@media (max-width: 600px) { .perfil-dados { grid-template-columns: 1fr; } }
+
+/* Modal de zoom da galeria (frente, verso, modelo e guia de tamanhos) */
+.detalhes-imagem img { cursor: zoom-in; }
+.detalhes-ampliar {
+    position: absolute; right: 10px; bottom: 10px;
+    padding: 6px 12px; border: 0; border-radius: 999px;
+    background: rgba(255, 255, 255, .92); color: var(--ink);
+    font: 800 11px var(--font-body); letter-spacing: .06em; text-transform: uppercase; cursor: pointer;
+}
+.detalhes-ampliar:hover { background: #fff; }
+body.zoom-aberto { overflow: hidden; }
+.zoom-modal {
+    position: fixed; inset: 0; z-index: 1000;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    padding: 24px; background: rgba(0, 0, 0, .86);
+}
+.zoom-modal[hidden] { display: none; }
+.zoom-figura { margin: 0; max-width: min(92vw, 900px); max-height: 92vh; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.zoom-figura img { max-width: 100%; max-height: 82vh; object-fit: contain; background: #fff; border-radius: 6px; cursor: zoom-out; }
+.zoom-figura figcaption { color: #fff; font: 800 12px var(--font-body); letter-spacing: .06em; text-transform: uppercase; }
+.zoom-fechar, .zoom-nav {
+    border: 0; border-radius: 50%; background: rgba(255, 255, 255, .16); color: #fff;
+    cursor: pointer; line-height: 1; transition: background .15s;
+}
+.zoom-fechar:hover, .zoom-nav:hover { background: rgba(255, 255, 255, .32); }
+.zoom-fechar { position: absolute; top: 16px; right: 16px; width: 44px; height: 44px; font-size: 28px; }
+.zoom-nav { flex: none; width: 48px; height: 48px; font-size: 34px; }
+.zoom-nav[hidden] { display: none; }
+@media (max-width: 600px) {
+    .zoom-modal { padding: 12px; gap: 4px; }
+    .zoom-nav { width: 36px; height: 36px; font-size: 26px; }
+}
+
+/* ---------- Conta: campos com erro/ajuda (criar conta e perfil) e dados do perfil ---------- */
+.login-campo { display: flex; flex-direction: column; margin-bottom: 18px; }
+.login-campo input { margin-bottom: 6px; }
+.campo-erro { margin: 0; color: #b3202a; font: 600 12px var(--font-body); }
+.campo-ajuda { margin: 0; color: var(--muted); font: 500 12px var(--font-body); }
+input[aria-invalid="true"] { border-color: #b3202a; }
+.perfil-container { max-width: 760px; }
+.perfil-dados { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 24px; margin: 0; }
+.perfil-dados dt { margin: 0 0 4px; color: var(--muted); font: 800 11px var(--font-body); letter-spacing: .08em; text-transform: uppercase; }
+.perfil-dados dd { margin: 0; font: 600 15px var(--font-body); overflow-wrap: anywhere; }
+@media (max-width: 600px) { .perfil-dados { grid-template-columns: 1fr; } }

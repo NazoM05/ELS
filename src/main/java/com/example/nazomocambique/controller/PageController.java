@@ -28,6 +28,7 @@ public class PageController {
 		this.produtoService = produtoService;
 	}
 
+	// Catálogo da loja. Filtros combináveis pela URL: /home?busca=jeans&categoria=CALCA&genero=FEMININO
 	@GetMapping({"/", "/home"})
 	public String home(@RequestParam(required = false) String busca,
 			@RequestParam(required = false) String categoria,
@@ -94,6 +95,7 @@ public class PageController {
 		return "cadastroprod";
 	}
 	
+  // Endereço antigo da pesquisa: segue funcionando e cai no catálogo com filtros
   @GetMapping({"/pesquisa"})
   public String pesquisa(@RequestParam Optional<String> p, RedirectAttributes redirect) {
     p.filter(termo -> !termo.isBlank()).ifPresent(termo -> redirect.addAttribute("busca", termo));
