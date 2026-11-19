@@ -97,11 +97,18 @@
        th:text="${urlAtual != null} ? 'Para trocar a imagem, escolha um novo arquivo (opcional).' : 'Escolha uma imagem (JPG, PNG, WEBP...). Opcional.'"></p>
 </div>
 
-<!-- Imagens do produto: Frente e Costas lado a lado (grid de 2 colunas) -->
+<!-- Imagens do produto: 4 posições (Frente, Costas, Foto com modelo e Guia de tamanhos), 2 por linha -->
 <div th:fragment="imagens(produto)" class="cadastro-campo adm-c6">
+    <span class="adm-rotulo">Imagens do produto</span>
+    <p class="adm-ajuda">Todas são opcionais. Na edição, só as posições em que você escolher um novo arquivo são trocadas; as demais continuam como estão.</p>
+
     <div class="upload-par">
-        <div th:replace="~{fragments/campos-produto :: uploadImagem('arquivoImagemFrente', 'Imagem da Frente', ${produto.imagemFrente})}"></div>
-        <div th:replace="~{fragments/campos-produto :: uploadImagem('arquivoImagemCostas', 'Imagem das Costas', ${produto.imagemCostas})}"></div>
+        <div th:replace="~{fragments/campos-produto :: uploadImagem('arquivoImagemFrente', '1. Imagem da Frente', ${produto.imagemFrente})}"></div>
+        <div th:replace="~{fragments/campos-produto :: uploadImagem('arquivoImagemCostas', '2. Imagem das Costas (verso)', ${produto.imagemCostas})}"></div>
+    </div>
+    <div class="upload-par">
+        <div th:replace="~{fragments/campos-produto :: uploadImagem('arquivoImagemModelo', '3. Foto com modelo', ${produto.imagemModelo})}"></div>
+        <div th:replace="~{fragments/campos-produto :: uploadImagem('arquivoImagemGuiaTamanhos', '4. Guia de tamanhos', ${produto.imagemGuiaTamanhos})}"></div>
     </div>
 
     <script>

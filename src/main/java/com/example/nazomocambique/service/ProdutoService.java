@@ -86,11 +86,20 @@ public class ProdutoService {
 		atual.setTamanho(form.getTamanho());
 		atual.setStatus(form.isStatus());
 		atual.setDescricao(form.getDescricao());
-		atual.setImagemFrente(form.getImagemFrente());
-		atual.setImagemCostas(form.getImagemCostas());
+		// Imagens: só troca a que veio preenchida (arquivo novo enviado). Vazio/nulo significa
+		// "não alterada", então a imagem já salva no produto é mantida.
+		atual.setImagemFrente(manterSeVazio(form.getImagemFrente(), atual.getImagemFrente()));
+		atual.setImagemCostas(manterSeVazio(form.getImagemCostas(), atual.getImagemCostas()));
+		atual.setImagemModelo(manterSeVazio(form.getImagemModelo(), atual.getImagemModelo()));
+		atual.setImagemGuiaTamanhos(manterSeVazio(form.getImagemGuiaTamanhos(), atual.getImagemGuiaTamanhos()));
 		atual.getEstoque().clear();
 		atual.getEstoque().putAll(estoque);
 		return salvarProduto(atual);
+	}
+
+	// Valor novo se informado; senão o que já estava salvo
+	private String manterSeVazio(String novo, String atual) {
+		return (novo == null || novo.isBlank()) ? atual : novo;
 	}
 
 	// Mantém só o estoque dos tamanhos marcados (quantidade vazia ou negativa é ignorada/zerada)

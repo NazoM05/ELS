@@ -84,12 +84,16 @@ public class AdminController {
 	@PostMapping({"/produto/salvar"})
 	public String salvar(Produto produto,
 			@RequestParam(value = "arquivoImagemFrente", required = false) MultipartFile arquivoImagemFrente,
-			@RequestParam(value = "arquivoImagemCostas", required = false) MultipartFile arquivoImagemCostas) {
+			@RequestParam(value = "arquivoImagemCostas", required = false) MultipartFile arquivoImagemCostas,
+			@RequestParam(value = "arquivoImagemModelo", required = false) MultipartFile arquivoImagemModelo,
+			@RequestParam(value = "arquivoImagemGuiaTamanhos", required = false) MultipartFile arquivoImagemGuiaTamanhos) {
 		try {
 			// Arquivo novo substitui a imagem; sem arquivo, vale o nome que veio no campo oculto
 			// (edição mantém a imagem atual; campo oculto vazio vira "sem imagem").
 			produto.setImagemFrente(resolverImagem(arquivoImagemFrente, produto.getImagemFrente()));
 			produto.setImagemCostas(resolverImagem(arquivoImagemCostas, produto.getImagemCostas()));
+			produto.setImagemModelo(resolverImagem(arquivoImagemModelo, produto.getImagemModelo()));
+			produto.setImagemGuiaTamanhos(resolverImagem(arquivoImagemGuiaTamanhos, produto.getImagemGuiaTamanhos()));
 
 			produtoService.salvarFormulario(produto);
 			return "redirect:/admin/produto/listar?sucesso";
