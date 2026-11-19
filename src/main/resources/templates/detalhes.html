@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- CSS global único do site -->
-    <link rel="stylesheet" th:href="@{/global.css(v=1)}">
+    <link rel="stylesheet" th:href="@{/css/global.css(v=1)}">
 
     <title>Detalhes do produto - Estilo London Store</title>
 
@@ -18,7 +18,7 @@
 <body>
 
     <!-- Barra de anúncios (a mesma da home) -->
-    <div th:replace="~{fragments/anuncios :: anuncios}"></div>
+    <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
 
     <!-- Mesma barra branca da home -->
     <div class="barrabranca">
@@ -121,14 +121,7 @@
     </main>
 
     <!-- Mesma sidebar e overlay da home -->
-    <div class="sidebar" id="sidebar">
-        <nav>
-            <a th:href="@{/}">Início</a>
-            <a href="#">Perfil</a>
-            <a href="#">Configurações</a>
-            <a href="#">Sair</a>
-        </nav>
-    </div>
+    <div th:replace="~{fragments/fragmentos :: sidebar}" ></div>
 
     <div class="overlay" id="overlay"></div>
 

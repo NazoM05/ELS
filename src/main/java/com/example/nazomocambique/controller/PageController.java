@@ -19,7 +19,13 @@ public class PageController {
 	}
 
 	@GetMapping({"/", "/home"})
-	public String home(Model model) {
+	public String home (Model model) {
+		model.addAttribute("listaProdutos", produtoService.listarTodos());
+		return "berzerk";
+	}
+	
+	@GetMapping({"/london"})
+	public String london(Model model) {
 		model.addAttribute("listaProdutos", produtoService.listarTodos());
 		return "home";
 	}
@@ -50,5 +56,9 @@ public class PageController {
 		return "detalhes";
 	}
 	
+	@GetMapping("/login")
+	public String login(Model model) {
+		return "login";
+	}
 	
 }

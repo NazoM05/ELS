@@ -1,0 +1,521 @@
+/* ==========================================================
+   Tema Berzerk (referência: print do site) - Estilo London Store
+   Fundo branco, tiles cinza, selos pretos. Carregar DEPOIS do global.css.
+   ========================================================== */
+
+:root {
+    --bg: #FFFFFF;
+    --tile: #E5E5E5;
+    --ink: #0A0A0A;
+    --muted: #7A7A7A;
+    --line: #E2E2E2;
+    --font-display: 'Anton', Impact, 'Arial Narrow', sans-serif;
+    --font-body: 'Montserrat', Arial, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* ---------- Barra de menu + busca ---------- */
+.barrabranca {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, .92);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+}
+
+.barrabranca > button {
+    flex: 0 0 auto;
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--ink);
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+.barrabranca > button:hover { background: var(--ink); color: var(--bg); }
+
+.search-form {
+    flex: 1 1 auto;
+    display: flex;
+    min-width: 0;
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+.search-form input[type="text"] {
+    flex: 1 1 auto;
+    min-width: 0;
+    background: #F4F4F4;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-right: 0;
+    border-radius: 4px 0 0 4px;
+    padding: 12px 14px;
+    font: 500 14px var(--font-body);
+}
+.search-form input[type="text"]:focus { outline: none; border-color: var(--ink); background: #fff; }
+
+.search-form button {
+    flex: 0 0 auto;
+    background: var(--ink);
+    color: #fff;
+    border: 1px solid var(--ink);
+    border-radius: 0 4px 4px 0;
+    padding: 12px 18px;
+    font: 800 12px var(--font-body);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+.search-form button:hover { background: #fff; color: var(--ink); }
+
+/* ---------- Cabeçalho da seção ---------- */
+.container-produtos {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 24px 12px 64px;
+}
+
+.secao-titulo {
+    margin: 0 0 20px;
+    font: 400 clamp(32px, 7vw, 52px)/1 var(--font-display);
+    letter-spacing: .01em;
+    text-transform: uppercase;
+}
+
+/* ---------- Grid ---------- */
+.produtos-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px 10px;
+}
+
+.produto-card {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+/* Tile cinza com a foto */
+.produto-media {
+    position: relative;
+    overflow: hidden;
+    background: var(--tile);
+    border-radius: 6px;
+}
+
+.produto-media img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    transition: transform .5s ease;
+}
+.produto-card:hover .produto-media img { transform: scale(1.04); }
+
+/* Selos sobre a foto (usar quando houver dados) */
+.badge-desconto {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: var(--ink);
+    color: #fff;
+    padding: 6px 9px;
+    border-radius: 2px;
+    font: 800 11px var(--font-body);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.badge-vendidas {
+    position: absolute;
+    left: 50%;
+    bottom: 10px;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    background: var(--ink);
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font: 800 10px var(--font-body);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+/* Texto abaixo da foto */
+.produto-card h3 {
+    margin: 14px 0 4px;
+    font: 500 14px/1.3 var(--font-body);
+    color: var(--ink);
+}
+
+.produto-card .preco {
+    margin: 0;
+    font: 600 17px var(--font-body);
+}
+
+.preco-antigo {
+    margin-right: 6px;
+    font: 500 12px var(--font-body);
+    color: var(--muted);
+    text-decoration: line-through;
+}
+
+.parcelamento {
+    margin: 4px 0 0;
+    font: 500 13px var(--font-body);
+    color: var(--muted);
+}
+
+.tag-promo {
+    align-self: center;
+    margin-top: 8px;
+    background: var(--ink);
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font: 800 10px var(--font-body);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+/* Botão: retangular, inverte no hover */
+.btn-comprar {
+    margin: 12px 0 0;
+    width: 100%;
+    background: var(--ink);
+    color: #fff;
+    border: 1px solid var(--ink);
+    border-radius: 4px;
+    padding: 13px 12px;
+    font: 800 12px var(--font-body);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+.btn-comprar:hover,
+.btn-comprar:focus-visible { background: #fff; color: var(--ink); }
+
+.overlay { background: rgba(0, 0, 0, .55); }
+
+/* ---------- Telas maiores ---------- */
+@media (min-width: 640px) {
+    .container-produtos { padding: 32px 20px 80px; }
+    .produtos-grid { grid-template-columns: repeat(3, 1fr); gap: 32px 16px; }
+    .badge-desconto { font-size: 12px; }
+    .badge-vendidas { font-size: 11px; }
+    .produto-card h3 { font-size: 15px; }
+}
+
+@media (min-width: 1024px) {
+    .barrabranca { padding: 14px 32px; }
+    .container-produtos { padding: 40px 32px 96px; }
+    .produtos-grid { grid-template-columns: repeat(4, 1fr); gap: 40px 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: .01ms !important; }
+}
+
+/* ==========================================================
+   Botão da sidebar: três pontinhos (vertical) no lugar das 3 barras
+   Para pontos na horizontal, troque flex-direction por: row
+   ========================================================== */
+.barrabranca .menu-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+}
+
+.barrabranca .menu-btn span {
+    display: block;
+    width: 5px;
+    height: 5px;
+    margin: 0;
+    border-radius: 50%;
+    background: currentColor;
+    transform: none;
+    opacity: 1;
+}
+
+/* ---------- Sidebar: mesma fonte do título "Produtos" ---------- */
+.sidebar,
+.sidebar nav a {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+}
+
+.sidebar nav a {
+    font-size: 26px;
+    line-height: 1.2;
+}
+
+/* ==========================================================
+   Rodapé escuro (referência: rodapé do Berzerk)
+   ========================================================== */
+.rodape {
+    background: var(--ink);
+    color: #A0A0A0;
+    font-family: var(--font-body);
+    padding: 48px 20px 28px;
+}
+
+.rodape-topo {
+    max-width: 1440px;
+    margin: 0 auto;
+    display: grid;
+    gap: 36px;
+}
+
+.rodape-logo {
+    display: block;
+    margin-bottom: 20px;
+    color: #fff;
+    font: 800 18px var(--font-body);
+    letter-spacing: .35em;
+    text-transform: uppercase;
+}
+
+.rodape-redes { display: flex; gap: 10px; }
+
+.rodape-redes a {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #2A2A2A;
+    border-radius: 50%;
+    color: #fff;
+    transition: background .15s, color .15s, border-color .15s;
+}
+.rodape-redes a:hover { background: #fff; color: var(--ink); border-color: #fff; }
+.rodape-redes svg { width: 16px; height: 16px; }
+
+.rodape-colunas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px 20px;
+}
+
+.rodape-col h4 {
+    margin: 0 0 18px;
+    color: #fff;
+    font: 800 11px var(--font-body);
+    letter-spacing: .18em;
+    text-transform: uppercase;
+}
+.rodape-col h4:not(:first-child) { margin-top: 36px; }
+
+.rodape-col a {
+    display: block;
+    padding: 7px 0;
+    color: #A0A0A0;
+    font: 500 14px var(--font-body);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+    transition: color .15s;
+}
+.rodape-col a:hover { color: #fff; }
+
+.rodape-base {
+    max-width: 1440px;
+    margin: 40px auto 0;
+    padding-top: 24px;
+    border-top: 1px solid #1F1F1F;
+    text-align: center;
+    color: #6B6B6B;
+    font-size: 12px;
+    line-height: 1.8;
+}
+.rodape-base p { margin: 0; }
+
+@media (min-width: 900px) {
+    .rodape { padding: 64px 32px 32px; }
+    .rodape-topo {
+        grid-template-columns: 300px 1fr;
+        gap: 0;
+    }
+    .rodape-marca {
+        align-self: center;
+        padding-right: 32px;
+        border-right: 1px solid #1F1F1F;
+    }
+    .rodape-colunas {
+        grid-template-columns: 324px 1fr;
+        padding-left: 64px;
+    }
+}
+
+/* ==========================================================
+   Tela de login
+   ========================================================== */
+.login {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr;
+}
+
+/* Painel escuro (mesmo tom do rodapé) */
+.login-marca {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 28px 24px 32px;
+    background: var(--ink);
+    color: #fff;
+}
+
+.login-logo {
+    color: #fff;
+    font: 800 16px var(--font-body);
+    letter-spacing: .35em;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+.login-titulo {
+    margin: 0;
+    font: 400 clamp(44px, 12vw, 88px)/1 var(--font-display);
+    letter-spacing: .01em;
+    text-transform: uppercase;
+}
+
+/* Área do formulário */
+.login-area {
+    display: grid;
+    place-items: center;
+    padding: 32px 20px 48px;
+    background: var(--bg);
+}
+
+.login-form {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.login-form h2 {
+    margin: 0 0 24px;
+    font: 400 clamp(32px, 7vw, 44px)/1 var(--font-display);
+    text-transform: uppercase;
+}
+
+.login-form label {
+    margin-bottom: 6px;
+    font: 600 13px var(--font-body);
+    color: var(--ink);
+}
+
+.login-form input {
+    width: 100%;
+    margin-bottom: 18px;
+    background: #F4F4F4;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 14px;
+    font: 500 15px var(--font-body);
+    transition: border-color .15s, background .15s;
+}
+.login-form input:focus {
+    outline: none;
+    border-color: var(--ink);
+    background: #fff;
+}
+
+.login-esqueci {
+    align-self: flex-end;
+    margin: -6px 0 20px;
+    color: var(--muted);
+    font: 500 13px var(--font-body);
+    text-decoration: underline;
+}
+.login-esqueci:hover { color: var(--ink); }
+
+.login-btn {
+    width: 100%;
+    background: var(--ink);
+    color: #fff;
+    border: 1px solid var(--ink);
+    border-radius: 4px;
+    padding: 15px 12px;
+    font: 800 13px var(--font-body);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+.login-btn:hover,
+.login-btn:focus-visible { background: #fff; color: var(--ink); }
+
+.login-cadastro {
+    margin: 22px 0 0;
+    text-align: center;
+    color: var(--muted);
+    font: 500 14px var(--font-body);
+}
+.login-cadastro a {
+    color: var(--ink);
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+.login-voltar {
+    margin-top: 28px;
+    align-self: center;
+    color: var(--ink);
+    font: 800 11px var(--font-body);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 3px;
+}
+
+.login-erro,
+.login-info {
+    margin: 0 0 18px;
+    padding: 12px 14px;
+    border-radius: 4px;
+    font: 600 13px var(--font-body);
+}
+.login-erro { background: var(--ink); color: #fff; }
+.login-info { background: #F4F4F4; color: var(--ink); }
+
+/* Duas colunas no desktop */
+@media (min-width: 900px) {
+    .login { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; }
+    .login-marca { padding: 40px 48px 56px; }
+    .login-area { padding: 48px; }
+}

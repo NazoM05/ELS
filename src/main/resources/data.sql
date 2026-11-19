@@ -38,3 +38,5 @@ VALUES
     ('Cardigan de Tricô', 'G', 74.90, 'Tricô', 'cardigan-de-trico.svg', FALSE, 'Caramelo'),
     ('Camisa Social Branca', 'M', 64.90, 'Algodão', 'camisa-social-branca.svg', TRUE, 'Branco'),
     ('Camisa Xadrez Flanela', 'G', 52.90, 'Flanela', 'camisa-xadrez-flanela.svg', FALSE, 'Vermelho');
+    
+    insert into USUARIO (username, senha, role, ativo) values ('admin', '$2a$10$oz8mJWjsca2yd5hdU5pvzO123repm3JNyZ9fxbFzMs5wVaaccsiZG', 'ROLE_ADMIN', TRUE);
