@@ -49,6 +49,17 @@ public class PageController {
 		return "home";
 	}
 
+	@GetMapping("/outlet")
+	public String outlet(@RequestParam(required = false) String busca,
+			@RequestParam(required = false) String categoria,
+			@RequestParam(required = false) String genero,
+			@RequestParam(required = false) String ordem,
+			@RequestParam(required = false) String pagina, Model model) {
+		carregarCatalogo(model, "/outlet", busca, categoria, genero, ordem, pagina, true);
+		model.addAttribute("paginaOutlet", true);
+		return "berzerk";
+	}
+
 	@ModelAttribute("categorias")
 	public Categoria[] categorias() {
 		return Categoria.values();
@@ -61,11 +72,16 @@ public class PageController {
 
 	private void carregarCatalogo(Model model, String caminho, String busca, String categoriaTexto,
 			String generoTexto, String ordemTexto, String paginaTexto) {
+		carregarCatalogo(model, caminho, busca, categoriaTexto, generoTexto, ordemTexto, paginaTexto, false);
+	}
+
+	private void carregarCatalogo(Model model, String caminho, String busca, String categoriaTexto,
+			String generoTexto, String ordemTexto, String paginaTexto, boolean outlet) {
 		String termo = busca == null ? "" : busca.trim();
 		Categoria categoria = Categoria.deTexto(categoriaTexto);
 		Genero genero = Genero.deTexto(generoTexto);
 		Ordenacao ordem = Ordenacao.deTexto(ordemTexto);
-		Page<Produto> pagina = produtoService.filtrar(termo, categoria, genero, ordem, numeroDaPagina(paginaTexto) - 1);
+		Page<Produto> pagina = produtoService.filtrar(termo, categoria, genero, ordem, numeroDaPagina(paginaTexto) - 1, outlet);
 
 		Map<String, String> filtros = new LinkedHashMap<>();
 		filtros.put("busca", termo);

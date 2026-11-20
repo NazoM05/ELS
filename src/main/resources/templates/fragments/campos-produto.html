@@ -30,6 +30,38 @@
     </select>
 </div>
 
+<!-- Outlet: ao marcar, revela o percentual de desconto aplicado na vitrine -->
+<div th:fragment="outlet(produto)" class="cadastro-campo adm-c6">
+    <span class="adm-rotulo">Oferta Outlet</span>
+    <label class="adm-chip" style="display:inline-flex; width:max-content; margin:8px 0;">
+        <input type="checkbox" id="produtoOutlet" name="outlet" value="true" th:checked="${produto.outlet}">
+        <span>Adicionar este produto ao Outlet</span>
+    </label>
+    <div id="campoDescontoOutlet" class="cadastro-campo" style="padding:12px; border:1px solid var(--linha, #ddd); border-radius:10px;"
+         th:hidden="${!produto.outlet}">
+        <label for="descontoOutlet">Percentual de desconto (%)</label>
+        <input type="number" id="descontoOutlet" name="descontoOutlet" min="1" max="100" step="1"
+               placeholder="Ex.: 30" th:value="${produto.descontoOutlet}" th:required="${produto.outlet}">
+        <p class="adm-ajuda">O desconto será destacado nos cards do Outlet e aplicado ao preço exibido.</p>
+    </div>
+    <script>
+        (function () {
+            var flag = document.getElementById('produtoOutlet');
+            var campo = document.getElementById('campoDescontoOutlet');
+            var percentual = document.getElementById('descontoOutlet');
+            if (!flag || !campo || !percentual) return;
+            function atualizar() {
+                campo.hidden = !flag.checked;
+                percentual.required = flag.checked;
+                percentual.disabled = !flag.checked;
+                if (!flag.checked) percentual.value = '';
+            }
+            flag.addEventListener('change', atualizar);
+            atualizar();
+        })();
+    </script>
+</div>
+
 <!-- Descrição -->
 <div th:fragment="descricao(produto)" class="cadastro-campo adm-c6">
     <label for="descricao">Descrição</label>
