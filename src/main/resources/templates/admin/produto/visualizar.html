@@ -8,27 +8,22 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=17)}">
+    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=29)}">
     <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
-    <title>Visualizar produto - Estilo London Store</title>
+    <title th:replace="~{fragments/fragmentos :: titulo(${txt['pg.adminVisualizar.titulo']})}">Visualizar produto - Estilo London Store</title>
 
     <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
     <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
     <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png}">
 </head>
 
-<body class="admin-ui">
+<body class="admin-ui pg-adminVisualizar">
 
     <!-- Barra de anúncios -->
-    <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
 
     <!-- Barra fixa com menu e logo -->
     <div class="barrabranca">
-        <button class="menu-btn" id="menuBtn" aria-label="Abrir menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
         <a th:replace="~{fragments/fragmentos :: logo}"></a>
     </div>
 
@@ -37,7 +32,7 @@
 
         <a class="adm-voltar" th:href="@{/admin/produto/listar}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
-            Voltar para produtos
+            <th:block th:text="${txt['pg.adminVisualizar.voltar']}">Voltar para produtos</th:block>
         </a>
 
         <!-- Título + atalhos -->
@@ -51,8 +46,8 @@
                 </p>
             </div>
             <div class="vis-atalhos">
-                <a class="adm-btn adm-btn-sec" th:href="@{'/detalhes/' + ${produto.id}}" target="_blank" rel="noopener">Ver na loja</a>
-                <a class="btn-comprar adm-btn" th:href="@{'/admin/produto/editar/' + ${produto.id}}">Editar produto</a>
+                <a class="adm-btn adm-btn-sec" th:href="@{'/detalhes/' + ${produto.id}}" target="_blank" rel="noopener" th:text="${txt['pg.adminVisualizar.btnLoja']}">Ver na loja</a>
+                <a class="btn-comprar adm-btn" th:href="@{'/admin/produto/editar/' + ${produto.id}}" th:text="${txt['pg.adminVisualizar.btnEditar']}">Editar produto</a>
             </div>
         </header>
 
@@ -146,15 +141,16 @@
         </section>
 
         <p class="vis-nota">
-            Ainda não existe módulo de pedidos: vendas e receita ficam em 0 até ele ser criado.
-            As visualizações já são contadas a cada acesso à página do produto na loja.
+            As vendas são somadas a cada pedido finalizado na loja, e o estoque de cada tamanho é descontado na hora.
+            As visualizações são contadas a cada acesso à página do produto na loja.
         </p>
 
         <!-- Estoque por tamanho -->
         <section class="vis-bloco">
             <h2 class="vis-secao">Estoque por tamanho</h2>
 
-            <div th:if="${produto.temAlertaEstoque}" class="cadastro-alerta cadastro-alerta-erro" role="alert">
+            <div th:if="${produto.temAlertaEstoque}" class="cadastro-alerta"
+                 th:classappend="${#lists.isEmpty(produto.estoquePorTamanho.?[situacao == 'ESGOTADO'])} ? 'cadastro-alerta-aviso' : 'cadastro-alerta-erro'" role="alert">
                 Atenção: há tamanhos esgotados ou com poucas unidades (até <span th:text="${T(com.example.nazomocambique.model.Produto).ESTOQUE_BAIXO}">5</span>).
             </div>
 
@@ -203,7 +199,7 @@
 
     <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
     <div class="overlay" id="overlay"></div>
-    <script th:src="@{/jshome.js(v=9)}"></script>
+    <script th:src="@{/jshome.js(v=10)}"></script>
 
 </body>
 </html>

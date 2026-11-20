@@ -883,3 +883,12 @@ body {
         transition: none;
     }
 }
+
+/* ---- Opções de entrega no checkout (Correios / frete padrão) ---- */
+.checkout-frete-opcoes { display: grid; gap: 8px; margin-bottom: 14px; font-size: .95rem; }
+.checkout-frete-opcoes[hidden] { display: none; }
+.checkout-frete-titulo { margin: 0; font-weight: 600; color: var(--cor-texto); }
+.checkout-frete-opcao { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--cor-borda); border-radius: var(--raio-md); background: var(--cor-superficie); cursor: pointer; }
+.checkout-frete-opcao:has(input:checked) { border-color: var(--cor-rosa-forte); background: var(--cor-rosa-suave); }
+.checkout-frete-texto { display: flex; flex-direction: column; }
+.checkout-frete-prazo { font-size: .85rem; color: var(--cor-texto-suave); }

@@ -8,127 +8,249 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=17)}">
+    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=29)}">
     <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
 
-    <title>Configurações - Estilo London Store</title>
+    <title th:replace="~{fragments/fragmentos :: titulo(${txt['pg.adminConfig.titulo']})}">Configurações - Estilo London Store</title>
     <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
     <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
     <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png}">
 </head>
 
-<body class="admin-ui">
+<body class="admin-ui pg-adminConfig">
 
     <!-- Barra de anúncios -->
-    <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
 
     <!-- Barra branca com menu -->
     <div class="barrabranca">
-        <button class="menu-btn" id="menuBtn" aria-label="Abrir menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
         <a th:replace="~{fragments/fragmentos :: logo}"></a>
     </div>
 
-    <main class="cadastro-container">
+    <main class="config-container">
+
+        <header class="adm-topo">
+            <div>
+                <h1 class="adm-titulo" th:text="${txt['pg.adminConfig.h1']}">Configurações</h1>
+                <p class="adm-sub">Personalize a cor, a logo, os textos e as cores de cada parte do site, no site todo ou em cada página.</p>
+            </div>
+        </header>
 
         <!-- Mensagens de retorno -->
         <div th:if="${sucesso}" class="cadastro-alerta cadastro-alerta-ok" role="status" th:text="${sucesso}"></div>
         <div th:if="${erro}" class="cadastro-alerta cadastro-alerta-erro" role="alert" th:text="${erro}"></div>
 
-        <section class="cadastro-form-box">
-            <h2>Aparência do site</h2>
-            <p class="adm-ajuda" style="margin-bottom: 22px;">
-                Defina a cor principal e a logo da loja. O que for salvo aqui vale para todo o site: loja, login e painel.
-            </p>
+        <div class="config-layout" th:classappend="${urlPrevia == null} ? 'sem-previa'">
 
-            <form th:action="@{/admin/configuracoes/salvar}" method="post" enctype="multipart/form-data"
-                  class="cadastro-form" id="formAparencia"
-                  th:attr="data-logo-personalizada=${site.logoPersonalizada}">
+            <!-- Menu das seções: o número mostra quantos itens estão fora do padrão -->
+            <nav class="config-menu" aria-label="Seções das configurações">
+                <p class="config-menu-titulo">Site todo</p>
+                <a th:each="i : ${menuGeral}" th:href="@{/admin/configuracoes(secao=${i.secao().id()})}"
+                   th:classappend="${i.secao().id() == secaoAtual.id()} ? 'atual'"
+                   th:attr="aria-current=${i.secao().id() == secaoAtual.id()} ? 'page'">
+                    <span th:text="${i.secao().nome()}">Seção</span>
+                    <span class="config-contador" th:if="${i.alterados() > 0}" th:text="${i.alterados()}"
+                          th:title="${i.alterados()} + ' alterado(s)'">2</span>
+                </a>
+                <p class="config-menu-titulo">Páginas</p>
+                <a th:each="i : ${menuPaginas}" th:href="@{/admin/configuracoes(secao=${i.secao().id()})}"
+                   th:classappend="${i.secao().id() == secaoAtual.id()} ? 'atual'"
+                   th:attr="aria-current=${i.secao().id() == secaoAtual.id()} ? 'page'">
+                    <span th:text="${i.secao().nome()}">Página</span>
+                    <span class="config-contador" th:if="${i.alterados() > 0}" th:text="${i.alterados()}"
+                          th:title="${i.alterados()} + ' alterado(s)'">2</span>
+                </a>
+            </nav>
 
-                <!-- Cor principal -->
-                <div class="cadastro-campo adm-c6">
-                    <span class="adm-rotulo" id="rotuloCor">Cor principal</span>
-                    <p class="adm-ajuda">Usada em botões, etiquetas, barra de avisos, menu lateral, painel do login e rodapé.</p>
+            <div class="config-conteudo">
 
-                    <div class="tema-cores">
-                        <input type="color" id="corSeletor" class="tema-seletor" th:value="${#strings.toLowerCase(site.corPrimaria)}"
-                               aria-labelledby="rotuloCor">
-                        <input type="text" id="corPrimaria" name="corPrimaria" class="tema-hex" th:value="${site.corPrimaria}"
-                               maxlength="7" pattern="#[0-9A-Fa-f]{6}" placeholder="#0A0A0A" required
-                               aria-label="Código da cor em hexadecimal" autocomplete="off" spellcheck="false">
+                <!-- Cor principal e logo -->
+                <th:block th:if="${secaoAtual.tipo() == 'aparencia'}">
+            <section class="cadastro-form-box">
+                <h2>Aparência do site</h2>
+                <p class="adm-ajuda" style="margin-bottom: 22px;">
+                    Defina a cor principal e a logo da loja. O que for salvo aqui vale para todo o site: loja, login e painel.
+                </p>
+
+                <form th:action="@{/admin/configuracoes/salvar}" method="post" enctype="multipart/form-data"
+                      class="cadastro-form" id="formAparencia"
+                      th:attr="data-logo-personalizada=${site.logoPersonalizada}">
+
+                    <!-- Cor principal -->
+                    <div class="cadastro-campo adm-c6">
+                        <span class="adm-rotulo" id="rotuloCor">Cor principal</span>
+                        <p class="adm-ajuda">Usada em botões, etiquetas, barra de avisos, menu lateral, painel do login e rodapé.</p>
+
+                        <div class="tema-cores">
+                            <input type="color" id="corSeletor" class="tema-seletor" th:value="${#strings.toLowerCase(site.corPrimaria)}"
+                                   aria-labelledby="rotuloCor">
+                            <input type="text" id="corPrimaria" name="corPrimaria" class="tema-hex" th:value="${site.corPrimaria}"
+                                   maxlength="7" pattern="#[0-9A-Fa-f]{6}" placeholder="#0A0A0A" required
+                                   aria-label="Código da cor em hexadecimal" autocomplete="off" spellcheck="false">
+                        </div>
+
+                        <div class="tema-amostras" role="group" aria-label="Cores sugeridas">
+                            <button type="button" class="tema-amostra" th:each="cor : ${coresPredefinidas}"
+                                    th:attr="data-cor=${cor.value},title=${cor.key},aria-label=${cor.key}"
+                                    th:style="'--cor:' + ${cor.value}" aria-pressed="false"></button>
+                        </div>
                     </div>
 
-                    <div class="tema-amostras" role="group" aria-label="Cores sugeridas">
-                        <button type="button" class="tema-amostra" th:each="cor : ${coresPredefinidas}"
-                                th:attr="data-cor=${cor.value},title=${cor.key},aria-label=${cor.key}"
-                                th:style="'--cor:' + ${cor.value}" aria-pressed="false"></button>
+                    <!-- Prévia -->
+                    <div class="cadastro-campo adm-c6">
+                        <span class="adm-rotulo">Prévia</span>
+                        <p class="adm-ajuda">A página inteira (menu lateral e barra de avisos inclusive) mostra a cor escolhida antes de você salvar.</p>
+                        <div class="tema-previa">
+                            <span class="tema-previa-btn">Comprar</span>
+                            <span class="tema-previa-badge">-20%</span>
+                            <span class="tema-previa-tag">Novidade</span>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Prévia -->
-                <div class="cadastro-campo adm-c6">
+                    <!-- Logo -->
+                    <div class="cadastro-campo adm-c6">
+                        <label class="adm-rotulo" for="logo">Logo da loja</label>
+                        <p class="adm-ajuda">Aparece no cabeçalho, no menu lateral e na tela de login.</p>
+
+                        <div class="tema-logos">
+                            <div>
+                                <div class="tema-logo-caixa tema-logo-clara">
+                                    <img id="logoPreviaClara" alt="Logo sobre fundo claro"
+                                         th:src="${site.logoPersonalizada} ? @{'/logo-site/' + ${site.logoArquivo}} : @{/brand/logo-el.png}">
+                                </div>
+                                <p class="tema-logo-legenda">Cabeçalho</p>
+                            </div>
+                            <div>
+                                <div class="tema-logo-caixa tema-logo-escura">
+                                    <img id="logoPreviaEscura" alt="Logo sobre a cor principal"
+                                         th:src="${site.logoPersonalizada} ? @{'/logo-site/' + ${site.logoArquivo}} : @{/brand/logo-el-branca.png}">
+                                </div>
+                                <p class="tema-logo-legenda">Menu lateral e login</p>
+                            </div>
+                        </div>
+
+                        <input type="file" id="logo" name="logo" accept="image/png,image/jpeg,image/webp,image/gif">
+                        <p class="adm-ajuda"
+                           th:text="${site.logoPersonalizada} ? 'Para trocar a logo, escolha um novo arquivo. Sem arquivo, a logo atual é mantida.' : 'Opcional. Sem arquivo, continua a logo padrão da loja.'"></p>
+                        <p class="tema-aviso">
+                            Prefira PNG ou WEBP com fundo transparente, de pelo menos 1000 px de altura e até 2 MB. Sobre áreas coloridas
+                            (menu lateral e login) a logo aparece em uma cor só, clara ou escura, para ficar legível.
+                        </p>
+                    </div>
+
+                    <div class="adm-acoes">
+                        <button type="submit" class="adm-btn adm-btn-sec" th:formaction="@{/admin/configuracoes/restaurar}" formnovalidate
+                                onclick="return confirm('Restaurar a cor e a logo originais? A logo enviada será removida.');">
+                            Restaurar padrão
+                        </button>
+                        <button type="submit" class="btn-comprar cadastro-btn-salvar adm-btn">Salvar alterações</button>
+                    </div>
+                </form>
+            </section>
+                </th:block>
+
+                <!-- Textos e cores (site todo ou uma página) -->
+                <section class="cadastro-form-box" th:unless="${secaoAtual.tipo() == 'aparencia'}">
+                    <div class="config-cabecalho">
+                        <h2 th:text="${secaoAtual.nome()}">Seção</h2>
+                        <p class="adm-ajuda" th:text="${secaoAtual.descricao()}">Descrição</p>
+                    </div>
+
+                    <form th:action="@{/admin/configuracoes/personalizacao/salvar}" method="post" id="formPersonalizacao"
+                          class="config-form" novalidate>
+                        <input type="hidden" name="secao" th:value="${secaoAtual.id()}">
+
+                        <!-- Textos -->
+                        <fieldset class="config-bloco" th:if="${gruposTexto != null}">
+                            <legend>Textos</legend>
+                            <div class="config-grupo" th:each="g : ${gruposTexto}">
+                                <h3 th:text="${g.nome()}">Grupo</h3>
+                                <div class="config-campo" th:each="c : ${g.campos()}" th:classappend="${c.alterado()} ? 'alterado'">
+                                    <label th:for="${'f-' + c.chave()}" th:text="${c.rotulo()}">Rótulo</label>
+                                    <div class="config-linha">
+                                        <textarea th:if="${c.longo()}" th:id="${'f-' + c.chave()}" th:name="${c.chave()}" rows="3"
+                                                  class="js-texto" th:maxlength="${c.limite()}" th:text="${c.valor()}"
+                                                  th:attr="data-padrao=${c.padrao()}"></textarea>
+                                        <input th:unless="${c.longo()}" type="text" th:id="${'f-' + c.chave()}" th:name="${c.chave()}"
+                                               class="js-texto" th:value="${c.valor()}" th:maxlength="${c.limite()}"
+                                               th:placeholder="${c.opcional()} ? '(em branco: não aparece)' : ${c.padrao()}"
+                                               th:attr="data-padrao=${c.padrao()}" autocomplete="off">
+                                        <button type="button" class="config-padrao js-texto-padrao"
+                                                th:attr="aria-label='Voltar ao texto padrão: ' + ${c.rotulo()}">Padrão</button>
+                                    </div>
+                                    <p class="config-dica" th:if="${c.alterado()}">
+                                        Padrão: <span th:text="${c.padrao().isEmpty()} ? '(vazio)' : ${c.padrao()}">texto</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <!-- Cores -->
+                        <fieldset class="config-bloco" th:if="${gruposCor != null}">
+                            <legend>Cores</legend>
+                            <p class="adm-ajuda config-bloco-ajuda" th:if="${secaoAtual.tipo() == 'pagina'}">
+                                Valem só nesta página e vencem as cores do site todo. Em branco = segue o site todo.
+                            </p>
+                            <p class="adm-ajuda config-bloco-ajuda" th:unless="${secaoAtual.tipo() == 'pagina'}">
+                                Valem em todas as páginas (cada página ainda pode trocar na própria seção). Em branco = cor original do tema.
+                            </p>
+                            <details class="config-grupo-cor" th:each="g, st : ${gruposCor}" th:open="${st.first or g.alterados() > 0}">
+                                <summary>
+                                    <span th:text="${g.nome()}">Grupo</span>
+                                    <span class="config-contador" th:if="${g.alterados() > 0}" th:text="${g.alterados()}">1</span>
+                                </summary>
+                                <div class="config-cores">
+                                    <div class="config-cor" th:each="c : ${g.itens()}" th:classappend="${!c.valor().isEmpty()} ? 'alterado'">
+                                        <label class="config-cor-rotulo" th:for="${'f-' + c.chave()}" th:text="${c.rotulo()}">Item</label>
+                                        <div class="config-cor-controles">
+                                            <input type="color" class="config-cor-seletor"
+                                                   th:value="${c.valor().isEmpty()} ? '#ffffff' : ${#strings.toLowerCase(c.valor())}"
+                                                   th:attr="aria-label='Escolher cor: ' + ${c.rotulo()}">
+                                            <input type="text" class="config-cor-hex js-cor" th:id="${'f-' + c.chave()}" th:name="${c.chave()}"
+                                                   th:value="${c.valor()}" placeholder="Padrão" maxlength="7" autocomplete="off" spellcheck="false"
+                                                   th:attr="data-regra=${c.regra()}">
+                                            <button type="button" class="config-padrao js-cor-padrao"
+                                                    th:attr="aria-label='Voltar à cor padrão: ' + ${c.rotulo()}">Padrão</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </details>
+                        </fieldset>
+
+                        <div class="adm-acoes config-acoes">
+                            <button type="submit" class="adm-btn adm-btn-sec" th:formaction="@{/admin/configuracoes/personalizacao/restaurar}"
+                                    formnovalidate onclick="return confirm('Voltar todos os textos e cores desta seção ao padrão?');">
+                                Restaurar seção
+                            </button>
+                            <button type="submit" class="btn-comprar cadastro-btn-salvar adm-btn">Salvar alterações</button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+
+            <!-- Prévia da página (mesma origem: a tela injeta as cores enquanto você escolhe) -->
+            <aside class="config-previa" th:if="${urlPrevia != null}" aria-label="Prévia da página">
+                <div class="config-previa-topo">
                     <span class="adm-rotulo">Prévia</span>
-                    <p class="adm-ajuda">A página inteira (menu lateral e barra de avisos inclusive) mostra a cor escolhida antes de você salvar.</p>
-                    <div class="tema-previa">
-                        <span class="tema-previa-btn">Comprar</span>
-                        <span class="tema-previa-badge">-20%</span>
-                        <span class="tema-previa-tag">Novidade</span>
-                    </div>
+                    <a th:href="@{${urlPrevia}}" target="_blank" rel="noopener">Abrir em nova aba</a>
                 </div>
-
-                <!-- Logo -->
-                <div class="cadastro-campo adm-c6">
-                    <label class="adm-rotulo" for="logo">Logo da loja</label>
-                    <p class="adm-ajuda">Aparece no cabeçalho, no menu lateral e na tela de login.</p>
-
-                    <div class="tema-logos">
-                        <div>
-                            <div class="tema-logo-caixa tema-logo-clara">
-                                <img id="logoPreviaClara" alt="Logo sobre fundo claro"
-                                     th:src="${site.logoPersonalizada} ? @{'/logo-site/' + ${site.logoArquivo}} : @{/brand/logo-el.png}">
-                            </div>
-                            <p class="tema-logo-legenda">Cabeçalho</p>
-                        </div>
-                        <div>
-                            <div class="tema-logo-caixa tema-logo-escura">
-                                <img id="logoPreviaEscura" alt="Logo sobre a cor principal"
-                                     th:src="${site.logoPersonalizada} ? @{'/logo-site/' + ${site.logoArquivo}} : @{/brand/logo-el-branca.png}">
-                            </div>
-                            <p class="tema-logo-legenda">Menu lateral e login</p>
-                        </div>
-                    </div>
-
-                    <input type="file" id="logo" name="logo" accept="image/png,image/jpeg,image/webp,image/gif">
-                    <p class="adm-ajuda"
-                       th:text="${site.logoPersonalizada} ? 'Para trocar a logo, escolha um novo arquivo. Sem arquivo, a logo atual é mantida.' : 'Opcional. Sem arquivo, continua a logo padrão da loja.'"></p>
-                    <p class="tema-aviso">
-                        Prefira PNG ou WEBP com fundo transparente, de pelo menos 1000 px de altura e até 2 MB. Sobre áreas coloridas
-                        (menu lateral e login) a logo aparece em uma cor só, clara ou escura, para ficar legível.
-                    </p>
+                <div class="config-previa-moldura" id="previaMoldura">
+                    <iframe id="previa" th:src="@{${urlPrevia}}" title="Prévia da página" tabindex="-1"></iframe>
                 </div>
-
-                <div class="adm-acoes">
-                    <button type="submit" class="adm-btn adm-btn-sec" th:formaction="@{/admin/configuracoes/restaurar}" formnovalidate
-                            onclick="return confirm('Restaurar a cor e a logo originais? A logo enviada será removida.');">
-                        Restaurar padrão
-                    </button>
-                    <button type="submit" class="btn-comprar cadastro-btn-salvar adm-btn">Salvar alterações</button>
-                </div>
-            </form>
-        </section>
+                <p class="adm-ajuda">As cores mudam aqui enquanto você escolhe. Os textos aparecem depois de salvar.</p>
+            </aside>
+        </div>
     </main>
 
     <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
     <div class="overlay" id="overlay"></div>
 
-    <script th:src="@{/jshome.js(v=9)}"></script>
+    <script th:src="@{/jshome.js(v=10)}"></script>
     <script>
         (function () {
             var raiz = document.documentElement;
             var form = document.getElementById('formAparencia');
+            if (!form) { return; } // outra seção aberta
             var seletor = document.getElementById('corSeletor');
             var campoHex = document.getElementById('corPrimaria');
             var amostras = document.querySelectorAll('.tema-amostra');
@@ -159,6 +281,14 @@
                 var custom = logoPersonalizada || (entrada.files && entrada.files.length > 0);
                 var filtro = custom ? (claro ? 'brightness(0) invert(1)' : 'brightness(0)') : (claro ? 'none' : 'invert(1)');
                 raiz.style.setProperty('--logo-filtro', filtro);
+                // A prévia ao lado mostra a mesma cor
+                var previa = document.getElementById('previa');
+                var raizPrevia = previa && previa.contentDocument && previa.contentDocument.documentElement;
+                if (raizPrevia) {
+                    raizPrevia.style.setProperty('--primary-color', hex);
+                    raizPrevia.style.setProperty('--primary-contrast', claro ? '#FFFFFF' : '#0A0A0A');
+                    raizPrevia.style.setProperty('--logo-filtro', filtro);
+                }
                 amostras.forEach(function (a) {
                     a.setAttribute('aria-pressed', a.getAttribute('data-cor').toUpperCase() === hex.toUpperCase() ? 'true' : 'false');
                 });
@@ -220,6 +350,124 @@
                 setTimeout(function () { ok.remove(); }, 400);
             }, 5000);
         }
+    </script>
+    <script th:inline="javascript">
+        (function () {
+            var HEX = /^#[0-9A-Fa-f]{6}$/;
+            var logoPersonalizada = /*[[${site.logoPersonalizada}]]*/ false;
+
+            // ---------- Textos: botão "Padrão" ----------
+            document.querySelectorAll('.js-texto-padrao').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var campo = btn.parentNode.querySelector('.js-texto');
+                    campo.value = campo.getAttribute('data-padrao') || '';
+                    campo.focus();
+                });
+            });
+
+            // ---------- Cores ----------
+            function normalizar(v) {
+                v = (v || '').trim();
+                if (v && v.charAt(0) !== '#') { v = '#' + v; }
+                return v.toUpperCase();
+            }
+            // Mesma regra do servidor (Aparencia.corContraste / filtroLogo)
+            function canal(v) { v = v / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }
+            function luminancia(hex) {
+                return 0.2126 * canal(parseInt(hex.substr(1, 2), 16))
+                     + 0.7152 * canal(parseInt(hex.substr(3, 2), 16))
+                     + 0.0722 * canal(parseInt(hex.substr(5, 2), 16));
+            }
+            function textoClaro(hex) {
+                var l = luminancia(hex);
+                return 1.05 / (l + 0.05) >= (l + 0.05) / (luminancia('#0A0A0A') + 0.05);
+            }
+            function filtro(hex) {
+                var claro = textoClaro(hex);
+                return logoPersonalizada ? (claro ? 'brightness(0) invert(1)' : 'brightness(0)') : (claro ? 'none' : 'invert(1)');
+            }
+
+            var previa = document.getElementById('previa');
+            var camposCor = document.querySelectorAll('.js-cor');
+
+            function cssDaTela() {
+                var css = '';
+                camposCor.forEach(function (campo) {
+                    var v = normalizar(campo.value);
+                    if (!HEX.test(v)) { return; }
+                    css += campo.getAttribute('data-regra')
+                        .split('__COR__').join(v)
+                        .split('__CONTRASTE__').join(textoClaro(v) ? '#FFFFFF' : '#0A0A0A')
+                        .split('__FILTRO__').join(filtro(v));
+                });
+                return css;
+            }
+
+            function atualizarPrevia() {
+                var doc = previa && previa.contentDocument;
+                if (!doc || !doc.head) { return; }
+                var estilo = doc.getElementById('previa-configuracoes');
+                if (!estilo) {
+                    estilo = doc.createElement('style');
+                    estilo.id = 'previa-configuracoes';
+                    doc.head.appendChild(estilo);
+                }
+                estilo.textContent = cssDaTela();
+            }
+
+            camposCor.forEach(function (campo) {
+                var linha = campo.closest('.config-cor');
+                var seletor = linha.querySelector('.config-cor-seletor');
+                var botao = linha.querySelector('.js-cor-padrao');
+
+                function marcar() {
+                    var v = normalizar(campo.value);
+                    linha.classList.toggle('alterado', HEX.test(v));
+                    linha.classList.toggle('invalido', v !== '' && !HEX.test(v));
+                }
+                seletor.addEventListener('input', function () {
+                    campo.value = seletor.value.toUpperCase();
+                    marcar();
+                    atualizarPrevia();
+                });
+                campo.addEventListener('input', function () {
+                    var v = normalizar(campo.value);
+                    if (HEX.test(v)) { seletor.value = v.toLowerCase(); }
+                    marcar();
+                    atualizarPrevia();
+                });
+                campo.addEventListener('blur', function () { campo.value = normalizar(campo.value); marcar(); });
+                botao.addEventListener('click', function () {
+                    campo.value = '';
+                    seletor.value = '#ffffff';
+                    marcar();
+                    atualizarPrevia();
+                });
+            });
+
+            // ---------- Prévia: página inteira em escala reduzida ----------
+            var moldura = document.getElementById('previaMoldura');
+            var LARGURA = 1280;
+            function ajustarEscala() {
+                if (!moldura || !previa) { return; }
+                var escala = moldura.clientWidth / LARGURA;
+                previa.style.transform = 'scale(' + escala + ')';
+                previa.style.height = (moldura.clientHeight / escala) + 'px';
+            }
+            if (previa) {
+                previa.addEventListener('load', function () {
+                    try {
+                        // A prévia é só para olhar: links não navegam
+                        previa.contentDocument.addEventListener('click', function (e) {
+                            if (e.target.closest('a, button[type="submit"]')) { e.preventDefault(); }
+                        }, true);
+                    } catch (e) { /* página de outra origem: só mostra */ }
+                    atualizarPrevia();
+                });
+                window.addEventListener('resize', ajustarEscala);
+                ajustarEscala();
+            }
+        })();
     </script>
 </body>
 </html>

@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.text.Normalizer;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -86,7 +87,7 @@ public class Produto {
 	@Column(name = "quantidade")
 	private Map<String, Integer> estoque = new HashMap<>();
 
-	// Métricas. Ainda não existe módulo de pedidos: "vendidas" fica em 0 até ele existir.
+	// Métricas. "vendidas" soma as unidades de cada pedido finalizado em /checkout.
 	@Column(columnDefinition = "INTEGER DEFAULT 0")
 	private Integer vendidas = 0;
 
@@ -171,6 +172,47 @@ public class Produto {
 			return List.of();
 		}
 		return Arrays.stream(tamanho.split(",")).map(String::trim).filter(t -> !t.isEmpty()).toList();
+	}
+
+	/**
+	 * Tamanho em formato de comparação: sem acentos, sem espaços nas pontas e em maiúsculas.
+	 * O carrinho do navegador grava o tamanho em maiúsculas (ex.: "ÚNICO"), então a conferência
+	 * com o cadastro do produto ("Único") precisa ignorar essas diferenças.
+	 */
+	public static String normalizarTamanho(String tamanho) {
+		if (tamanho == null) {
+			return "";
+		}
+		return Normalizer.normalize(tamanho.trim(), Normalizer.Form.NFD).replaceAll("\\p{M}", "")
+				.toUpperCase(Locale.ROOT);
+	}
+
+	/** Tamanho exatamente como está no cadastro do produto, ou null se o produto não oferece esse tamanho. */
+	public String resolverTamanho(String informado) {
+		String procurado = normalizarTamanho(informado);
+		for (String t : getTamanhosDisponiveis()) {
+			if (normalizarTamanho(t).equals(procurado)) {
+				return t;
+			}
+		}
+		return null;
+	}
+
+	/** Quantidade em estoque do tamanho (já resolvido); 0 quando não há estoque informado. */
+	public int estoqueDoTamanho(String tamanhoResolvido) {
+		Integer q = estoque == null || tamanhoResolvido == null ? null : estoque.get(tamanhoResolvido);
+		return q == null ? 0 : Math.max(q, 0);
+	}
+
+	/** Primeiro tamanho com estoque (já vem selecionado na página do produto); null = esgotado. */
+	@Transient
+	public String getTamanhoInicial() {
+		for (String t : getTamanhosDisponiveis()) {
+			if (estoqueDoTamanho(t) > 0) {
+				return t;
+			}
+		}
+		return null;
 	}
 
 	/** Resumo para listagens, ex.: "Camiseta · Unissex"; null quando nenhum dos dois foi informado. */

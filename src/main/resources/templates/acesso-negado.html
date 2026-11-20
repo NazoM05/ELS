@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=29)}">
+    <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
+
+    <title th:replace="~{fragments/fragmentos :: titulo('Acesso negado')}">Acesso negado - Estilo London Store</title>
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+</head>
+
+<body class="institucional-pagina pg-acessoNegado">
+    <div class="barrabranca">
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
+    </div>
+
+    <main class="institucional institucional-unica">
+        <article class="institucional-texto">
+            <h1 class="adm-titulo">Acesso negado</h1>
+            <p>O seu perfil não tem permissão para abrir esta página.</p>
+            <p>Se você acha que deveria ter acesso, fale com o administrador da loja.</p>
+            <p><a th:href="@{/}">Voltar para a loja</a></p>
+        </article>
+    </main>
+
+    <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
+    <div class="overlay" id="overlay"></div>
+    <script th:src="@{/jshome.js(v=10)}"></script>
+</body>
+</html>

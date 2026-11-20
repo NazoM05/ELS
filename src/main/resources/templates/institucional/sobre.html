@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Conheça a Estilo London Store: moda masculina, feminina e unissex com estilo urbano e preço justo.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=29)}">
+    <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
+
+    <title th:replace="~{fragments/fragmentos :: titulo(${txt['pg.sobre.titulo']})}">Sobre nós - Estilo London Store</title>
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png}">
+</head>
+
+<body class="institucional-pagina pg-sobre">
+    <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
+
+    <div class="barrabranca">
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
+        <button th:replace="~{fragments/fragmentos :: botao-carrinho}"></button>
+    </div>
+
+    <main class="institucional">
+        <nav class="institucional-menu" aria-label="Páginas institucionais">
+            <a th:href="@{/sobre}" th:classappend="${paginaInstitucional == 'sobre'} ? 'atual'" th:attr="aria-current=${paginaInstitucional == 'sobre'} ? 'page'" th:text="${txt['geral.rodapeSobre']}">Sobre nós</a>
+            <a th:href="@{/frete-e-entrega}" th:classappend="${paginaInstitucional == 'frete'} ? 'atual'" th:attr="aria-current=${paginaInstitucional == 'frete'} ? 'page'" th:text="${txt['geral.rodapeFrete']}">Frete e Entrega</a>
+            <a th:href="@{/trocas-e-devolucoes}" th:classappend="${paginaInstitucional == 'trocas'} ? 'atual'" th:attr="aria-current=${paginaInstitucional == 'trocas'} ? 'page'" th:text="${txt['geral.rodapeTrocas']}">Trocas e Devoluções</a>
+            <a th:href="@{/politica-de-privacidade}" th:classappend="${paginaInstitucional == 'privacidade'} ? 'atual'" th:attr="aria-current=${paginaInstitucional == 'privacidade'} ? 'page'" th:text="${txt['geral.rodapePrivacidade']}">Política de Privacidade</a>
+        </nav>
+
+        <article class="institucional-texto">
+            <p class="institucional-kicker" th:unless="${#strings.isEmpty(txt['pg.sobre.kicker'])}" th:text="${txt['pg.sobre.kicker']}">Estilo London Store</p>
+            <h1 class="adm-titulo" th:text="${txt['pg.sobre.h1']}">Sobre nós</h1>
+            <p class="institucional-lead" th:text="${txt['pg.sobre.lead']}">Somos uma loja de moda com estilo urbano, feita para quem quer se vestir bem no dia a dia sem complicação.</p>
+
+            <h2>O que fazemos</h2>
+            <p>Selecionamos camisetas, camisas, calças, bermudas, vestidos, saias, jaquetas, moletons e acessórios para o público masculino, feminino e unissex. Cada peça é escolhida pensando em conforto, caimento e durabilidade.</p>
+
+            <h2>Como trabalhamos</h2>
+            <ul>
+                <li><strong>Estoque real:</strong> o que aparece como disponível na loja está separado para você. Quando um tamanho acaba, ele aparece como esgotado.</li>
+                <li><strong>Guia de medidas:</strong> as peças trazem tabela de tamanhos para você acertar na escolha.</li>
+                <li><strong>Compra tranquila:</strong> parcelamento em até 3x sem juros e troca facilitada em até 30 dias.</li>
+            </ul>
+
+            <h2>Fale com a gente</h2>
+            <p>Dúvidas, sugestões ou elogios: escreva para <a href="mailto:contato@seudominio.com.br">contato@seudominio.com.br</a>. Respondemos em dias úteis.</p>
+
+            <div class="institucional-acoes">
+                <a class="btn-comprar" th:href="@{/home}" th:text="${txt['pg.sobre.btn']}">Conhecer a coleção</a>
+            </div>
+        </article>
+    </main>
+
+    <footer th:replace="~{fragments/fragmentos :: rodape}"></footer>
+
+    <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
+    <th:block th:replace="~{fragments/fragmentos :: carrinho-drawer}"></th:block>
+    <div class="overlay" id="overlay"></div>
+
+    <script th:src="@{/jshome.js(v=10)}"></script>
+</body>
+</html>

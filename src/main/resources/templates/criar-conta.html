@@ -9,50 +9,50 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=17)}">
+    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=29)}">
     <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
 
-    <title>Criar conta | Estilo London Store</title>
+    <title th:replace="~{fragments/fragmentos :: titulo(${txt['pg.criarConta.titulo']})}">Criar conta | Estilo London Store</title>
     <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
     <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
     <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png}">
 </head>
 
-<body>
+<body class="pg-criarConta">
 
     <main class="login">
 
         <!-- Painel escuro com a marca (mesmo do login) -->
         <section class="login-marca">
             <img class="login-marca-fundo" th:src="${site.logoPersonalizada} ? @{'/logo-site/' + ${site.logoArquivo}} : @{/brand/logo-el-branca-hd.png}" alt="" aria-hidden="true">
-            <a class="login-logo" th:href="@{/}">Estilo London</a>
-            <h1 class="login-titulo">Crie<br>sua conta</h1>
+            <a class="login-logo" th:href="@{/}" th:text="${txt['geral.nomeCurto']}">Estilo London</a>
+            <h1 class="login-titulo" th:text="${txt['pg.criarConta.painel']}">Crie<br>sua conta</h1>
         </section>
 
         <!-- Formulário -->
         <section class="login-area">
             <form class="login-form" th:action="@{/criar-conta}" method="post" novalidate>
 
-                <h2>Criar conta</h2>
+                <h2 th:text="${txt['pg.criarConta.h2']}">Criar conta</h2>
 
                 <p class="login-erro" th:if="${!erros.isEmpty()}" role="alert">Confira os campos destacados abaixo.</p>
 
                 <div class="login-campo">
-                    <label for="nome">Nome</label>
+                    <label for="nome" th:text="${txt['pg.criarConta.nome']}">Nome</label>
                     <input type="text" id="nome" name="nome" th:value="${nome}" maxlength="80" autocomplete="name" required autofocus
                            th:attr="aria-invalid=${erros.containsKey('nome')}">
                     <p class="campo-erro" th:if="${erros.containsKey('nome')}" th:text="${erros['nome']}" role="alert"></p>
                 </div>
 
                 <div class="login-campo">
-                    <label for="email">E-mail</label>
+                    <label for="email" th:text="${txt['pg.criarConta.email']}">E-mail</label>
                     <input type="email" id="email" name="email" th:value="${email}" maxlength="150" autocomplete="email" required
                            th:attr="aria-invalid=${erros.containsKey('email')}">
                     <p class="campo-erro" th:if="${erros.containsKey('email')}" th:text="${erros['email']}" role="alert"></p>
                 </div>
 
                 <div class="login-campo">
-                    <label for="senha">Senha</label>
+                    <label for="senha" th:text="${txt['pg.criarConta.senha']}">Senha</label>
                     <input type="password" id="senha" name="senha" maxlength="64" autocomplete="new-password" required
                            th:attr="aria-invalid=${erros.containsKey('senha')}">
                     <p class="campo-ajuda" th:unless="${erros.containsKey('senha')}">De 8 a 64 caracteres, com pelo menos uma letra e um número.</p>
@@ -60,17 +60,17 @@
                 </div>
 
                 <div class="login-campo">
-                    <label for="confirmarSenha">Confirmar senha</label>
+                    <label for="confirmarSenha" th:text="${txt['pg.criarConta.confirmar']}">Confirmar senha</label>
                     <input type="password" id="confirmarSenha" name="confirmarSenha" maxlength="64" autocomplete="new-password" required
                            th:attr="aria-invalid=${erros.containsKey('confirmarSenha')}">
                     <p class="campo-erro" th:if="${erros.containsKey('confirmarSenha')}" th:text="${erros['confirmarSenha']}" role="alert"></p>
                 </div>
 
-                <button type="submit" class="login-btn">Criar conta</button>
+                <button type="submit" class="login-btn" th:text="${txt['pg.criarConta.btnCriar']}">Criar conta</button>
 
-                <p class="login-cadastro">Já tem uma conta? <a th:href="@{/login}">Fazer login</a></p>
+                <p class="login-cadastro"><th:block th:text="${txt['pg.criarConta.jaTem']}">Já tem uma conta?</th:block> <a th:href="@{/login}" th:text="${txt['pg.criarConta.linkLogin']}">Fazer login</a></p>
 
-                <a class="login-voltar" th:href="@{/}">Voltar para a loja</a>
+                <a class="login-voltar" th:href="@{/}" th:text="${txt['pg.criarConta.voltar']}">Voltar para a loja</a>
             </form>
         </section>
 

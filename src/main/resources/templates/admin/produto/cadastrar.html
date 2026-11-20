@@ -8,27 +8,22 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=17)}">
+    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=29)}">
     <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
  
-    <title>Cadastro de Produtos - Estilo London Store</title>
+    <title th:replace="~{fragments/fragmentos :: titulo(${txt['pg.adminCadastrar.titulo']})}">Cadastro de Produtos - Estilo London Store</title>
     <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
     <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
     <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png}">
 </head>
  
-<body class="admin-ui">
+<body class="admin-ui pg-adminCadastrar">
  
     <!-- Barra de anúncios -->
-    <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
  
     <!-- Barra branca com menu e busca -->
     <div class="barrabranca">
-        <button class="menu-btn" id="menuBtn" aria-label="Abrir menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
         <a th:replace="~{fragments/fragmentos :: logo}"></a>
  
         <form class="search-form" onsubmit="return false;">
@@ -45,12 +40,12 @@
  
         <a class="adm-voltar" th:href="@{/admin/produto/listar}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
-            Voltar para produtos
+            <th:block th:text="${txt['pg.adminCadastrar.voltar']}">Voltar para produtos</th:block>
         </a>
 
         <!-- Formulário de cadastro -->
         <section class="cadastro-form-box">
-            <h2>Novo produto</h2>
+            <h2 th:text="${txt['pg.adminCadastrar.h2']}">Novo produto</h2>
 
             <form th:action="@{/admin/produto/salvar}" method="post" enctype="multipart/form-data" class="cadastro-form">
 
@@ -86,8 +81,8 @@
                 <div th:replace="~{fragments/campos-produto :: imagens(${produto})}"></div>
 
                 <div class="adm-acoes">
-                    <a th:href="@{/admin/produto/listar}" class="adm-btn adm-btn-sec">Cancelar</a>
-                    <button type="submit" class="btn-comprar cadastro-btn-salvar adm-btn">Salvar produto</button>
+                    <a th:href="@{/admin/produto/listar}" class="adm-btn adm-btn-sec" th:text="${txt['pg.adminCadastrar.btnCancelar']}">Cancelar</a>
+                    <button type="submit" class="btn-comprar cadastro-btn-salvar adm-btn" th:text="${txt['pg.adminCadastrar.btnSalvar']}">Salvar produto</button>
                 </div>
             </form>
         </section>
@@ -95,7 +90,7 @@
         <!-- Grid de produtos já cadastrados -->
         <section>
             <div class="cadastro-titulo">
-                <h2>Produtos cadastrados</h2>
+                <h2 th:text="${txt['pg.adminCadastrar.lista']}">Produtos cadastrados</h2>
                 <span class="cadastro-contador" th:text="${#lists.size(listaProdutos)} + ' no total'"></span>
             </div>
  
@@ -124,7 +119,7 @@
     <div th:replace="~{fragments/fragmentos :: sidebar}" ></div>
     <div class="overlay" id="overlay"></div>
  
-    <script th:src="@{/jshome.js(v=9)}"></script>
+    <script th:src="@{/jshome.js(v=10)}"></script>
     <script>
         // Filtra os cards já cadastrados pela barra de pesquisa
         const filtro = document.getElementById('filtro');

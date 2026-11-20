@@ -9,27 +9,23 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=17)}">
+    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=29)}">
     <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
 
-    <title>Meu perfil | Estilo London Store</title>
+    <title th:replace="~{fragments/fragmentos :: titulo(${txt['pg.perfil.titulo']})}">Meu perfil | Estilo London Store</title>
     <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
     <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
     <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png}">
 </head>
 
-<body class="admin-ui">
+<body class="admin-ui pg-perfil">
 
     <!-- Barra de anúncios -->
     <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
 
     <!-- Barra branca com menu -->
     <div class="barrabranca">
-        <button class="menu-btn" id="menuBtn" aria-label="Abrir menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
         <a th:replace="~{fragments/fragmentos :: logo}"></a>
     </div>
 
@@ -37,14 +33,14 @@
 
         <header class="adm-topo">
             <div>
-                <h1 class="adm-titulo">Meu perfil</h1>
-                <p class="adm-sub">Veja os dados da sua conta e altere seu e-mail ou sua senha.</p>
+                <h1 class="adm-titulo" th:text="${txt['pg.perfil.h1']}">Meu perfil</h1>
+                <p class="adm-sub" th:unless="${#strings.isEmpty(txt['pg.perfil.sub'])}" th:text="${txt['pg.perfil.sub']}">Veja os dados da sua conta e altere seu e-mail ou sua senha.</p>
             </div>
         </header>
 
         <!-- Dados atuais -->
         <section class="cadastro-form-box">
-            <h2>Dados da conta</h2>
+            <h2 th:text="${txt['pg.perfil.dadosConta']}">Dados da conta</h2>
             <dl class="perfil-dados">
                 <div>
                     <dt>Nome</dt>
@@ -67,7 +63,7 @@
 
         <!-- Dados pessoais -->
         <section class="cadastro-form-box" id="dados-pessoais">
-            <h2>Dados pessoais</h2>
+            <h2 th:text="${txt['pg.perfil.dadosPessoais']}">Dados pessoais</h2>
 
             <div th:if="${sucessoDados}" class="cadastro-alerta cadastro-alerta-ok" role="status" th:text="${sucessoDados}"></div>
 
@@ -89,14 +85,14 @@
                 </div>
 
                 <div class="adm-acoes">
-                    <button type="submit" class="btn-comprar cadastro-btn-salvar adm-btn">Salvar dados pessoais</button>
+                    <button type="submit" class="btn-comprar cadastro-btn-salvar adm-btn" th:text="${txt['pg.perfil.btnDados']}">Salvar dados pessoais</button>
                 </div>
             </form>
         </section>
 
         <!-- Alterar e-mail -->
         <section class="cadastro-form-box" id="alterar-email">
-            <h2>Alterar e-mail</h2>
+            <h2 th:text="${txt['pg.perfil.alterarEmail']}">Alterar e-mail</h2>
 
             <div th:if="${sucessoEmail}" class="cadastro-alerta cadastro-alerta-ok" role="status" th:text="${sucessoEmail}"></div>
 
@@ -117,14 +113,14 @@
                 </div>
 
                 <div class="adm-acoes">
-                    <button type="submit" class="btn-comprar cadastro-btn-salvar adm-btn">Salvar e-mail</button>
+                    <button type="submit" class="btn-comprar cadastro-btn-salvar adm-btn" th:text="${txt['pg.perfil.btnEmail']}">Salvar e-mail</button>
                 </div>
             </form>
         </section>
 
         <!-- Alterar senha -->
         <section class="cadastro-form-box" id="alterar-senha">
-            <h2>Alterar senha</h2>
+            <h2 th:text="${txt['pg.perfil.alterarSenha']}">Alterar senha</h2>
 
             <div th:if="${sucessoSenha}" class="cadastro-alerta cadastro-alerta-ok" role="status" th:text="${sucessoSenha}"></div>
 
@@ -152,7 +148,7 @@
                 </div>
 
                 <div class="adm-acoes">
-                    <button type="submit" class="btn-comprar cadastro-btn-salvar adm-btn">Salvar senha</button>
+                    <button type="submit" class="btn-comprar cadastro-btn-salvar adm-btn" th:text="${txt['pg.perfil.btnSenha']}">Salvar senha</button>
                 </div>
             </form>
         </section>
@@ -161,7 +157,7 @@
     <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
     <div class="overlay" id="overlay"></div>
 
-    <script th:src="@{/jshome.js(v=9)}"></script>
+    <script th:src="@{/jshome.js(v=10)}"></script>
     <script>
         // Máscara do CPF enquanto digita: 000.000.000-00
         (function () {

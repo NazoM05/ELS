@@ -6,9 +6,12 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import jakarta.persistence.LockModeType;
 
 import com.example.nazomocambique.model.Categoria;
 import com.example.nazomocambique.model.Genero;
@@ -43,4 +46,12 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 	@Modifying(clearAutomatically = true)
 	@Query("update Produto p set p.visualizacoes = coalesce(p.visualizacoes, 0) + 1 where p.id = :id")
 	int incrementarVisualizacoes(@Param("id") Long id);
+
+	/**
+	 * Carrega o produto travando a linha até o fim da transação. Usado na finalização da compra:
+	 * duas pessoas comprando o último item ao mesmo tempo não conseguem baixar o mesmo estoque.
+	 */
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	@Query("select p from Produto p where p.id = :id")
+	Optional<Produto> buscarParaAtualizar(@Param("id") Long id);
 }

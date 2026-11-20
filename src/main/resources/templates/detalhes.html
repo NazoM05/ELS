@@ -9,30 +9,30 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=17)}">
+    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=29)}">
     <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
 
-    <title th:text="${produto.nome} + ' - Estilo London Store'">Detalhes do produto - Estilo London Store</title>
+    <title th:text="${produto.nome} + ' - ' + ${txt['geral.nomeLoja']}">Detalhes do produto - Estilo London Store</title>
 
     <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
     <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
     <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png}">
 </head>
 
-<body>
+<body class="pg-detalhes">
 
     <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
 
     <div class="barrabranca">
-        <button class="menu-btn" id="menuBtn">
+        <button class="menu-btn" id="menuBtn" aria-label="Abrir menu">
             <span></span>
             <span></span>
             <span></span>
         </button>
         <a th:replace="~{fragments/fragmentos :: logo}"></a>
         <form class="search-form" action="#" method="get">
-            <input type="text" name="search" placeholder="Pesquisar...">
-            <button type="submit">Buscar</button>
+            <input type="text" name="search" th:placeholder="${txt['geral.buscaPlaceholder']}">
+            <button type="submit" th:text="${txt['geral.buscaBotao']}">Buscar</button>
         </form>
         <button th:replace="~{fragments/fragmentos :: botao-carrinho}"></button>
     </div>
@@ -40,7 +40,7 @@
     <main class="detalhes-container">
 
         <nav class="detalhes-voltar">
-            <a th:href="@{/home}">Voltar</a>
+            <a th:href="@{/home}" th:text="${txt['pg.detalhes.voltar']}">Voltar</a>
             <span>›</span>
 
             <th:block th:if="${produto.genero == null and produto.categoria == null}">
@@ -95,68 +95,76 @@
                     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                 </button>
                 <button type="button" class="detalhes-ampliar" id="btnAmpliar" aria-label="Ampliar imagem"
-                        th:if="${not #lists.isEmpty(galeria)}">&#x1F50D; Ampliar</button>
+                        th:if="${not #lists.isEmpty(galeria)}" th:text="'🔍 ' + ${txt['pg.detalhes.ampliar']}">&#x1F50D; Ampliar</button>
                 <p class="detalhes-legenda" id="legendaImagem" aria-live="polite"
                    th:if="${not #lists.isEmpty(galeria)}" th:text="${galeria[0].rotulo}">Frente</p>
             </div>
 
             <div class="detalhes-info">
-                <p class="detalhes-status">Novo | +100 vendidos</p>
+                <p class="detalhes-status" th:unless="${#strings.isEmpty(txt['pg.detalhes.status'])}" th:text="${txt['pg.detalhes.status']}">Novo | +100 vendidos</p>
 
                 <h1 class="detalhes-titulo" th:text="${produto.nome}">Nome do produto</h1>
 
-                <p class="detalhes-avaliacao">4.9 ★★★★★ (120)</p>
+                <p class="detalhes-avaliacao" th:unless="${#strings.isEmpty(txt['pg.detalhes.avaliacao'])}" th:text="${txt['pg.detalhes.avaliacao']}">4.9 ★★★★★ (120)</p>
 
-                <p class="preco-antigo">R$ 199,90</p>
+                <p class="preco-antigo" th:unless="${#strings.isEmpty(txt['pg.detalhes.precoAntigo'])}" th:text="${txt['pg.detalhes.precoAntigo']}">R$ 199,90</p>
                 <p class="preco detalhes-preco" th:text="${'R$ ' + #numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</p>
-                <p class="detalhes-pagamento">ou em até 3x sem juros</p>
+                <p class="detalhes-pagamento" th:unless="${#strings.isEmpty(txt['pg.detalhes.pagamento'])}" th:text="${txt['pg.detalhes.pagamento']}">ou em até 3x sem juros</p>
 
                 <p class="detalhes-opcao detalhes-cor">
-                    Cor:
+                    <th:block th:text="${txt['pg.detalhes.rotuloCor']}">Cor:</th:block>
                     <span class="detalhes-cor-amostra" aria-hidden="true"></span>
                     <strong th:text="${produto.cor != null and !#strings.isEmpty(#strings.trim(produto.cor))} ? ${produto.cor} : 'Não informada'">Rosa</strong>
                 </p>
 
-                <p class="detalhes-opcao">Tamanho:</p>
+                <p class="detalhes-opcao" th:text="${txt['pg.detalhes.rotuloTamanho']}">Tamanho:</p>
+                <!-- Tamanhos do cadastro do produto; sem estoque fica desabilitado -->
                 <div class="detalhes-tamanhos" role="radiogroup" aria-label="Tamanho do produto">
-                    <button type="button" data-tamanho="P" aria-checked="false">P</button>
-                    <button type="button" class="ativo" data-tamanho="M" aria-checked="true">M</button>
-                    <button type="button" data-tamanho="G" aria-checked="false">G</button>
-                    <button type="button" data-tamanho="GG" aria-checked="false">GG</button>
+                    <button type="button" th:each="linha : ${produto.estoquePorTamanho}"
+                            th:with="esgotado=${linha.quantidade == null or linha.quantidade le 0},
+                                     ativo=${linha.tamanho == produto.tamanhoInicial}"
+                            th:text="${linha.tamanho}"
+                            th:classappend="${ativo} ? 'ativo'"
+                            th:disabled="${esgotado}"
+                            th:title="${esgotado} ? 'Esgotado' : (${linha.situacao == 'BAIXO'} ? |Últimas ${linha.quantidade} unidades| : null)"
+                            th:attr="data-tamanho=${linha.tamanho},aria-checked=${ativo ? 'true' : 'false'}">M</button>
                 </div>
+                <p class="detalhes-sem-tamanho" th:if="${produto.tamanhoInicial == null}">Nenhum tamanho disponível no momento.</p>
 
-                <h2 class="detalhes-subtitulo">O que você precisa saber sobre este produto</h2>
+                <h2 class="detalhes-subtitulo" th:text="${txt['pg.detalhes.subtitulo']}">O que você precisa saber sobre este produto</h2>
                 <ul class="detalhes-lista">
-                    <li>Tecido macio e confortável.</li>
-                    <li>Modelagem que veste bem no dia a dia.</li>
-                    <li>Lavagem fácil.</li>
+                    <li th:each="n : ${ {1, 2, 3} }" th:unless="${#strings.isEmpty(txt['pg.detalhes.item' + n])}"
+                        th:text="${txt['pg.detalhes.item' + n]}">Tecido macio e confortável.</li>
                 </ul>
             </div>
 
             <aside class="detalhes-compra">
-                <p class="detalhes-frete"><strong>Frete grátis</strong> acima de R$ 99</p>
-                <p>Chegará em poucos dias úteis.</p>
+                <p class="detalhes-frete" th:unless="${#strings.isEmpty(txt['pg.detalhes.freteDestaque']) and #strings.isEmpty(txt['pg.detalhes.freteTexto'])}"><strong th:text="${txt['pg.detalhes.freteDestaque']}">Frete grátis</strong> <th:block th:text="${txt['pg.detalhes.freteTexto']}">a partir de R$ 99 no Sul e de R$ 250 nas demais regiões</th:block></p>
+                <p th:unless="${#strings.isEmpty(txt['pg.detalhes.prazo'])}" th:text="${txt['pg.detalhes.prazo']}">Chegará em poucos dias úteis.</p>
 
-                <p class="detalhes-estoque">Estoque disponível</p>
+                <p class="detalhes-estoque" th:text="${produto.tamanhoInicial != null} ? ${txt['pg.detalhes.estoque']} : ${txt['pg.detalhes.esgotado']}">Estoque disponível</p>
 
-                <label for="quantidade">Quantidade:</label>
+                <label for="quantidade" th:text="${txt['pg.detalhes.quantidade']}">Quantidade:</label>
                 <select id="quantidade" class="js-qtd-input">
                     <option value="1">1 unidade</option>
                     <option value="2">2 unidades</option>
                     <option value="3">3 unidades</option>
                 </select>
 
-                <button type="button" class="btn-comprar js-add-carrinho" data-tamanho="M">Comprar agora</button>
-                <button type="button" class="btn-comprar btn-secundario js-add-carrinho" data-tamanho="M">Adicionar ao carrinho</button>
+                <!-- "Comprar agora" põe no carrinho e já leva para a finalização da compra -->
+                <button type="button" class="btn-comprar js-add-carrinho" data-ir-checkout
+                        th:attr="data-tamanho=${produto.tamanhoInicial}" th:disabled="${produto.tamanhoInicial == null}" th:text="${txt['pg.detalhes.btnComprar']}">Comprar agora</button>
+                <button type="button" class="btn-comprar btn-secundario js-add-carrinho"
+                        th:attr="data-tamanho=${produto.tamanhoInicial}" th:disabled="${produto.tamanhoInicial == null}" th:text="${txt['pg.detalhes.btnCarrinho']}">Adicionar ao carrinho</button>
 
-                <p class="detalhes-vendedor">Vendido por <strong>Estilo London Store</strong></p>
+                <p class="detalhes-vendedor"><th:block th:text="${txt['pg.detalhes.vendidoPor']}">Vendido por</th:block> <strong th:text="${txt['geral.nomeLoja']}">Estilo London Store</strong></p>
             </aside>
 
         </section>
 
         <section class="container-produtos" th:if="${produtosRecomendados != null and !#lists.isEmpty(produtosRecomendados)}"
                  aria-label="Produtos recomendados">
-            <h2 class="secao-titulo">Produtos recomendados</h2>
+            <h2 class="secao-titulo" th:text="${txt['pg.detalhes.recomendados']}">Produtos recomendados</h2>
 
             <div class="produtos-grid">
                 <div th:each="rec : ${produtosRecomendados}" class="produto-card"
@@ -179,62 +187,13 @@
                     </p>
 
                     <p class="parcelamento" th:if="${rec.preco instanceof T(java.lang.Number)}"
-                       th:text="'Até 12x de R$ ' + ${#numbers.formatDecimal(rec.preco / 12, 1, 'POINT', 2, 'COMMA')}"></p>
+                       th:text="${txt['geral.cardParcelamento']} + ' R$ ' + ${#numbers.formatDecimal(rec.preco / 12, 1, 'POINT', 2, 'COMMA')}"></p>
                 </div>
             </div>
         </section>
     </main>
 
-    <footer class="rodape">
-        <div class="rodape-topo">
-            <div class="rodape-marca">
-                <span class="rodape-logo">Estilo London</span>
-                <div class="rodape-redes">
-                    <a href="#" aria-label="Facebook">
-                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.5-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.8 1.4-3.8 3.9v2.3H7.9v3h2.6V21h3z"/></svg>
-                    </a>
-                    <a href="#" aria-label="Instagram">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4.5"/><circle cx="12" cy="12" r="3.6"/><circle cx="17" cy="7" r=".6" fill="currentColor"/></svg>
-                    </a>
-                    <a href="#" aria-label="TikTok">
-                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 3h-2.8v11.4a2.4 2.4 0 1 1-2.4-2.4c.2 0 .4 0 .6.1V9.2a5.2 5.2 0 1 0 4.6 5.2V8.6a6.5 6.5 0 0 0 3.8 1.2V7a3.8 3.8 0 0 1-3.8-4z"/></svg>
-                    </a>
-                    <a href="#" aria-label="YouTube">
-                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 0 0 2.4 7.2C2 8.8 2 12 2 12s0 3.2.4 4.8a2.5 2.5 0 0 0 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8c.4-1.6.4-4.8.4-4.8s0-3.2-.4-4.8zM10 15V9l5.2 3L10 15z"/></svg>
-                    </a>
-                </div>
-            </div>
-
-            <div class="rodape-colunas">
-                <div class="rodape-col">
-                    <h4>Institucional</h4>
-                    <a href="#">Sobre nós</a>
-                    <a href="#">Frete e Entrega</a>
-                    <a href="#">Trocas e Devoluções</a>
-                    <a href="#">Política de Privacidade</a>
-
-                    <h4>Atendimento</h4>
-                    <a href="#">WhatsApp (SAC)</a>
-                    <a href="#">contato@seudominio.com.br</a>
-                </div>
-
-                <div class="rodape-col">
-                    <h4>Coleções</h4>
-                    <a th:href="@{/home(ordem='novidades')}">Novidades</a>
-                    <a th:href="@{/home(categoria='CAMISETA')}">Camisetas</a>
-                    <a th:href="@{/home(busca='oversized')}">Oversized</a>
-                    <a th:href="@{/home(categoria='CALCA')}">Calças</a>
-                    <a th:href="@{/home(categoria='ACESSORIOS')}">Acessórios</a>
-                    <a th:href="@{/home(ordem='menor-preco')}">Outlet</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="rodape-base">
-            <p>© 2026 Estilo London Store. CNPJ: 00.000.000/0001-00.</p>
-            <p>Rua Exemplo, 123 - Cidade/UF | CEP 00000-000</p>
-        </div>
-    </footer>
+    <footer th:replace="~{fragments/fragmentos :: rodape}"></footer>
 
     <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
     <th:block th:replace="~{fragments/fragmentos :: carrinho-drawer}"></th:block>
@@ -250,6 +209,6 @@
         <button type="button" class="zoom-nav zoom-prox" id="zoomProx" aria-label="Próxima foto">&#8250;</button>
     </div>
 
-    <script th:src="@{/jshome.js(v=9)}"></script>
+    <script th:src="@{/jshome.js(v=10)}"></script>
 </body>
 </html>
