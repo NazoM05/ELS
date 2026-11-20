@@ -10,11 +10,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=16)}">
+    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=29)}">
     <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
 
 
-    <title>Listagem de produtos - Estilo London Store</title>
+    <title th:replace="~{fragments/fragmentos :: titulo(${txt['pg.adminProdutos.titulo']})}">Listagem de produtos - Estilo London Store</title>
 
     <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
     <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
@@ -22,18 +22,13 @@
 </head>
 
 
-<body class="admin-ui">
+<body class="admin-ui pg-adminProdutos">
 
     <!-- Barra de anúncios (a mesma da home) -->
-    <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
 
     <!-- Mesma barra branca da home -->
     <div class="barrabranca">
-        <button class="menu-btn" id="menuBtn" aria-label="Abrir menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
         <a th:replace="~{fragments/fragmentos :: logo}"></a>
         <form class="search-form" action="#" method="get">
             <input type="text" name="search" id="filtroBusca" placeholder="Pesquisar...">
@@ -57,11 +52,11 @@
         <!-- Título da página + botão para a tela de cadastro (AdminController: GET /admin/produto/cadastrar) -->
         <header class="adm-topo">
             <div>
-                <h1 class="adm-titulo">Produtos</h1>
+                <h1 class="adm-titulo" th:text="${txt['pg.adminProdutos.h1']}">Produtos</h1>
                 <p class="adm-sub"
                    th:text="${listaProdutos.size() == 1} ? '1 produto cadastrado' : ${listaProdutos.size()} + ' produtos cadastrados'">0 produtos cadastrados</p>
             </div>
-            <a class="btn-comprar adm-btn" th:href="@{/admin/produto/cadastrar}">+ Novo produto</a>
+            <a class="btn-comprar adm-btn" th:href="@{/admin/produto/cadastrar}" th:text="${txt['pg.adminProdutos.btnNovo']}">+ Novo produto</a>
         </header>
 
         <!-- Abas -->
@@ -184,7 +179,7 @@
     <div th:replace="~{fragments/fragmentos :: sidebar}" ></div>
     <div class="overlay" id="overlay"></div>
 
-    <script th:src="@{/jshome.js(v=8)}"></script>
+    <script th:src="@{/jshome.js(v=10)}"></script>
 
     <!-- Alterna as abas, filtra as linhas pela busca e cuida dos avisos -->
     <script>

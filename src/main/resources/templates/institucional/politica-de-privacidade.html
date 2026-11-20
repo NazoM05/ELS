@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Quais dados a Estilo London Store coleta, para que usa, com quem compartilha e como exercer seus direitos pela LGPD.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=29)}">
+    <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
+
+    <title th:replace="~{fragments/fragmentos :: titulo(${txt['pg.privacidade.titulo']})}">Política de Privacidade - Estilo London Store</title>
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png}">
+</head>
+
+<body class="institucional-pagina pg-privacidade">
+    <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
+
+    <div class="barrabranca">
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
+        <button th:replace="~{fragments/fragmentos :: botao-carrinho}"></button>
+    </div>
+
+    <main class="institucional">
+        <nav class="institucional-menu" aria-label="Páginas institucionais">
+            <a th:href="@{/sobre}" th:classappend="${paginaInstitucional == 'sobre'} ? 'atual'" th:attr="aria-current=${paginaInstitucional == 'sobre'} ? 'page'" th:text="${txt['geral.rodapeSobre']}">Sobre nós</a>
+            <a th:href="@{/frete-e-entrega}" th:classappend="${paginaInstitucional == 'frete'} ? 'atual'" th:attr="aria-current=${paginaInstitucional == 'frete'} ? 'page'" th:text="${txt['geral.rodapeFrete']}">Frete e Entrega</a>
+            <a th:href="@{/trocas-e-devolucoes}" th:classappend="${paginaInstitucional == 'trocas'} ? 'atual'" th:attr="aria-current=${paginaInstitucional == 'trocas'} ? 'page'" th:text="${txt['geral.rodapeTrocas']}">Trocas e Devoluções</a>
+            <a th:href="@{/politica-de-privacidade}" th:classappend="${paginaInstitucional == 'privacidade'} ? 'atual'" th:attr="aria-current=${paginaInstitucional == 'privacidade'} ? 'page'" th:text="${txt['geral.rodapePrivacidade']}">Política de Privacidade</a>
+        </nav>
+
+        <article class="institucional-texto">
+            <p class="institucional-kicker" th:unless="${#strings.isEmpty(txt['pg.privacidade.kicker'])}" th:text="${txt['pg.privacidade.kicker']}">Seus dados</p>
+            <h1 class="adm-titulo" th:text="${txt['pg.privacidade.h1']}">Política de Privacidade</h1>
+            <p class="institucional-lead" th:text="${txt['pg.privacidade.lead']}">Explicamos aqui quais dados coletamos quando você usa a loja, para que usamos e quais são os seus direitos.</p>
+            <p class="institucional-data">Última atualização: 19 de novembro de 2026.</p>
+
+            <h2>1. Quem somos</h2>
+            <p>Estilo London Store, CNPJ 00.000.000/0001-00, Rua Exemplo, 123 - Cidade/UF, CEP 00000-000. Somos responsáveis pelos dados pessoais tratados nesta loja. Contato: <a href="mailto:contato@seudominio.com.br">contato@seudominio.com.br</a>.</p>
+
+            <h2>2. Dados que coletamos</h2>
+            <ul>
+                <li><strong>Conta:</strong> nome e e-mail ao criar a conta. A senha é guardada de forma criptografada; nem nós conseguimos lê-la.</li>
+                <li><strong>Perfil (opcional):</strong> CPF e data de nascimento, se você preencher no seu perfil.</li>
+                <li><strong>Pedidos:</strong> nome de quem recebe, telefone, endereço de entrega, peças compradas e forma de pagamento escolhida. Não pedimos nem guardamos número de cartão.</li>
+                <li><strong>Navegação:</strong> contamos quantas vezes a página de cada produto é aberta, sem saber quem a abriu.</li>
+            </ul>
+
+            <h2>3. Para que usamos</h2>
+            <ul>
+                <li>Criar e manter a sua conta e permitir que você entre na loja.</li>
+                <li>Processar, entregar e dar suporte aos seus pedidos, incluindo trocas e devoluções.</li>
+                <li>Controlar o estoque e entender quais produtos interessam mais aos clientes.</li>
+                <li>Cumprir obrigações legais e fiscais.</li>
+            </ul>
+            <p>Não vendemos seus dados e não usamos seus dados para enviar propaganda.</p>
+
+            <h2>4. Cookies e dados guardados no seu navegador</h2>
+            <ul>
+                <li><strong>Cookie de sessão:</strong> quando você entra na sua conta, o navegador guarda um cookie que mantém você conectado. Ele é necessário para a loja funcionar e é apagado quando você sai ou fecha o navegador.</li>
+                <li><strong>Carrinho e lista de desejos:</strong> ficam guardados apenas no seu navegador (armazenamento local), não em um cookie. Os itens do carrinho só são enviados para nós quando você vai finalizar a compra. Você pode apagá-los limpando os dados do site no navegador.</li>
+            </ul>
+            <p>A loja não usa cookies de publicidade nem ferramentas de análise de terceiros.</p>
+
+            <h2>5. Serviços de terceiros</h2>
+            <ul>
+                <li><strong>Google Fonts:</strong> as fontes do site são carregadas dos servidores do Google. Ao abrir a página, o seu navegador se conecta ao Google, que recebe dados técnicos como endereço IP e tipo de navegador. Veja a <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">política de privacidade do Google</a>.</li>
+                <li><strong>Placehold.co:</strong> quando um produto ainda não tem foto, uma imagem de reserva é carregada desse serviço, que recebe os mesmos dados técnicos da conexão.</li>
+                <li><strong>Transportadoras:</strong> recebem nome, telefone e endereço de entrega para levar o seu pedido.</li>
+            </ul>
+
+            <h2>6. Por quanto tempo guardamos</h2>
+            <p>Os dados da conta ficam guardados enquanto a conta existir. Os dados dos pedidos são mantidos pelo prazo exigido pela legislação fiscal e de defesa do consumidor.</p>
+
+            <h2>7. Seus direitos (LGPD)</h2>
+            <p>Pela Lei Geral de Proteção de Dados (Lei nº 13.709/2018), você pode pedir a qualquer momento:</p>
+            <ul>
+                <li>confirmação de que tratamos seus dados e acesso a eles;</li>
+                <li>correção de dados incompletos ou desatualizados (nome, e-mail, senha, CPF e data de nascimento também podem ser alterados no seu perfil);</li>
+                <li>exclusão dos dados, exceto os que a lei nos obriga a guardar;</li>
+                <li>informações sobre com quem compartilhamos seus dados.</li>
+            </ul>
+            <p>Para isso, escreva para <a href="mailto:contato@seudominio.com.br">contato@seudominio.com.br</a>.</p>
+
+            <h2>8. Segurança</h2>
+            <p>Usamos medidas técnicas para proteger seus dados, como senhas criptografadas e acesso restrito à área administrativa.</p>
+
+            <h2>9. Mudanças nesta política</h2>
+            <p>Podemos atualizar esta política. A data da última atualização fica sempre no topo desta página.</p>
+        </article>
+    </main>
+
+    <footer th:replace="~{fragments/fragmentos :: rodape}"></footer>
+
+    <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
+    <th:block th:replace="~{fragments/fragmentos :: carrinho-drawer}"></th:block>
+    <div class="overlay" id="overlay"></div>
+
+    <script th:src="@{/jshome.js(v=10)}"></script>
+</body>
+</html>

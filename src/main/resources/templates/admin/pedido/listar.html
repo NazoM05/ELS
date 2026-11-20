@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=29)}">
+    <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
+
+    <title th:replace="~{fragments/fragmentos :: titulo(${txt['pg.adminPedidos.titulo']})}">Pedidos - Estilo London Store</title>
+
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png}">
+</head>
+
+<body class="admin-ui pg-adminPedidos">
+
+
+    <!-- Busca pelo código: código completo abre o pedido; enquanto digita, filtra a tabela -->
+    <div class="barrabranca">
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
+        <form class="search-form" data-servidor th:action="@{/admin/pedidos/buscar}" method="get" id="formBuscaPedido">
+            <input type="text" name="codigo" id="filtroPedidos" autocomplete="off"
+                   th:placeholder="${txt['pg.adminPedidos.buscaPlaceholder']}" placeholder="Código, cliente ou e-mail"
+                   th:aria-label="${txt['pg.adminPedidos.buscaPlaceholder']}">
+            <button type="submit" th:text="${txt['pg.adminPedidos.btnBuscar']}">Abrir pedido</button>
+        </form>
+    </div>
+
+    <main class="listagem-container">
+
+        <div th:if="${param.naoEncontrado != null}" class="cadastro-alerta cadastro-alerta-erro" role="alert"
+             th:text="|Nenhum pedido com o código “${param.naoEncontrado[0]}”.|">Nenhum pedido com este código.</div>
+
+        <header class="adm-topo">
+            <div>
+                <h1 class="adm-titulo" th:text="${txt['pg.adminPedidos.h1']}">Pedidos</h1>
+                <p class="adm-sub">
+                    <span th:text="${pedidos.size() == 1} ? '1 pedido' : ${pedidos.size()} + ' pedidos'">0 pedidos</span>
+                    · <strong th:text="${emAberto == 1} ? '1 precisa de atenção' : ${emAberto} + ' precisam de atenção'">0 precisam de atenção</strong>
+                </p>
+            </div>
+        </header>
+
+        <!-- Abas: filtram a mesma tabela pela etapa -->
+        <div class="listagem-abas" role="tablist">
+            <button type="button" class="listagem-aba ativa" role="tab" aria-selected="true" data-filtro="aberto">
+                Em aberto <span class="listagem-contador" th:text="${emAberto}">0</span>
+            </button>
+            <button type="button" class="listagem-aba" role="tab" aria-selected="false" data-filtro="todos">
+                Todos <span class="listagem-contador" th:text="${pedidos.size()}">0</span>
+            </button>
+            <button type="button" class="listagem-aba" role="tab" aria-selected="false"
+                    th:each="s : ${statusPedido}" th:attr="data-filtro=${s.name()}">
+                <th:block th:text="${s.rotulo}">Etapa</th:block>
+                <span class="listagem-contador" th:text="${contagem.get(s)}">0</span>
+            </button>
+        </div>
+
+        <section class="listagem-painel ativo" role="tabpanel">
+            <table class="listagem-tabela pedidos-tabela">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Data</th>
+                        <th>Cliente</th>
+                        <th class="pedidos-col-num">Itens</th>
+                        <th class="listagem-col-preco">Total</th>
+                        <th>Etapa</th>
+                        <th class="listagem-col-acoes"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="p : ${pedidos}" class="pedidos-linha"
+                        th:attr="data-status=${p.status.name()},data-aberto=${p.status.emAberto},data-busca=${#strings.toLowerCase(p.codigo + ' ' + #strings.replace(p.codigo, '-', '') + ' ' + p.nomeDestinatario + ' ' + p.usuario.username + ' ' + p.cidade)}">
+                        <td>
+                            <a class="pedidos-codigo" th:href="@{'/admin/pedidos/' + ${p.codigo}}" th:text="${p.codigo}">EL-000000-AAAA</a>
+                        </td>
+                        <td class="pedidos-data" th:text="${p.criadoEmFormatado}">01/01/2026 às 10:00</td>
+                        <td>
+                            <span class="listagem-col-nome" th:text="${p.nomeDestinatario}">Cliente</span>
+                            <small class="listagem-meta" th:text="${p.cidade} + '/' + ${p.uf}">Cidade/UF</small>
+                        </td>
+                        <td class="pedidos-col-num" th:text="${p.quantidadeTotal}">1</td>
+                        <td class="listagem-col-preco" th:text="${'R$ ' + #numbers.formatDecimal(p.total, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</td>
+                        <td>
+                            <span class="status-pedido" th:classappend="'status-pedido-' + ${p.status.classe}" th:text="${p.status.rotulo}">Etapa</span>
+                        </td>
+                        <td class="listagem-col-acoes">
+                            <div class="listagem-icones">
+                                <a class="listagem-icone" th:href="@{'/admin/pedidos/' + ${p.codigo}}" title="Abrir pedido" aria-label="Abrir pedido">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(pedidos)}" class="listagem-vazio">
+                        <td colspan="7">Nenhum pedido ainda. Cada venda feita na loja aparece aqui com o seu código.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <p class="adm-sem-resultado" id="semResultados" role="status" hidden></p>
+    </main>
+
+    <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
+    <div class="overlay" id="overlay"></div>
+
+    <script th:src="@{/jshome.js(v=10)}"></script>
+    <script>
+        var abas = document.querySelectorAll('.listagem-aba');
+        var busca = document.getElementById('filtroPedidos');
+        var semResultados = document.getElementById('semResultados');
+        var linhas = document.querySelectorAll('.pedidos-linha');
+        var filtro = 'aberto';
+
+        abas.forEach(function (aba) {
+            aba.addEventListener('click', function () {
+                abas.forEach(function (a) { a.classList.remove('ativa'); a.setAttribute('aria-selected', 'false'); });
+                aba.classList.add('ativa');
+                aba.setAttribute('aria-selected', 'true');
+                filtro = aba.dataset.filtro;
+                filtrar();
+            });
+        });
+
+        function filtrar() {
+            var termo = busca.value.trim().toLowerCase();
+            var visiveis = 0;
+            linhas.forEach(function (linha) {
+                var naAba = filtro === 'todos' || (filtro === 'aberto' ? linha.dataset.aberto === 'true' : linha.dataset.status === filtro);
+                var mostra = naAba && linha.dataset.busca.indexOf(termo) !== -1;
+                linha.style.display = mostra ? '' : 'none';
+                if (mostra) { visiveis++; }
+            });
+            if (linhas.length > 0 && visiveis === 0) {
+                semResultados.textContent = termo ? 'Nenhum pedido encontrado para “' + busca.value.trim() + '” nesta aba.' : 'Nenhum pedido nesta aba.';
+                semResultados.hidden = false;
+            } else {
+                semResultados.hidden = true;
+            }
+        }
+        busca.addEventListener('input', filtrar);
+        filtrar();
+
+        if (document.querySelector('.cadastro-alerta') && window.history.replaceState) {
+            window.history.replaceState(null, '', window.location.pathname);
+        }
+    </script>
+</body>
+</html>

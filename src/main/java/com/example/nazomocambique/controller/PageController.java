@@ -16,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.nazomocambique.model.Categoria;
 import com.example.nazomocambique.model.Genero;
+import com.example.nazomocambique.model.Ordenacao;
 import com.example.nazomocambique.model.Paginacao;
 import com.example.nazomocambique.model.Produto;
 import com.example.nazomocambique.service.ProdutoService;
@@ -32,8 +33,9 @@ public class PageController {
 	public String home(@RequestParam(required = false) String busca,
 			@RequestParam(required = false) String categoria,
 			@RequestParam(required = false) String genero,
+			@RequestParam(required = false) String ordem,
 			@RequestParam(required = false) String pagina, Model model) {
-		carregarCatalogo(model, "/home", busca, categoria, genero, pagina);
+		carregarCatalogo(model, "/home", busca, categoria, genero, ordem, pagina);
 		return "berzerk";
 	}
 	
@@ -41,8 +43,9 @@ public class PageController {
 	public String london(@RequestParam(required = false) String busca,
 			@RequestParam(required = false) String categoria,
 			@RequestParam(required = false) String genero,
+			@RequestParam(required = false) String ordem,
 			@RequestParam(required = false) String pagina, Model model) {
-		carregarCatalogo(model, "/london", busca, categoria, genero, pagina);
+		carregarCatalogo(model, "/london", busca, categoria, genero, ordem, pagina);
 		return "home";
 	}
 
@@ -57,16 +60,18 @@ public class PageController {
 	}
 
 	private void carregarCatalogo(Model model, String caminho, String busca, String categoriaTexto,
-			String generoTexto, String paginaTexto) {
+			String generoTexto, String ordemTexto, String paginaTexto) {
 		String termo = busca == null ? "" : busca.trim();
 		Categoria categoria = Categoria.deTexto(categoriaTexto);
 		Genero genero = Genero.deTexto(generoTexto);
-		Page<Produto> pagina = produtoService.filtrar(termo, categoria, genero, numeroDaPagina(paginaTexto) - 1);
+		Ordenacao ordem = Ordenacao.deTexto(ordemTexto);
+		Page<Produto> pagina = produtoService.filtrar(termo, categoria, genero, ordem, numeroDaPagina(paginaTexto) - 1);
 
 		Map<String, String> filtros = new LinkedHashMap<>();
 		filtros.put("busca", termo);
 		filtros.put("categoria", categoria == null ? null : categoria.name());
 		filtros.put("genero", genero == null ? null : genero.name());
+		filtros.put("ordem", ordem == Ordenacao.PADRAO ? null : ordem.getParametro());
 
 		model.addAttribute("listaProdutos", pagina.getContent());
 		model.addAttribute("paginacao", new Paginacao(pagina.getNumber() + 1, pagina.getTotalPages(),
@@ -74,7 +79,9 @@ public class PageController {
 		model.addAttribute("busca", termo);
 		model.addAttribute("categoriaSelecionada", categoria);
 		model.addAttribute("generoSelecionado", genero);
-		model.addAttribute("filtrosAtivos", !termo.isEmpty() || categoria != null || genero != null);
+		model.addAttribute("ordem", ordem);
+		model.addAttribute("filtrosAtivos", !termo.isEmpty() || categoria != null || genero != null
+				|| ordem != Ordenacao.PADRAO);
 	}
 
 	private int numeroDaPagina(String texto) {
@@ -131,7 +138,9 @@ public class PageController {
 	
 	// Lista de desejos: a página só entrega o esqueleto; os itens vêm do localStorage (jshome.js)
 	@GetMapping("/favoritos")
-	public String favoritos() {
+	public String favoritos(Model model) {
+		// O topo desta página não mostra o atalho do coração (ela já é a lista de desejos)
+		model.addAttribute("paginaFavoritos", true);
 		return "favoritos";
 	}
 

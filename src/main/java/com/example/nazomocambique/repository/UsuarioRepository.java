@@ -17,4 +17,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long>{
 
 	boolean existsByCpfAndIdNot(String cpf, Long id);
 
+	/** Quantas contas ativas têm o perfil (usado para nunca deixar a loja sem administrador). */
+	long countByRoleAndAtivoTrue(String role);
+
 }

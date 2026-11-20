@@ -1,6 +1,7 @@
 package com.example.nazomocambique.model;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,7 +25,7 @@ public class Usuario {
 
 	private String senha; // hash BCrypt, quando existir login
 
-	private String role; // "ROLE_ADMIN", "ROLE_ATENDENTE", "ROLE_USUARIO"
+	private String role; // "ROLE_ADMIN", "ROLE_GESTOR" (só a separação de pedidos), "ROLE_USUARIO"
 
 	private String nome;
 
@@ -109,6 +110,30 @@ public class Usuario {
 			return null;
 		}
 		return "***." + cpf.substring(3, 6) + "." + cpf.substring(6, 9) + "-**";
+	}
+
+	/** Nome para exibir nas telas do admin: o nome, ou o e-mail (login) quando a conta não tem nome. */
+	@Transient
+	public String getNomeExibicao() {
+		return nome != null && !nome.isBlank() ? nome : username;
+	}
+
+	/** Perfil em português: Administrador, Gestor ou Cliente. */
+	@Transient
+	public String getRotuloPerfil() {
+		if ("ROLE_ADMIN".equals(role)) {
+			return "Administrador";
+		}
+		if ("ROLE_GESTOR".equals(role)) {
+			return "Gestor";
+		}
+		return "Cliente";
+	}
+
+	/** Data de nascimento no formato dd/MM/yyyy; null quando não informada. */
+	@Transient
+	public String getDataNascimentoFormatada() {
+		return dataNascimento == null ? null : dataNascimento.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 	}
 
 	public boolean getAtivo() {

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=29)}">
+    <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
+
+    <title th:replace="~{fragments/fragmentos :: titulo(${detalhe.usuario.nomeExibicao})}">Usuário - Estilo London Store</title>
+
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png}">
+</head>
+
+<body class="admin-ui pg-adminUsuario" th:with="u=${detalhe.usuario}">
+
+    <div class="barrabranca">
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
+    </div>
+
+    <main class="cadastro-container pedido-admin">
+
+        <a class="adm-voltar" th:href="@{/admin/usuarios}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+            Voltar para usuários
+        </a>
+
+        <div th:if="${mensagemOk != null}" class="cadastro-alerta cadastro-alerta-ok" role="status" th:text="${mensagemOk}">Conta desativada.</div>
+        <div th:if="${erro != null}" class="cadastro-alerta cadastro-alerta-erro" role="alert" th:text="${erro}">Erro</div>
+
+        <header class="adm-topo">
+            <div>
+                <p class="adm-sub pedido-admin-rotulo" th:text="${u.rotuloPerfil}">Cliente</p>
+                <h1 class="adm-titulo" th:text="${u.nomeExibicao}">Nome do usuário</h1>
+                <p class="adm-sub">
+                    <span class="status-pedido" th:classappend="${u.ativo} ? 'status-usuario-ativo' : 'status-usuario-inativo'"
+                          th:text="${u.ativo} ? 'Ativo' : 'Desativado'">Ativo</span>
+                    <span th:text="${u.username}">email@exemplo.com</span>
+                </p>
+            </div>
+
+            <div class="usuario-acao-topo">
+                <form th:if="${u.ativo and detalhe.bloqueioDesativar == null}" method="post"
+                      th:action="@{'/admin/usuarios/' + ${u.id} + '/status'}"
+                      th:attr="data-confirmar='Desativar a conta de ' + ${u.nomeExibicao} + '? A pessoa não poderá mais entrar e perde a sessão aberta.'">
+                    <input type="hidden" name="ativo" value="false">
+                    <input type="hidden" name="retorno" value="detalhe">
+                    <button type="submit" class="adm-btn adm-btn-sec">Desativar conta</button>
+                </form>
+                <th:block th:if="${u.ativo and detalhe.bloqueioDesativar != null}">
+                    <button type="button" class="adm-btn adm-btn-sec" disabled>Desativar conta</button>
+                    <small class="adm-sub" th:text="${detalhe.bloqueioDesativar}">Motivo</small>
+                </th:block>
+                <form th:unless="${u.ativo}" method="post" th:action="@{'/admin/usuarios/' + ${u.id} + '/status'}">
+                    <input type="hidden" name="ativo" value="true">
+                    <input type="hidden" name="retorno" value="detalhe">
+                    <button type="submit" class="adm-btn">Ativar conta</button>
+                </form>
+            </div>
+        </header>
+
+        <!-- Resumo de compras -->
+        <dl class="usuario-resumo">
+            <div>
+                <dt>Pedidos</dt>
+                <dd th:text="${detalhe.totalPedidos}">0</dd>
+            </div>
+            <div>
+                <dt>Total gasto</dt>
+                <dd th:text="${'R$ ' + #numbers.formatDecimal(detalhe.totalGasto, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</dd>
+            </div>
+            <div>
+                <dt>Ticket médio</dt>
+                <dd th:text="${detalhe.ticketMedio != null} ? ${'R$ ' + #numbers.formatDecimal(detalhe.ticketMedio, 1, 'POINT', 2, 'COMMA')} : '—'">—</dd>
+            </div>
+            <div>
+                <dt>Em aberto</dt>
+                <dd th:text="${detalhe.pedidosEmAberto}">0</dd>
+            </div>
+        </dl>
+
+        <div class="checkout-grid">
+            <div class="checkout-coluna">
+                <section class="cadastro-form-box checkout-box">
+                    <h2>Dados da conta</h2>
+                    <dl class="perfil-dados">
+                        <div>
+                            <dt>Nome</dt>
+                            <dd th:text="${!#strings.isEmpty(u.nome)} ? ${u.nome} : '—'">Nome</dd>
+                        </div>
+                        <div>
+                            <dt>E-mail (login)</dt>
+                            <dd th:text="${u.username}">email@exemplo.com</dd>
+                        </div>
+                        <div>
+                            <dt>Perfil</dt>
+                            <dd th:text="${u.rotuloPerfil}">Cliente</dd>
+                        </div>
+                        <div>
+                            <dt>Situação</dt>
+                            <dd th:text="${u.ativo} ? 'Ativa' : 'Desativada'">Ativa</dd>
+                        </div>
+                        <div>
+                            <dt>CPF</dt>
+                            <dd th:text="${u.cpfMascarado != null} ? ${u.cpfMascarado} : '—'">—</dd>
+                        </div>
+                        <div>
+                            <dt>Data de nascimento</dt>
+                            <dd th:text="${u.dataNascimentoFormatada != null} ? ${u.dataNascimentoFormatada} : '—'">—</dd>
+                        </div>
+                        <div th:if="${detalhe.ultimoPedido != null}">
+                            <dt>Último pedido</dt>
+                            <dd>
+                                <a class="pedidos-codigo" th:href="@{'/admin/pedidos/' + ${detalhe.ultimoPedido.codigo}}" th:text="${detalhe.ultimoPedido.codigo}">EL-000000-AAAA</a>
+                                <small class="listagem-meta" th:text="${detalhe.ultimoPedido.criadoEmFormatado}">01/01/2026</small>
+                            </dd>
+                        </div>
+                        <div th:if="${detalhe.ultimoPedido != null}">
+                            <dt>Entrega do último pedido</dt>
+                            <dd th:text="${detalhe.ultimoPedido.cidade} + '/' + ${detalhe.ultimoPedido.uf}">Cidade/UF</dd>
+                        </div>
+                    </dl>
+                </section>
+            </div>
+
+            <div class="checkout-coluna">
+                <section class="cadastro-form-box checkout-box">
+                    <h2>Pedidos por etapa</h2>
+                    <ul class="usuario-etapas">
+                        <li th:each="s : ${statusPedido}">
+                            <span class="status-pedido" th:classappend="'status-pedido-' + ${s.classe}" th:text="${s.rotulo}">Etapa</span>
+                            <strong th:text="${detalhe.contagemPorStatus.get(s)}">0</strong>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+
+        <!-- Histórico de pedidos: mais recente primeiro; o código abre o pedido -->
+        <h2 class="usuario-secao">Histórico de pedidos</h2>
+        <section class="listagem-painel ativo">
+            <table class="listagem-tabela pedidos-tabela">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Data</th>
+                        <th class="pedidos-col-num">Itens</th>
+                        <th>Pagamento</th>
+                        <th class="listagem-col-preco">Total</th>
+                        <th>Etapa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="p : ${detalhe.pedidos}">
+                        <td><a class="pedidos-codigo" th:href="@{'/admin/pedidos/' + ${p.codigo}}" th:text="${p.codigo}">EL-000000-AAAA</a></td>
+                        <td class="pedidos-data" th:text="${p.criadoEmFormatado}">01/01/2026 às 10:00</td>
+                        <td class="pedidos-col-num" th:text="${p.quantidadeTotal}">1</td>
+                        <td th:text="${p.formaPagamento.rotulo}">Pix</td>
+                        <td class="listagem-col-preco" th:text="${'R$ ' + #numbers.formatDecimal(p.total, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</td>
+                        <td><span class="status-pedido" th:classappend="'status-pedido-' + ${p.status.classe}" th:text="${p.status.rotulo}">Etapa</span></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(detalhe.pedidos)}" class="listagem-vazio">
+                        <td colspan="6">Este usuário ainda não fez pedidos.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        <p class="adm-sub">“Total gasto” e “Ticket médio” consideram só pedidos já pagos, sem os cancelados e os que aguardam pagamento.</p>
+    </main>
+
+    <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
+    <div class="overlay" id="overlay"></div>
+
+    <script th:src="@{/jshome.js(v=10)}"></script>
+    <script>
+        // Confirmação antes de desativar uma conta
+        document.addEventListener('submit', function (e) {
+            var msg = e.target.dataset ? e.target.dataset.confirmar : null;
+            if (msg && !window.confirm(msg)) { e.preventDefault(); }
+        });
+    </script>
+</body>
+</html>

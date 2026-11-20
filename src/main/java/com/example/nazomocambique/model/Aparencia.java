@@ -40,7 +40,23 @@ public class Aparencia {
 
 	/** Cor do texto sobre a cor principal: a de maior contraste (WCAG) entre branco e quase-preto. */
 	public String getCorContraste() {
-		return contrasteComBranco() >= contrasteComEscuro() ? COR_TEXTO_CLARO : COR_TEXTO_ESCURO;
+		return corContraste(corPrimaria);
+	}
+
+	/** Mesma regra para qualquer cor #RRGGBB (usada também nas cores principais de cada página). */
+	public static String corContraste(String hex) {
+		return contrasteComBranco(hex) >= contrasteComEscuro(hex) ? COR_TEXTO_CLARO : COR_TEXTO_ESCURO;
+	}
+
+	/** Filtro da logo sobre um fundo da cor {@code hex}, para continuar legível. */
+	public static String filtroLogo(String hex, boolean logoPersonalizada) {
+		boolean fundoEscuro = COR_TEXTO_CLARO.equals(corContraste(hex));
+		if (logoPersonalizada) {
+			// Logo enviada: vira uma silhueta de cor única, para ler bem sobre qualquer cor principal
+			return fundoEscuro ? "brightness(0) invert(1)" : "brightness(0)";
+		}
+		// Logo padrão sobre a cor principal é branca; inverte se a cor for clara
+		return fundoEscuro ? "none" : "invert(1)";
 	}
 
 	/** Só faz sentido para logos em áreas coloridas (menu lateral, painel do login). */
@@ -53,24 +69,16 @@ public class Aparencia {
 	 * filtros fixos), por isso pode ser impresso sem escape no <style>.
 	 */
 	public String getCssTema() {
-		String filtro;
-		if (isLogoPersonalizada()) {
-			// Logo enviada: vira uma silhueta de cor única, para ler bem sobre qualquer cor principal
-			filtro = isFundoPrimarioEscuro() ? "brightness(0) invert(1)" : "brightness(0)";
-		} else {
-			// Logo padrão sobre a cor principal é branca; inverte se a cor for clara
-			filtro = isFundoPrimarioEscuro() ? "none" : "invert(1)";
-		}
 		return ":root{--primary-color:" + corPrimaria + ";--primary-contrast:" + getCorContraste()
-				+ ";--logo-filtro:" + filtro + ";}";
+				+ ";--logo-filtro:" + filtroLogo(corPrimaria, isLogoPersonalizada()) + ";}";
 	}
 
-	private double contrasteComBranco() {
-		return 1.05 / (luminancia(corPrimaria) + 0.05);
+	private static double contrasteComBranco(String hex) {
+		return 1.05 / (luminancia(hex) + 0.05);
 	}
 
-	private double contrasteComEscuro() {
-		return (luminancia(corPrimaria) + 0.05) / (luminancia(COR_TEXTO_ESCURO) + 0.05);
+	private static double contrasteComEscuro(String hex) {
+		return (luminancia(hex) + 0.05) / (luminancia(COR_TEXTO_ESCURO) + 0.05);
 	}
 
 	// Luminância relativa (WCAG 2.x) de uma cor #RRGGBB

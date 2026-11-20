@@ -375,6 +375,14 @@ if (searchForm && !buscaNoServidor) {
         });
         window.addEventListener('storage', (e) => { if (e.key === CHAVE) desenhar(); });
 
+        // Clicar em qualquer parte do card (fora do coração e dos links) abre os detalhes daquele produto
+        grade.addEventListener('click', (e) => {
+            if (e.target.closest('a, button')) return;
+            const card = e.target.closest('.produto-card');
+            if (!card) return;
+            window.location.href = linkDe({ id: card.getAttribute('data-produto-id'), link: card.getAttribute('data-produto-link') });
+        });
+
         desenhar();
     }
 
