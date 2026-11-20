@@ -54,6 +54,12 @@ public class Produto {
 
 	private String tamanho;
 	private float preco;
+
+	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+	private boolean outlet = false;
+
+	@Column(name = "desconto_outlet")
+	private Integer descontoOutlet;
 	private String tipo;
 
 	// Classificação da peça (obrigatória nas telas de cadastro e edição). Gravadas pelo nome da constante.
@@ -247,6 +253,13 @@ public class Produto {
 		if (arquivo != null && !arquivo.isBlank()) {
 			itens.add(new ImagemGaleria(chave, rotulo, rotuloCurto, arquivo.trim()));
 		}
+	}
+
+	/** Preço promocional calculado para exibição quando o produto está no Outlet. */
+	@Transient
+	public double getPrecoComDescontoOutlet() {
+		if (!outlet || descontoOutlet == null) return preco;
+		return preco * (100 - descontoOutlet) / 100.0;
 	}
 
 	@PrePersist

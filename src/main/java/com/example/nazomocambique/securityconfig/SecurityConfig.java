@@ -83,7 +83,7 @@ public class SecurityConfig {
 		.authorizeHttpRequests(auth -> auth 
 				// Públicas: login/cadastro, a vitrine (home, busca e detalhes do produto) e os arquivos que ela usa
 				.requestMatchers("/login", "/criar-conta", "/acesso-negado").permitAll()
-				.requestMatchers("/", "/home", "/london", "/pesquisa", "/detalhes/**", "/favoritos").permitAll()
+				.requestMatchers("/", "/home", "/london", "/outlet", "/pesquisa", "/detalhes/**", "/favoritos").permitAll()
 				.requestMatchers("/sobre", "/frete-e-entrega", "/trocas-e-devolucoes", "/politica-de-privacidade").permitAll()
 				.requestMatchers("/css/**", "/jshome.js", "/mapa-frete.js", "/img/**", "/brand/**", "/logo-site/**", "/favicon.ico").permitAll()
 				// Webhook do Mercado Pago: sem login (quem chama é o Mercado Pago); a assinatura é conferida no controller

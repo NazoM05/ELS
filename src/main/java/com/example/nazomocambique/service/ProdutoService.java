@@ -68,16 +68,21 @@ public class ProdutoService {
 
 	/** Igual ao anterior, com a ordem da vitrine (padrão, novidades ou menor preço). */
 	public Page<Produto> filtrar(String termo, Categoria categoria, Genero genero, Ordenacao ordenacao, int pagina) {
+		return filtrar(termo, categoria, genero, ordenacao, pagina, false);
+	}
+
+	/** Catálogo segmentado: por padrão exclui Outlet; true retorna somente produtos Outlet. */
+	public Page<Produto> filtrar(String termo, Categoria categoria, Genero genero, Ordenacao ordenacao, int pagina, boolean outlet) {
 		Ordenacao ordem = ordenacao == null ? Ordenacao.PADRAO : ordenacao;
 		String termoLimpo = (termo == null || termo.isBlank()) ? null : termo.trim();
 		Genero g1 = genero;
 		Genero g2 = genero == null ? null : Genero.UNISSEX;
 		int indice = Math.max(pagina, 0);
 		Page<Produto> resultado = produtoRepository.filtrar(termoLimpo, categoria, g1, g2,
-				PageRequest.of(indice, PRODUTOS_POR_PAGINA, ordem.getSort()));
+				outlet, PageRequest.of(indice, PRODUTOS_POR_PAGINA, ordem.getSort()));
 		if (resultado.getTotalPages() > 0 && indice >= resultado.getTotalPages()) {
 			resultado = produtoRepository.filtrar(termoLimpo, categoria, g1, g2,
-					PageRequest.of(resultado.getTotalPages() - 1, PRODUTOS_POR_PAGINA, ordem.getSort()));
+					outlet, PageRequest.of(resultado.getTotalPages() - 1, PRODUTOS_POR_PAGINA, ordem.getSort()));
 		}
 		return resultado;
 	}
@@ -91,6 +96,13 @@ public class ProdutoService {
 	public Produto salvarFormulario(Produto form) throws Exception {
 		if (form.getCategoria() == null || form.getGenero() == null) {
 			throw new IllegalArgumentException("Informe a categoria e o gênero do produto.");
+		}
+		if (form.isOutlet()) {
+			if (form.getDescontoOutlet() == null || form.getDescontoOutlet() < 1 || form.getDescontoOutlet() > 100) {
+				throw new IllegalArgumentException("O desconto do Outlet deve estar entre 1% e 100%.");
+			}
+		} else {
+			form.setDescontoOutlet(null);
 		}
 		Map<String, Integer> estoque = estoqueDosTamanhosMarcados(form);
 		if (form.getId() == null) {
@@ -106,6 +118,8 @@ public class ProdutoService {
 		atual.setGenero(form.getGenero());
 		atual.setTamanho(form.getTamanho());
 		atual.setStatus(form.isStatus());
+		atual.setOutlet(form.isOutlet());
+		atual.setDescontoOutlet(form.isOutlet() ? form.getDescontoOutlet() : null);
 		atual.setDescricao(form.getDescricao());
 		// Imagens: só troca a que veio preenchida (arquivo novo enviado). Vazio/nulo significa
 		// "não alterada", então a imagem já salva no produto é mantida.

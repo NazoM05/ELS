@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+    <!-- Folha de estilos única compartilhada por todas as páginas -->
+    <th:block th:fragment="css">
+        <link rel="stylesheet" th:href="@{/css/site.css(v=1)}">
+    </th:block>
+</body>
+</html>

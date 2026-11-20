@@ -318,7 +318,12 @@ public class PedidoService {
 
 	// float -> BigDecimal pelo texto, para 74.9f virar 74.90 (e não 74.9000015...)
 	private static BigDecimal precoDe(Produto produto) {
-		return new BigDecimal(Float.toString(produto.getPreco())).setScale(2, RoundingMode.HALF_UP);
+		BigDecimal preco = new BigDecimal(Float.toString(produto.getPreco())).setScale(2, RoundingMode.HALF_UP);
+		if (produto.isOutlet() && produto.getDescontoOutlet() != null) {
+			preco = preco.multiply(BigDecimal.valueOf(100L - produto.getDescontoOutlet()))
+					.divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+		}
+		return preco;
 	}
 
 	private Map<String, String> validarEntrega(DadosEntrega d) {

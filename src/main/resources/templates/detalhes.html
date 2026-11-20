@@ -68,7 +68,7 @@
 		     th:style="${produto.corCss != null} ? |--cor-produto: ${produto.corCss}|"
 		     th:attr="data-produto-id=${produto.id},
 		              data-produto-nome=${produto.nome},
-		              data-produto-preco=${produto.preco},
+		              data-produto-preco=${produto.precoComDescontoOutlet},
 		              data-produto-imagem=${imgCarr},
 		              data-produto-link=@{'/detalhes/' + ${produto.id}}">
 
@@ -107,8 +107,10 @@
 
                 <p class="detalhes-avaliacao" th:unless="${#strings.isEmpty(txt['pg.detalhes.avaliacao'])}" th:text="${txt['pg.detalhes.avaliacao']}">4.9 ★★★★★ (120)</p>
 
-                <p class="preco-antigo" th:unless="${#strings.isEmpty(txt['pg.detalhes.precoAntigo'])}" th:text="${txt['pg.detalhes.precoAntigo']}">R$ 199,90</p>
-                <p class="preco detalhes-preco" th:text="${'R$ ' + #numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</p>
+                <p class="preco-antigo" th:if="${produto.outlet}" style="text-decoration:line-through; opacity:.65;"
+                   th:text="${'R$ ' + #numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')}">R$ 199,90</p>
+                <p class="preco detalhes-preco" th:text="${'R$ ' + #numbers.formatDecimal(produto.precoComDescontoOutlet, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</p>
+                <p th:if="${produto.outlet}" style="font-weight:700; color:#c62828;" th:text="${produto.descontoOutlet} + '% OFF no Outlet'"></p>
                 <p class="detalhes-pagamento" th:unless="${#strings.isEmpty(txt['pg.detalhes.pagamento'])}" th:text="${txt['pg.detalhes.pagamento']}">ou em até 3x sem juros</p>
 
                 <p class="detalhes-opcao detalhes-cor">

@@ -33,14 +33,16 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 			where (:termo is null or lower(p.nome) like lower(concat('%', :termo, '%')))
 			  and (:categoria is null or p.categoria = :categoria)
 			  and (:g1 is null or p.genero = :g1 or p.genero = :g2)
+			  and p.outlet = :outlet
 			""", countQuery = """
 			select count(p) from Produto p
 			where (:termo is null or lower(p.nome) like lower(concat('%', :termo, '%')))
 			  and (:categoria is null or p.categoria = :categoria)
 			  and (:g1 is null or p.genero = :g1 or p.genero = :g2)
+			  and p.outlet = :outlet
 			""")
 	Page<Produto> filtrar(@Param("termo") String termo, @Param("categoria") Categoria categoria,
-			@Param("g1") Genero g1, @Param("g2") Genero g2, Pageable pageable);
+			@Param("g1") Genero g1, @Param("g2") Genero g2, @Param("outlet") boolean outlet, Pageable pageable);
 
 	// UPDATE direto: não dispara @PreUpdate, então "atualizadoEm" não muda a cada visita à página.
 	@Modifying(clearAutomatically = true)
