@@ -38,5 +38,11 @@ public class AcessoUsuario implements UserDetails {
 		return usuario.getUsername();
 	}
 
+	/** Conta desativada (ativo = false) não consegue entrar, nem como admin ou gestor. */
+	@Override
+	public boolean isEnabled() {
+		return usuario.getAtivo();
+	}
+
 
 }

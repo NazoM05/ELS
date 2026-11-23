@@ -1,33 +1,39 @@
-HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# Build artifacts
+/target/
+/build/
+/dist/
 
-### STS ###
-.apt_generated
+# Runtime database and logs
+/dados/*.db
+/dados/*.mv.db
+/dados/*.trace.db
+*.log
+
+# Local environment / secrets
+.env
+.env.*
+!.env.example
+
+# IDE metadata
 .classpath
 .factorypath
 .project
-.settings
-.springBeans
-.sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
+.settings/
+.idea/
 *.iml
-*.ipr
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
 .vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Maven wrapper downloaded binary
+.mvn/wrapper/maven-wrapper.jar
+
+# Segredos locais, uploads e bancos locais (nunca no Git)
+/src/main/resources/secrets-local.properties
+/uploads/
+/dados/
+
+# Imagens/uploads gerados em runtime
+/uploads/

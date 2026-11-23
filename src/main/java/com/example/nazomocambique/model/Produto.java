@@ -1,17 +1,34 @@
 package com.example.nazomocambique.model;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.text.Normalizer;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapKeyColumn;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,6 +38,13 @@ import lombok.Setter;
 @Setter
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Produto {
+	/** Identificador da coleção especial Vice City (coluna colecao). */
+	public static final String COLECAO_VICE_CITY = "VICE_CITY";
+	/** Coleção Tricolor (camisas do time). */
+	public static final String COLECAO_TRICOLOR = "TRICOLOR";
+	/** Coleção de oversizeds da Urban Culture. */
+	public static final String COLECAO_URBAN_CULTURE = "URBAN_CULTURE";
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -37,8 +61,69 @@ public class Produto {
 
 	private String tamanho;
 	private float preco;
+
+	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+	private boolean outlet = false;
+
+	@Column(name = "desconto_outlet")
+	private Integer descontoOutlet;
+
+	// Coleção especial do produto (ex.: "VICE_CITY"). Produto de coleção só aparece na página da coleção;
+	// null = catálogo normal (Início e Outlet).
+	@Column(length = 40)
+	private String colecao;
 	private String tipo;
-	private String imagem; // nome do arquivo em static/img (ex.: camisa-militar.svg)
+
+	// Classificação da peça (obrigatória nas telas de cadastro e edição). Gravadas pelo nome da constante.
+	@Enumerated(EnumType.STRING)
+	@Column(length = 20)
+	private Categoria categoria;
+
+	@Enumerated(EnumType.STRING)
+	@Column(length = 20)
+	private Genero genero;
+	// Nomes dos arquivos de imagem (colunas imagem_frente e imagem_costas). Resolvidos em /img/{nome}:
+	// primeiro em uploads/img (enviados pelo admin), depois em static/img (ex.: camisa-militar.svg).
+	private String imagemFrente;
+	private String imagemCostas;
+
+	// Outras duas posições da galeria (colunas imagem_modelo e imagem_guia_tamanhos), mesma resolução em /img/{nome}:
+	// foto da peça vestida em um modelo e imagem com a tabela/guia de medidas.
+	@Column(name = "imagem_modelo")
+	private String imagemModelo;
+
+	@Column(name = "imagem_guia_tamanhos")
+	private String imagemGuiaTamanhos;
+
+	@Column(length = 1000)
+	private String descricao;
+
+	// Estoque por tamanho (ex.: P=10, M=3). Só guarda tamanhos que o admin informou a quantidade.
+	@ElementCollection(fetch = FetchType.EAGER)
+	@CollectionTable(name = "produto_estoque", joinColumns = @JoinColumn(name = "produto_id"))
+	@MapKeyColumn(name = "tamanho", length = 20)
+	@Column(name = "quantidade")
+	private Map<String, Integer> estoque = new HashMap<>();
+
+	// Métricas. "vendidas" soma as unidades de cada pedido finalizado em /checkout.
+	@Column(columnDefinition = "INTEGER DEFAULT 0")
+	private Integer vendidas = 0;
+
+	// Incrementada a cada acesso à página do produto na loja (/detalhes/{id}).
+	@Column(columnDefinition = "INTEGER DEFAULT 0")
+	private Integer visualizacoes = 0;
+
+	private LocalDateTime criadoEm;
+	private LocalDateTime atualizadoEm;
+
+	// Tamanhos oferecidos nas telas de cadastro e edição (letras + numeração)
+	public static final List<String> TAMANHOS_PADRAO = List.of("PP", "P", "M", "G", "GG", "XG", "Único",
+			"36", "38", "40", "42", "44", "46");
+
+	// Abaixo (ou igual) a esse número o tamanho é sinalizado como "poucas unidades"
+	public static final int ESTOQUE_BAIXO = 5;
+
+	private static final DateTimeFormatter FORMATO_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm");
 
 	// Cores conhecidas (nome em minúsculas -> hexadecimal usado na amostra da tela de detalhes)
 	private static final Map<String, String> CORES_CSS = Map.ofEntries(
@@ -67,7 +152,7 @@ public class Produto {
 	}
 
 	public Produto(Long id, String nome, String cor, boolean status, String tamanho, float preco, String tipo,
-			String imagem) {
+			String imagemFrente) {
 		super();
 		this.id = id;
 		this.nome = nome;
@@ -76,7 +161,7 @@ public class Produto {
 		this.tamanho = tamanho;
 		this.preco = preco;
 		this.tipo = tipo;
-		this.imagem = imagem;
+		this.imagemFrente = imagemFrente;
 	}
 
 	/**
@@ -105,5 +190,209 @@ public class Produto {
 			return List.of();
 		}
 		return Arrays.stream(tamanho.split(",")).map(String::trim).filter(t -> !t.isEmpty()).toList();
+	}
+
+	/**
+	 * Tamanho em formato de comparação: sem acentos, sem espaços nas pontas e em maiúsculas.
+	 * O carrinho do navegador grava o tamanho em maiúsculas (ex.: "ÚNICO"), então a conferência
+	 * com o cadastro do produto ("Único") precisa ignorar essas diferenças.
+	 */
+	public static String normalizarTamanho(String tamanho) {
+		if (tamanho == null) {
+			return "";
+		}
+		return Normalizer.normalize(tamanho.trim(), Normalizer.Form.NFD).replaceAll("\\p{M}", "")
+				.toUpperCase(Locale.ROOT);
+	}
+
+	/** Tamanho exatamente como está no cadastro do produto, ou null se o produto não oferece esse tamanho. */
+	public String resolverTamanho(String informado) {
+		String procurado = normalizarTamanho(informado);
+		for (String t : getTamanhosDisponiveis()) {
+			if (normalizarTamanho(t).equals(procurado)) {
+				return t;
+			}
+		}
+		return null;
+	}
+
+	/** Quantidade em estoque do tamanho (já resolvido); 0 quando não há estoque informado. */
+	public int estoqueDoTamanho(String tamanhoResolvido) {
+		Integer q = estoque == null || tamanhoResolvido == null ? null : estoque.get(tamanhoResolvido);
+		return q == null ? 0 : Math.max(q, 0);
+	}
+
+	/** Primeiro tamanho com estoque (já vem selecionado na página do produto); null = esgotado. */
+	@Transient
+	public String getTamanhoInicial() {
+		for (String t : getTamanhosDisponiveis()) {
+			if (estoqueDoTamanho(t) > 0) {
+				return t;
+			}
+		}
+		return null;
+	}
+
+	/** Resumo para listagens, ex.: "Camiseta · Unissex"; null quando nenhum dos dois foi informado. */
+	@Transient
+	public String getClassificacao() {
+		if (categoria != null && genero != null) {
+			return categoria.getRotulo() + " · " + genero.getRotulo();
+		}
+		if (categoria != null) {
+			return categoria.getRotulo();
+		}
+		return genero != null ? genero.getRotulo() : null;
+	}
+
+	/**
+	 * Galeria da tela de detalhes, na ordem Frente, Verso, Modelo e Guia de tamanhos.
+	 * Só entram as posições com nome de arquivo preenchido (nulo ou em branco é ignorado),
+	 * então a tela nunca monta uma miniatura com src vazio.
+	 */
+	@Transient
+	public List<ImagemGaleria> getGaleria() {
+		List<ImagemGaleria> itens = new ArrayList<>();
+		adicionarNaGaleria(itens, "frente", "Frente", "Frente", imagemFrente);
+		adicionarNaGaleria(itens, "verso", "Verso", "Verso", imagemCostas);
+		adicionarNaGaleria(itens, "modelo", "Foto com modelo", "Modelo", imagemModelo);
+		adicionarNaGaleria(itens, "guia", "Guia de tamanhos (medidas em cm)", "Guia", imagemGuiaTamanhos);
+		return itens;
+	}
+
+	private void adicionarNaGaleria(List<ImagemGaleria> itens, String chave, String rotulo, String rotuloCurto,
+			String arquivo) {
+		if (arquivo != null && !arquivo.isBlank()) {
+			itens.add(new ImagemGaleria(chave, rotulo, rotuloCurto, arquivo.trim()));
+		}
+	}
+
+	/** Preço promocional calculado para exibição quando o produto está no Outlet. */
+	@Transient
+	public double getPrecoComDescontoOutlet() {
+		if (!outlet || descontoOutlet == null) return preco;
+		return preco * (100 - descontoOutlet) / 100.0;
+	}
+
+	@PrePersist
+	void aoCriar() {
+		LocalDateTime agora = LocalDateTime.now();
+		this.criadoEm = agora;
+		this.atualizadoEm = agora;
+	}
+
+	@PreUpdate
+	void aoAtualizar() {
+		this.atualizadoEm = LocalDateTime.now();
+	}
+
+	/**
+	 * Tamanhos mostrados como flags nas telas de cadastro/edição: os padrões mais
+	 * qualquer tamanho já salvo no produto que não esteja na lista (assim nada se perde).
+	 */
+	@Transient
+	public List<String> getTamanhosOpcoes() {
+		Set<String> todos = new LinkedHashSet<>(TAMANHOS_PADRAO);
+		todos.addAll(getTamanhosDisponiveis());
+		return new ArrayList<>(todos);
+	}
+
+	// ---------- Insights da tela "Visualizar produto" ----------
+
+	/** Soma do estoque informado; null quando nenhum tamanho tem estoque informado. */
+	@Transient
+	public Integer getEstoqueTotal() {
+		if (estoque == null || estoque.isEmpty()) {
+			return null;
+		}
+		return estoque.values().stream().filter(q -> q != null).mapToInt(Integer::intValue).sum();
+	}
+
+	/** Uma linha por tamanho disponível, com a situação do estoque (OK / BAIXO / ESGOTADO / NAO_INFORMADO). */
+	@Transient
+	public List<EstoqueTamanho> getEstoquePorTamanho() {
+		List<EstoqueTamanho> linhas = new ArrayList<>();
+		for (String t : getTamanhosDisponiveis()) {
+			Integer q = estoque == null ? null : estoque.get(t);
+			String situacao = q == null ? "NAO_INFORMADO" : q <= 0 ? "ESGOTADO" : q <= ESTOQUE_BAIXO ? "BAIXO" : "OK";
+			linhas.add(new EstoqueTamanho(t, q, situacao));
+		}
+		return linhas;
+	}
+
+	@Transient
+	public boolean isTemAlertaEstoque() {
+		return getEstoquePorTamanho().stream()
+				.anyMatch(l -> l.getSituacao().equals("ESGOTADO") || l.getSituacao().equals("BAIXO"));
+	}
+
+	@Transient
+	public int getVendidasTotal() {
+		return vendidas == null ? 0 : vendidas;
+	}
+
+	@Transient
+	public int getVisualizacoesTotal() {
+		return visualizacoes == null ? 0 : visualizacoes;
+	}
+
+	/** Receita estimada = unidades vendidas x preço atual (não há histórico de pedidos). */
+	@Transient
+	public BigDecimal getReceita() {
+		return BigDecimal.valueOf(preco).multiply(BigDecimal.valueOf(getVendidasTotal()));
+	}
+
+	/** Conversão em % (vendidas / visualizações); null quando ainda não há visualizações. */
+	@Transient
+	public Double getTaxaConversao() {
+		int views = getVisualizacoesTotal();
+		return views == 0 ? null : getVendidasTotal() * 100.0 / views;
+	}
+
+	@Transient
+	public String getCriadoEmFormatado() {
+		return criadoEm == null ? null : criadoEm.format(FORMATO_DATA);
+	}
+
+	@Transient
+	public String getAtualizadoEmFormatado() {
+		return atualizadoEm == null ? null : atualizadoEm.format(FORMATO_DATA);
+	}
+
+	/** Uma foto da galeria da tela de detalhes (frente, verso, modelo ou guia de tamanhos). */
+	public static class ImagemGaleria {
+		private final String chave;
+		private final String rotulo;
+		private final String rotuloCurto;
+		private final String arquivo;
+
+		public ImagemGaleria(String chave, String rotulo, String rotuloCurto, String arquivo) {
+			this.chave = chave;
+			this.rotulo = rotulo;
+			this.rotuloCurto = rotuloCurto;
+			this.arquivo = arquivo;
+		}
+
+		public String getChave() { return chave; }
+		public String getRotulo() { return rotulo; }
+		public String getRotuloCurto() { return rotuloCurto; }
+		public String getArquivo() { return arquivo; }
+	}
+
+	/** Linha da tabela de estoque por tamanho. */
+	public static class EstoqueTamanho {
+		private final String tamanho;
+		private final Integer quantidade;
+		private final String situacao;
+
+		public EstoqueTamanho(String tamanho, Integer quantidade, String situacao) {
+			this.tamanho = tamanho;
+			this.quantidade = quantidade;
+			this.situacao = situacao;
+		}
+
+		public String getTamanho() { return tamanho; }
+		public Integer getQuantidade() { return quantidade; }
+		public String getSituacao() { return situacao; }
 	}
 }

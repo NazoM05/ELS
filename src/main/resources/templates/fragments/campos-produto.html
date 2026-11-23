@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--
+    Campos compartilhados pelas telas "Novo produto" (cadastrar) e "Editar produto" (form),
+    para as duas ficarem sempre iguais. Uso:
+        <div th:replace="~{fragments/campos-produto :: descricao(${produto})}"></div>
+        <div th:replace="~{fragments/campos-produto :: tamanhos(${produto})}"></div>
+        <div th:replace="~{fragments/campos-produto :: imagens(${produto})}"></div>
+-->
+
+<!-- Categoria (obrigatória) -->
+<div th:fragment="categoria(produto)" class="cadastro-campo adm-c3">
+    <label for="categoria">Categoria</label>
+    <select id="categoria" name="categoria" required>
+        <option value="" th:selected="${produto.categoria == null}">Selecione...</option>
+        <option th:each="c : ${categorias}" th:value="${c.name()}" th:text="${c.rotulo}"
+                th:selected="${produto.categoria == c}">Camiseta</option>
+    </select>
+</div>
+
+<!-- Gênero / público (obrigatório) -->
+<div th:fragment="genero(produto)" class="cadastro-campo adm-c3">
+    <label for="genero">Gênero / Público</label>
+    <select id="genero" name="genero" required>
+        <option value="" th:selected="${produto.genero == null}">Selecione...</option>
+        <option th:each="g : ${generos}" th:value="${g.name()}" th:text="${g.rotulo}"
+                th:selected="${produto.genero == g}">Unissex</option>
+    </select>
+</div>
+
+<!-- Outlet: ao marcar, revela o percentual de desconto aplicado na vitrine -->
+<div th:fragment="outlet(produto)" class="cadastro-campo adm-c6">
+    <span class="adm-rotulo">Oferta Outlet</span>
+    <label class="adm-chip adm-chip-outlet">
+        <input type="checkbox" id="produtoOutlet" name="outlet" value="true" th:checked="${produto.outlet}">
+        <span>Adicionar este produto ao Outlet</span>
+    </label>
+    <div id="campoDescontoOutlet" class="cadastro-campo campo-desconto-outlet"
+         th:hidden="${!produto.outlet}">
+        <label for="descontoOutlet">Percentual de desconto (%)</label>
+        <input type="number" id="descontoOutlet" name="descontoOutlet" min="1" max="100" step="1"
+               placeholder="Ex.: 30" th:value="${produto.descontoOutlet}" th:required="${produto.outlet}">
+        <p class="adm-ajuda">O desconto será destacado nos cards do Outlet e aplicado ao preço exibido.</p>
+    </div>
+    <script>
+        (function () {
+            var flag = document.getElementById('produtoOutlet');
+            var campo = document.getElementById('campoDescontoOutlet');
+            var percentual = document.getElementById('descontoOutlet');
+            if (!flag || !campo || !percentual) return;
+            function atualizar() {
+                campo.hidden = !flag.checked;
+                percentual.required = flag.checked;
+                percentual.disabled = !flag.checked;
+                if (!flag.checked) percentual.value = '';
+            }
+            flag.addEventListener('change', atualizar);
+            atualizar();
+        })();
+    </script>
+</div>
+
+<!-- Descrição -->
+<div th:fragment="descricao(produto)" class="cadastro-campo adm-c6">
+    <label for="descricao">Descrição</label>
+    <textarea id="descricao" name="descricao" rows="4" maxlength="1000"
+              placeholder="Tecido, modelagem, caimento, cuidados de lavagem..."
+              th:text="${produto.descricao}"></textarea>
+</div>
+
+<!-- Tamanhos: flags clicáveis + estoque de cada tamanho marcado -->
+<div th:fragment="tamanhos(produto)" class="cadastro-campo adm-c6">
+    <span class="adm-rotulo" id="rotuloTamanhos">Tamanhos disponíveis</span>
+    <p class="adm-ajuda">Clique para marcar ou desmarcar. Para cada tamanho marcado, informe a quantidade em estoque.</p>
+
+    <div class="adm-chips" role="group" aria-labelledby="rotuloTamanhos">
+        <label th:each="t : ${produto.tamanhosOpcoes}" class="adm-chip">
+            <input type="checkbox" name="tamanho" th:value="${t}"
+                   th:checked="${produto.tamanhosDisponiveis.contains(t)}">
+            <span th:text="${t}"></span>
+        </label>
+    </div>
+
+    <div class="adm-estoque" id="estoqueCampos">
+        <label th:each="t : ${produto.tamanhosOpcoes}" class="adm-estoque-item"
+               th:classappend="${produto.tamanhosDisponiveis.contains(t)} ? '' : 'oculto'"
+               th:attr="data-tamanho=${t}">
+            <span class="adm-estoque-rotulo" th:text="${t}"></span>
+            <input type="number" min="0" step="1" inputmode="numeric" placeholder="0"
+                   th:name="|estoque[${t}]|"
+                   th:value="${produto.estoque.get(t)}"
+                   th:disabled="${!produto.tamanhosDisponiveis.contains(t)}"
+                   aria-label="Estoque do tamanho">
+        </label>
+    </div>
+
+    <script>
+        // Mostra o campo de estoque só dos tamanhos marcados (campo oculto não é enviado)
+        (function () {
+            var caixa = document.getElementById('estoqueCampos');
+            document.querySelectorAll('input[name="tamanho"]').forEach(function (chk) {
+                chk.addEventListener('change', function () {
+                    var itens = caixa.querySelectorAll('.adm-estoque-item');
+                    itens.forEach(function (item) {
+                        if (item.getAttribute('data-tamanho') === chk.value) {
+                            item.classList.toggle('oculto', !chk.checked);
+                            item.querySelector('input').disabled = !chk.checked;
+                        }
+                    });
+                });
+            });
+        })();
+    </script>
+</div>
+
+<!-- Um campo de upload com prévia: título, imagem atual/selecionada e o input de arquivo -->
+<div th:fragment="uploadImagem(campo, titulo, arquivoAtual)" class="upload-card"
+     th:with="urlAtual=${arquivoAtual != null and !#strings.isEmpty(arquivoAtual)} ? @{'/img/' + ${arquivoAtual}}">
+    <label class="adm-rotulo" th:for="${campo}" th:text="${titulo}">Imagem</label>
+    <div class="upload-previa">
+        <img class="upload-img" alt="Prévia da imagem"
+             th:src="${urlAtual}" th:attr="data-original=${urlAtual}" th:hidden="${urlAtual == null}">
+        <span class="upload-vazio" th:hidden="${urlAtual != null}">Nenhuma imagem selecionada</span>
+    </div>
+    <input type="file" th:id="${campo}" th:name="${campo}" accept="image/*">
+    <p class="adm-ajuda"
+       th:text="${urlAtual != null} ? 'Para trocar a imagem, escolha um novo arquivo (opcional).' : 'Escolha uma imagem (JPG, PNG, WEBP...). Opcional.'"></p>
+</div>
+
+<!-- Imagens do produto: 4 posições (Frente, Costas, Foto com modelo e Guia de tamanhos), 2 por linha -->
+<div th:fragment="imagens(produto)" class="cadastro-campo adm-c6">
+    <span class="adm-rotulo">Imagens do produto</span>
+    <p class="adm-ajuda">Todas são opcionais. Na edição, só as posições em que você escolher um novo arquivo são trocadas; as demais continuam como estão.</p>
+
+    <div class="upload-par">
+        <div th:replace="~{fragments/campos-produto :: uploadImagem('arquivoImagemFrente', '1. Imagem da Frente', ${produto.imagemFrente})}"></div>
+        <div th:replace="~{fragments/campos-produto :: uploadImagem('arquivoImagemCostas', '2. Imagem das Costas (verso)', ${produto.imagemCostas})}"></div>
+    </div>
+    <div class="upload-par">
+        <div th:replace="~{fragments/campos-produto :: uploadImagem('arquivoImagemModelo', '3. Foto com modelo', ${produto.imagemModelo})}"></div>
+        <div th:replace="~{fragments/campos-produto :: uploadImagem('arquivoImagemGuiaTamanhos', '4. Guia de tamanhos', ${produto.imagemGuiaTamanhos})}"></div>
+    </div>
+
+    <script>
+        // Prévia da imagem escolhida; se o usuário cancelar a escolha, volta para a imagem atual (se houver)
+        (function () {
+            document.querySelectorAll('.upload-card input[type="file"]').forEach(function (entrada) {
+                var card = entrada.closest('.upload-card');
+                var img = card.querySelector('.upload-img');
+                var vazio = card.querySelector('.upload-vazio');
+                var urlTemp = null;
+
+                function mostrar(url) {
+                    if (url) {
+                        img.src = url;
+                        img.hidden = false;
+                        vazio.hidden = true;
+                    } else {
+                        img.removeAttribute('src');
+                        img.hidden = true;
+                        vazio.hidden = false;
+                    }
+                }
+
+                entrada.addEventListener('change', function () {
+                    if (urlTemp) { URL.revokeObjectURL(urlTemp); urlTemp = null; }
+                    var arquivo = entrada.files[0];
+                    if (arquivo && arquivo.type.indexOf('image/') === 0) {
+                        urlTemp = URL.createObjectURL(arquivo);
+                        mostrar(urlTemp);
+                    } else {
+                        if (arquivo) { entrada.value = ''; } // não é imagem: descarta
+                        mostrar(img.getAttribute('data-original'));
+                    }
+                });
+            });
+        })();
+    </script>
+</div>
+
+</body>
+</html>

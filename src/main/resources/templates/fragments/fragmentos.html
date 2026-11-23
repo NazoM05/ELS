@@ -1,33 +1,664 @@
 <!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
 
-    <!-- Para mudar os avisos, edite/adicione/remova os <p> abaixo (o primeiro precisa ter class="anuncio ativo") -->
-    <div th:fragment="anuncios" class="barra-anuncios" role="region" aria-label="Avisos da loja">
-        <p class="anuncio ativo">Frete grátis a partir de R$ 99 para a região Sul</p>
-        <p class="anuncio">Novas estampas disponíveis</p>
-        <p class="anuncio">Parcele em até 3x sem juros em toda a loja</p>
-        <p class="anuncio">Troca facilitada em até  30 dias</p>
+
+    <!-- Título da aba: "Página - Loja" (sem nome de página, só a loja) -->
+    <title th:fragment="titulo(pagina)"
+           th:text="${#strings.isEmpty(pagina)} ? ${txt['geral.nomeLoja']} : ${pagina} + ' - ' + ${txt['geral.nomeLoja']}">Estilo London Store</title>
+
+    <div th:fragment="anuncios" class="barra-anuncios" role="region" aria-label="Avisos da loja" th:unless="${#lists.isEmpty(anuncios)}">
+        <p class="anuncio" th:each="a, st : ${anuncios}" th:classappend="${st.first} ? 'ativo'" th:text="${a}">Aviso</p>
     </div>
+
+    <!-- Banner promocional (carrossel): todos os anúncios seguem o mesmo padrão neon urbano inspirado em Miami/GTA6.
+         Para adicionar um anúncio, copie um <article class="promo-miami-slide"> e troque imagem, selo, título, texto e link. -->
+    <section th:fragment="banner-novidades" class="promo-miami" aria-roledescription="carrossel" aria-label="Campanhas da loja" data-promo-carrossel>
+        <div class="promo-miami-trilho">
+
+            <article class="promo-miami-slide promo-miami-foco-direita ativo" aria-roledescription="slide" aria-label="1 de 4">
+                <img class="promo-miami-imagem" th:src="@{/img/banner-tricolor-neon.jpg(v=1)}" alt="Modelo com a nova camisa listrada tricolor ao pôr do sol em uma avenida neon" fetchpriority="high">
+                <div class="promo-miami-sombra" aria-hidden="true"></div>
+                <div class="promo-miami-conteudo">
+                    <span class="promo-miami-selo">CHEGOU · NOVA TEMPORADA</span>
+                    <h2>NOVO MANTO<br><span>DO TRICOLOR.</span></h2>
+                    <p>Vista as cores da nossa história com a nova camisa oficial.</p>
+                    <a class="promo-miami-cta" th:href="@{/colecao/tricolor}">VER COLEÇÃO <span aria-hidden="true">↗</span></a>
+                </div>
+            </article>
+
+            <article class="promo-miami-slide promo-miami-foco-esquerda" aria-roledescription="slide" aria-label="2 de 4">
+                <img class="promo-miami-imagem" th:src="@{/img/banner-miami-neon.png(v=3)}" alt="Campanha urbana ao pôr do sol em uma cidade tropical iluminada por neon" loading="lazy">
+                <div class="promo-miami-sombra" aria-hidden="true"></div>
+                <div class="promo-miami-conteudo">
+                    <span class="promo-miami-selo">NOVA TEMPORADA · NOVO VISUAL</span>
+                    <h2>SEU ESTILO.<br><span>SUAS REGRAS.</span></h2>
+                    <p>Vista a cidade. Viva a noite. Descubra a nova coleção.</p>
+                    <a class="promo-miami-cta" th:href="@{/home(ordem='novidades')}">EXPLORAR COLEÇÃO <span aria-hidden="true">↗</span></a>
+                </div>
+            </article>
+
+            <article class="promo-miami-slide promo-miami-slide-arte promo-miami-foco-direita" aria-roledescription="slide" aria-label="3 de 4">
+                <!-- Arte pronta: selo, título e texto já estão na imagem (sem o botão). No computador só o botão VER COLEÇÃO é HTML,
+                     como nos outros slides; no celular (≤640px) o recorte esconde o texto da imagem e o bloco inteiro aparece. -->
+                <img class="promo-miami-imagem" th:src="@{/img/banner-vice-city-80s.jpg(v=2)}" alt="Sinta-se nos 80's. Vice City, nova coleção: homem de camisa havaiana encostado em um carro, com palmeiras, helicóptero e hotel neon ao pôr do sol" loading="lazy">
+                <div class="promo-miami-sombra" aria-hidden="true"></div>
+                <div class="promo-miami-conteudo">
+                    <span class="promo-miami-selo">VICE CITY · NOVA COLEÇÃO</span>
+                    <h2>SINTA-SE NOS 80'S.<br><span>VICE CITY.</span></h2>
+                    <p>Neon, praia e atitude. Conheça as peças da nova coleção.</p>
+                    <a class="promo-miami-cta" th:href="@{/colecao/vice-city}">VER COLEÇÃO <span aria-hidden="true">↗</span></a>
+                </div>
+            </article>
+
+            <article class="promo-miami-slide promo-miami-foco-direita" aria-roledescription="slide" aria-label="4 de 4">
+                <img class="promo-miami-imagem" th:src="@{/img/banner-outlet-neon.jpg(v=1)}" alt="Modelo saindo de uma loja iluminada por neon com sacolas de compras" loading="lazy">
+                <div class="promo-miami-sombra" aria-hidden="true"></div>
+                <div class="promo-miami-conteudo">
+                    <span class="promo-miami-selo">OUTLET · TEMPO LIMITADO</span>
+                    <h2>A NOITE É<br><span>DO OUTLET.</span></h2>
+                    <p>Peças selecionadas com desconto. Corra antes que acabe.</p>
+                    <a class="promo-miami-cta" th:href="@{/outlet}">VER OUTLET <span aria-hidden="true">↗</span></a>
+                </div>
+            </article>
+
+        </div>
+
+        <button type="button" class="promo-miami-seta promo-miami-seta-anterior" aria-label="Anúncio anterior">‹</button>
+        <button type="button" class="promo-miami-seta promo-miami-seta-proxima" aria-label="Próximo anúncio">›</button>
+        <div class="promo-miami-pontos" role="group" aria-label="Escolher anúncio"></div>
+        <span class="promo-miami-assinatura" aria-hidden="true">NAZO · URBAN CULTURE</span>
+
+        <script>
+            (function () {
+                var raiz = document.currentScript && document.currentScript.closest('[data-promo-carrossel]');
+                if (!raiz) return;
+                var slides = Array.prototype.slice.call(raiz.querySelectorAll('.promo-miami-slide'));
+                var pontos = raiz.querySelector('.promo-miami-pontos');
+                if (slides.length < 2) return;
+
+                var atual = 0, timer = null, INTERVALO = 6500;
+                var semMovimento = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                var botoes = slides.map(function (s, i) {
+                    var b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = 'promo-miami-ponto';
+                    b.setAttribute('aria-label', 'Ver anúncio ' + (i + 1) + ' de ' + slides.length);
+                    b.addEventListener('click', function () { mostrar(i); reiniciar(); });
+                    pontos.appendChild(b);
+                    return b;
+                });
+
+                function mostrar(indice) {
+                    atual = (indice + slides.length) % slides.length;
+                    slides.forEach(function (slide, i) {
+                        slide.classList.toggle('ativo', i === atual);
+                        slide.setAttribute('aria-hidden', i === atual ? 'false' : 'true');
+                    });
+                    botoes.forEach(function (botao, i) {
+                        botao.classList.toggle('ativo', i === atual);
+                        botao.setAttribute('aria-current', i === atual ? 'true' : 'false');
+                    });
+                }
+
+                function iniciar() {
+                    if (semMovimento) return;
+                    clearInterval(timer);
+                    timer = setInterval(function () { mostrar(atual + 1); }, INTERVALO);
+                }
+
+                function pausar() { clearInterval(timer); }
+
+                function reiniciar() {
+                    pausar();
+                    iniciar();
+                }
+
+                raiz.querySelector('.promo-miami-seta-anterior').addEventListener('click', function () { mostrar(atual - 1); reiniciar(); });
+                raiz.querySelector('.promo-miami-seta-proxima').addEventListener('click', function () { mostrar(atual + 1); reiniciar(); });
+                raiz.addEventListener('mouseenter', pausar);
+                raiz.addEventListener('mouseleave', iniciar);
+                raiz.addEventListener('focusin', pausar);
+                raiz.addEventListener('focusout', function (e) { if (!raiz.contains(e.relatedTarget)) iniciar(); });
+
+                raiz.querySelectorAll('[data-promo-link]').forEach(function (slide) {
+                    var destino = slide.getAttribute('data-promo-link');
+                    if (!destino) return;
+                    slide.addEventListener('click', function (e) {
+                        if (e.target.closest('a, button')) return;
+                        window.location.href = destino;
+                    });
+                    slide.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            window.location.href = destino;
+                        }
+                    });
+                });
+
+                raiz.addEventListener('keydown', function (e) {
+                    if (e.key === 'ArrowLeft') { mostrar(atual - 1); reiniciar(); }
+                    if (e.key === 'ArrowRight') { mostrar(atual + 1); reiniciar(); }
+                });
+
+                var inicioX = null;
+                raiz.addEventListener('touchstart', function (e) { inicioX = e.touches[0].clientX; }, { passive: true });
+                raiz.addEventListener('touchend', function (e) {
+                    if (inicioX === null) return;
+                    var dx = e.changedTouches[0].clientX - inicioX;
+                    if (Math.abs(dx) > 40) { mostrar(atual + (dx < 0 ? 1 : -1)); reiniciar(); }
+                    inicioX = null;
+                });
+
+                raiz.classList.add('js-pronto');
+                mostrar(0);
+                iniciar();
+            })();
+        </script>
+    </section>
+
+    <div class="sidebar" id="sidebar" th:fragment="sidebar">
+        <a class="sidebar-logo" th:href="@{/}" th:aria-label="${txt['geral.nomeCurto']} + ' - página inicial'">
+            <img th:src="${site.logoPersonalizada} ? @{'/logo-site/' + ${site.logoArquivo}} : @{/brand/logo-el-branca.png}" th:alt="${txt['geral.nomeCurto']}">
+        </a>
+        <nav>
+            <a th:href="@{/home}" sec:authorize="!(hasRole('GESTOR') and !hasRole('ADMIN'))" th:text="${txt['geral.menuInicio']}">Início</a>
+            <a class="sidebar-vice" th:href="@{/colecao/vice-city}" sec:authorize="!(hasRole('GESTOR') and !hasRole('ADMIN'))"><span class="sidebar-vice-texto">Coleção Vice City</span></a>
+            <a th:href="@{/colecao/tricolor}" sec:authorize="!(hasRole('GESTOR') and !hasRole('ADMIN'))">Imortal Tricolor</a>
+            <a th:href="@{/colecao/urban-culture}" sec:authorize="!(hasRole('GESTOR') and !hasRole('ADMIN'))">Nazo · Urban Culture</a>
+            <a th:href="@{/outlet}" sec:authorize="!(hasRole('GESTOR') and !hasRole('ADMIN'))">Outlet</a>
+            <hr class="sidebar-divisor" sec:authorize="!(hasRole('GESTOR') and !hasRole('ADMIN'))">
+
+            <div class="sidebar-admin" sec:authorize="hasRole('ADMIN')">
+                <p class="sidebar-admin-titulo" th:text="${txt['geral.menuAdminTitulo']}">Opções de administrador</p>
+                <a th:href="@{/admin/configuracoes}" th:text="${txt['geral.menuConfiguracoes']}">Configurações</a>
+                <a th:href="@{/admin/comercial}">Pix e Cashback</a>
+                <a th:href="@{/admin/usuarios}">Gerenciar Usuários</a>
+                <a th:href="@{/admin/produto/listar}" th:text="${txt['geral.menuProdutos']}">Gerenciar produtos</a>
+                <a th:href="@{/admin/historico}">Auditoria</a>
+                <a th:href="@{/admin/pedidos}" th:text="${txt['geral.menuPedidos']}">Pedidos</a>
+            </div>
+
+            <div class="sidebar-admin" sec:authorize="hasRole('ADMIN')">
+                <p class="sidebar-admin-titulo">Área do separador</p>
+                <a th:href="@{/admin/separacao}">Separação de pedidos</a>
+            </div>
+
+            <div class="sidebar-admin" sec:authorize="hasRole('GESTOR') and !hasRole('ADMIN')">
+                <p class="sidebar-admin-titulo">Área do gestor</p>
+                <a th:href="@{/admin/separacao}">Separação de pedidos</a>
+            </div>
+
+            <a th:href="@{/login}" sec:authorize="isAnonymous()" th:text="${txt['geral.menuEntrar']}">Entrar</a>
+            <a th:href="@{/criar-conta}" sec:authorize="isAnonymous()" th:text="${txt['geral.menuCriarConta']}">Criar conta</a>
+
+            <div class="sidebar-conta" sec:authorize="isAuthenticated()">
+                <a class="sidebar-conta-link" th:href="@{/carteira}">Minha carteira</a>
+                <a class="sidebar-conta-link" th:href="@{/perfil}" th:text="${txt['geral.menuPerfil']}">Perfil</a>
+                <a class="sidebar-conta-link sidebar-sair" th:href="@{/logout}" th:text="${txt['geral.menuSair']}">Sair</a>
+            </div>
+        </nav>
+    </div>
+
+    <button class="menu-btn" id="menuBtn" th:fragment="botao-sidebar" aria-label="Abrir menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <!-- Botões do Topo: Wishlist (Coração) + Carrinho (Sacola) -->
+    <div class="el-top-actions" th:fragment="botao-carrinho" th:classappend="${paginaFavoritos} ? 'el-top-actions-isolado'">
+        <a class="el-cart-trigger" id="btnAbrirWishlist" th:unless="${paginaFavoritos}" th:href="@{/favoritos}" aria-label="Abrir lista de desejos" title="Lista de desejos">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+            <span class="el-cart-badge" id="wishlistQtdTotal">0</span>
+        </a>
+
+        <button type="button" class="el-cart-trigger" id="btnAbrirCarrinho" aria-label="Abrir carrinho de compras">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>
+            <span class="el-cart-badge" id="carrinhoQtdTotal">0</span>
+        </button>
+    </div>
+
+    <th:block th:fragment="carrinho-drawer">
+        <div id="carrinhoBackdrop" class="el-cart-backdrop" aria-hidden="true"></div>
+        <div id="carrinhoToast" class="el-cart-toast" role="status" aria-live="polite" aria-atomic="true" hidden>Produto adicionado</div>
+
+        <aside id="carrinhoDrawer" class="el-cart-drawer" aria-label="Carrinho de compras" aria-hidden="true"
+               th:attr="data-texto-vazio=${txt['geral.carrinhoVazio']},data-texto-remover=${txt['geral.carrinhoRemover']}">
+            <div class="el-cart-header">
+                <h2 class="el-cart-title" th:text="${txt['geral.carrinhoTitulo']}">Seu Carrinho</h2>
+                <button type="button" id="btnFecharCarrinho" class="el-cart-close" aria-label="Fechar carrinho">&times;</button>
+            </div>
+
+            <div id="carrinhoItens" class="el-cart-body"></div>
+
+            <div class="el-cart-footer">
+                <div class="el-cart-subtotal-row">
+                    <span th:text="${txt['geral.carrinhoSubtotal']}">Subtotal</span>
+                    <strong id="carrinhoSubtotal">R$ 0,00</strong>
+                </div>
+                <a id="btnFinalizarCompra" class="btn-comprar el-cart-checkout-btn" th:href="@{/checkout}"
+                   th:attr="data-base=@{/checkout}" th:text="${txt['geral.carrinhoFinalizar']}" hidden>Finalizar compra</a>
+                <button type="button" id="btnLimparCarrinho" class="el-cart-clear-btn" th:text="${txt['geral.carrinhoLimpar']}">Limpar carrinho</button>
+            </div>
+        </aside>
+
+
+        <!-- Só existe para quem não está logado: o carrinho pede login na hora de adicionar um produto -->
+        <span id="carrinhoExigeLogin" hidden sec:authorize="isAnonymous()" th:attr="data-url=@{/login}"></span>
+
+        <script>
+            (() => {
+                if (window.__carrinhoInicializado) return;
+                window.__carrinhoInicializado = true;
+
+                const STORAGE_KEY = "estilo_london_carrinho_v1";
+
+                const drawer = document.getElementById("carrinhoDrawer");
+                const backdrop = document.getElementById("carrinhoBackdrop");
+                const btnAbrir = document.getElementById("btnAbrirCarrinho");
+                const btnFechar = document.getElementById("btnFecharCarrinho");
+                const btnLimpar = document.getElementById("btnLimparCarrinho");
+                const listaEl = document.getElementById("carrinhoItens");
+                const subtotalEl = document.getElementById("carrinhoSubtotal");
+                const qtdTotalEl = document.getElementById("carrinhoQtdTotal");
+                const btnFinalizar = document.getElementById("btnFinalizarCompra");
+                const toast = document.getElementById("carrinhoToast");
+                let toastTimer = null;
+
+                if (!drawer || !backdrop || !listaEl || !subtotalEl) return;
+
+                const escaparHtml = (t) => String(t).replace(/[&<>"']/g, (c) =>
+                    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+                const textoVazio = escaparHtml(drawer.dataset.textoVazio || "Seu carrinho está vazio.");
+                const textoRemover = escaparHtml(drawer.dataset.textoRemover || "Remover");
+
+                const formatarBRL = (valor) =>
+                    Number(valor || 0).toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                    });
+
+                function lerCarrinho() {
+                    try {
+                        const raw = localStorage.getItem(STORAGE_KEY);
+                        const parsed = raw ? JSON.parse(raw) : [];
+                        return Array.isArray(parsed) ? parsed : [];
+                    } catch {
+                        return [];
+                    }
+                }
+
+                function salvarCarrinho(itens) {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(itens));
+                    window.dispatchEvent(new CustomEvent("carrinho:alterado"));
+                }
+
+                function urlCheckout() {
+                    const base = btnFinalizar?.getAttribute("data-base") || "/checkout";
+                    const params = new URLSearchParams();
+                    lerCarrinho().forEach((item) => {
+                        params.append("item", `${item.id}:${item.tamanho}:${item.quantidade}`);
+                    });
+                    const query = params.toString();
+                    return query ? `${base}?${query}` : base;
+                }
+
+                function construirChave(id, tamanho) {
+                    return `${String(id).trim()}__${String(tamanho || "UNICO").trim().toUpperCase()}`;
+                }
+
+                function mostrarToast(mensagem = "Produto adicionado") {
+                    if (!toast) return;
+                    toast.textContent = mensagem;
+                    toast.hidden = false;
+                    toast.classList.remove("visivel");
+                    void toast.offsetWidth;
+                    toast.classList.add("visivel");
+                    clearTimeout(toastTimer);
+                    toastTimer = setTimeout(() => {
+                        toast.classList.remove("visivel");
+                        setTimeout(() => { toast.hidden = true; }, 180);
+                    }, 2200);
+                }
+
+                function abrirCarrinho() {
+                    drawer.classList.add("is-open");
+                    backdrop.classList.add("is-open");
+                    drawer.setAttribute("aria-hidden", "false");
+                    backdrop.setAttribute("aria-hidden", "false");
+                }
+
+                function fecharCarrinho() {
+                    drawer.classList.remove("is-open");
+                    backdrop.classList.remove("is-open");
+                    drawer.setAttribute("aria-hidden", "true");
+                    backdrop.setAttribute("aria-hidden", "true");
+                    window.dispatchEvent(new CustomEvent("carrinho:fechado"));
+                }
+
+                // Visitante sem login pode navegar por tudo (inclusive coleções), mas ao tentar
+                // colocar algo no carrinho é levado para o login.
+                function exigirLogin() {
+                    const marcador = document.getElementById("carrinhoExigeLogin");
+                    if (!marcador) return false;
+                    mostrarToast("Entre na sua conta para adicionar ao carrinho");
+                    setTimeout(() => { window.location.href = marcador.dataset.url || "/login"; }, 900);
+                    return true;
+                }
+
+                function adicionarItem({ id, nome, preco, tamanho, imagem, quantidade = 1 }) {
+                    if (exigirLogin()) return;
+                    const precoNum = Number(String(preco).replace(",", "."));
+                    const qtdAdd = Math.max(1, parseInt(quantidade, 10) || 1);
+                    const tamNorm = String(tamanho || "UNICO").trim().toUpperCase();
+
+                    if (!id || !nome || Number.isNaN(precoNum)) return;
+
+                    const chave = construirChave(id, tamNorm);
+                    const itens = lerCarrinho();
+                    const existente = itens.find((item) => item.chave === chave);
+
+                    if (existente) {
+                        existente.quantidade += qtdAdd;
+                    } else {
+                        itens.push({
+                            chave,
+                            id: String(id),
+                            nome: String(nome),
+                            preco: precoNum,
+                            tamanho: tamNorm,
+                            imagem: imagem || "",
+                            quantidade: qtdAdd,
+                        });
+                    }
+
+                    salvarCarrinho(itens);
+                    renderizarCarrinho();
+                    // Só avisa e atualiza o número sobre a sacola; o carrinho abre apenas quando o cliente clica nele.
+                    mostrarToast("Produto adicionado");
+                }
+
+                function alterarQuantidade(chave, delta) {
+                    const itens = lerCarrinho();
+                    const idx = itens.findIndex((item) => item.chave === chave);
+                    if (idx === -1) return;
+
+                    const novaQtd = itens[idx].quantidade + delta;
+                    if (novaQtd <= 0) {
+                        itens.splice(idx, 1);
+                    } else {
+                        itens[idx].quantidade = novaQtd;
+                    }
+
+                    salvarCarrinho(itens);
+                    renderizarCarrinho();
+                }
+
+                function removerItem(chave) {
+                    const itens = lerCarrinho().filter((item) => item.chave !== chave);
+                    salvarCarrinho(itens);
+                    renderizarCarrinho();
+                }
+
+                function limparCarrinho() {
+                    salvarCarrinho([]);
+                    renderizarCarrinho();
+                }
+
+                function renderizarCarrinho() {
+                    const itens = lerCarrinho();
+                    const totalQtd = itens.reduce((acc, item) => acc + item.quantidade, 0);
+                    const subtotal = itens.reduce((acc, item) => acc + item.preco * item.quantidade, 0);
+
+                    if (qtdTotalEl) {
+                        qtdTotalEl.textContent = String(totalQtd);
+                    }
+                    subtotalEl.textContent = formatarBRL(subtotal);
+                    if (btnFinalizar) {
+                        btnFinalizar.hidden = itens.length === 0;
+                        btnFinalizar.setAttribute("href", urlCheckout());
+                    }
+
+                    if (itens.length === 0) {
+                        listaEl.innerHTML = `<p class="el-cart-empty">${textoVazio}</p>`;
+                        return;
+                    }
+
+                    listaEl.innerHTML = itens
+                        .map((item) => {
+                            const totalItem = item.preco * item.quantidade;
+                            const imgHtml = item.imagem
+                                ? `<img src="${item.imagem}" alt="${item.nome}">`
+                                : `<div class="el-cart-thumb-vazio"></div>`;
+
+                            return `
+                                <div class="el-cart-item" data-chave="${item.chave}">
+                                    ${imgHtml}
+                                    <div class="el-cart-item-info">
+                                        <h4>${item.nome}</h4>
+                                        <div class="el-cart-item-meta">Tamanho: <strong>${item.tamanho}</strong> · Unit.: ${formatarBRL(item.preco)}</div>
+                                        <div class="el-cart-item-price">${formatarBRL(totalItem)}</div>
+                                    </div>
+                                    <div class="el-cart-item-controls">
+                                        <div class="el-cart-qty-box">
+                                            <button type="button" class="js-qty-menos" aria-label="Diminuir quantidade">-</button>
+                                            <span>${item.quantidade}</span>
+                                            <button type="button" class="js-qty-mais" aria-label="Aumentar quantidade">+</button>
+                                        </div>
+                                        <button type="button" class="el-cart-remove js-remover-item">${textoRemover}</button>
+                                    </div>
+                                </div>
+                            `;
+                        })
+                        .join("");
+                }
+
+                btnAbrir?.addEventListener("click", abrirCarrinho);
+                btnFechar?.addEventListener("click", fecharCarrinho);
+                backdrop.addEventListener("click", fecharCarrinho);
+                btnLimpar?.addEventListener("click", limparCarrinho);
+
+                document.addEventListener("keydown", (e) => {
+                    if (e.key === "Escape" && drawer.classList.contains("is-open")) {
+                        fecharCarrinho();
+                    }
+                });
+
+                listaEl.addEventListener("click", (e) => {
+                    const card = e.target.closest(".el-cart-item");
+                    if (!card) return;
+                    const chave = card.getAttribute("data-chave");
+                    if (!chave) return;
+
+                    if (e.target.closest(".js-qty-mais")) {
+                        alterarQuantidade(chave, 1);
+                    } else if (e.target.closest(".js-qty-menos")) {
+                        alterarQuantidade(chave, -1);
+                    } else if (e.target.closest(".js-remover-item")) {
+                        removerItem(chave);
+                    }
+                });
+
+                document.addEventListener("click", (e) => {
+                    const btn = e.target.closest(".js-add-carrinho");
+                    if (!btn) return;
+
+                    const container = btn.closest("[data-produto-id]");
+                    if (!container) return;
+
+                    const selectTamanho = container.querySelector(".js-tamanho-select");
+                    const inputTamanhoChecked = container.querySelector('input[name^="tamanho"]:checked');
+                    const tamanhoAtivoBtn = container.querySelector('.detalhes-tamanhos button.ativo');
+
+                    const tamanho =
+                        selectTamanho?.value ||
+                        inputTamanhoChecked?.value ||
+                        tamanhoAtivoBtn?.getAttribute("data-tamanho") ||
+                        btn.getAttribute("data-tamanho") ||
+                        "UNICO";
+
+                    const inputQtd = container.querySelector(".js-qtd-input");
+                    const quantidade = inputQtd ? parseInt(inputQtd.value, 10) || 1 : 1;
+
+                    adicionarItem({
+                        id: container.getAttribute("data-produto-id"),
+                        nome: container.getAttribute("data-produto-nome"),
+                        preco: container.getAttribute("data-produto-preco"),
+                        imagem: container.getAttribute("data-produto-imagem"),
+                        tamanho,
+                        quantidade,
+                    });
+
+                    if (btn.hasAttribute("data-ir-checkout")) {
+                        window.location.href = urlCheckout();
+                    }
+                });
+
+                window.EstiloLondonCarrinho = {
+                    adicionar: adicionarItem,
+                    abrir: abrirCarrinho,
+                    fechar: fecharCarrinho,
+                    limpar: limparCarrinho,
+                    itens: lerCarrinho,
+                    urlCheckout,
+                };
+
+                renderizarCarrinho();
+            })();
+        </script>
+    </th:block>
+
+    <a class="barra-logo" th:fragment="logo" th:href="@{/}" th:aria-label="${txt['geral.nomeCurto']} + ' - página inicial'">
+        <img th:src="${site.logoPersonalizada} ? @{'/logo-site/' + ${site.logoArquivo}} : @{/brand/logo-el.png}" th:alt="${txt['geral.nomeCurto']}">
+    </a>
+
+    <form class="search-form busca-loja" id="formBusca" th:fragment="busca-loja" th:action="${paginaColecao} ? @{${colecaoCaminho}} : (${paginaOutlet} ? @{/outlet} : @{/home})" method="get" data-servidor>
+        <input type="text" name="busca" th:value="${busca}" th:placeholder="${txt['geral.buscaPlaceholder']}" aria-label="Pesquisar produtos" autocomplete="off">
+        <input type="hidden" name="ordem" th:if="${ordem != null and ordem.parametro != ''}" th:value="${ordem.parametro}">
+        <button type="submit" th:aria-label="${txt['geral.buscaBotao']}" th:title="${txt['geral.buscaBotao']}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></button>
+    </form>
+
+    <div th:fragment="filtros-catalogo">
+        <div class="filtros-loja" role="group" aria-label="Filtros do catálogo">
+            <div class="filtro-grupo">
+                <span class="filtro-rotulo" id="rotuloFiltroGenero" th:text="${txt['geral.filtroGenero']}">Gênero</span>
+                <div class="adm-chips filtro-chips" role="radiogroup" aria-labelledby="rotuloFiltroGenero">
+                    <label class="adm-chip">
+                        <input type="radio" name="genero" value="" form="formBusca"
+                               th:checked="${generoSelecionado == null}" onchange="this.form.submit()">
+                        <span th:text="${txt['geral.filtroTodos']}">Todos</span>
+                    </label>
+                    <label class="adm-chip" th:each="g : ${generosFiltro}">
+                        <input type="radio" name="genero" th:value="${g.name()}" form="formBusca"
+                               th:checked="${generoSelecionado == g}" onchange="this.form.submit()">
+                        <span th:text="${g.rotulo}">Masculino</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="filtro-grupo">
+                <label class="filtro-rotulo" for="filtroCategoria" th:text="${txt['geral.filtroCategoria']}">Categoria</label>
+                <select id="filtroCategoria" name="categoria" form="formBusca" onchange="this.form.submit()">
+                    <option value="" th:text="${txt['geral.filtroTodasCategorias']}">Todas as categorias</option>
+                    <option th:each="c : ${categorias}" th:value="${c.name()}" th:text="${c.rotulo}"
+                            th:selected="${categoriaSelecionada == c}">Camiseta</option>
+                </select>
+            </div>
+
+            <a class="filtro-limpar" th:if="${filtrosAtivos}" th:href="${paginaColecao} ? @{${colecaoCaminho}} : (${paginaOutlet} ? @{/outlet} : @{/home})" th:text="${txt['geral.filtroLimpar']}">Limpar filtros</a>
+        </div>
+
+        <p class="filtro-resultado" role="status"
+           th:text="${paginacao.totalItens == 1} ? '1 produto encontrado' : ${paginacao.totalItens} + ' produtos encontrados'">0 produtos</p>
+
+        <p class="filtro-vazio" th:if="${#lists.isEmpty(listaProdutos)}">
+            <th:block th:text="${txt['geral.filtroVazio']}">Nenhum produto encontrado com esses filtros.</th:block>
+            <a th:href="${paginaColecao} ? @{${colecaoCaminho}} : (${paginaOutlet} ? @{/outlet} : @{/home})" th:text="${txt['geral.filtroLimpar']}">Limpar filtros</a>
+        </p>
+    </div>
+
+    <nav class="paginacao" th:fragment="paginacao" th:if="${paginacao.temVariasPaginas}" aria-label="Paginação dos produtos">
+        <a class="paginacao-item paginacao-seta" th:if="${paginacao.temAnterior}"
+           th:href="@{${paginacao.urlAnterior}}" rel="prev" aria-label="Página anterior" th:text="'‹ ' + ${txt['geral.paginaAnterior']}">&lsaquo; Anterior</a>
+        <span class="paginacao-item paginacao-seta desativado" th:unless="${paginacao.temAnterior}" aria-disabled="true" th:text="'‹ ' + ${txt['geral.paginaAnterior']}">&lsaquo; Anterior</span>
+
+        <th:block th:each="item : ${paginacao.itens}">
+            <span class="paginacao-reticencias" th:if="${item.reticencias}" aria-hidden="true">&hellip;</span>
+            <span class="paginacao-item atual" th:if="${item.atual}" aria-current="page"
+                  th:text="${item.numero}" th:aria-label="'Página ' + ${item.numero} + ', página atual'">1</span>
+            <a class="paginacao-item" th:if="${!item.reticencias and !item.atual}"
+               th:href="@{${item.url}}" th:text="${item.numero}" th:aria-label="'Ir para a página ' + ${item.numero}">2</a>
+        </th:block>
+
+        <a class="paginacao-item paginacao-seta" th:if="${paginacao.temProxima}"
+           th:href="@{${paginacao.urlProxima}}" rel="next" aria-label="Próxima página" th:text="${txt['geral.paginaProxima']} + ' ›'">Próxima &rsaquo;</a>
+        <span class="paginacao-item paginacao-seta desativado" th:unless="${paginacao.temProxima}" aria-disabled="true" th:text="${txt['geral.paginaProxima']} + ' ›'">Próxima &rsaquo;</span>
+
+        <p class="paginacao-resumo" th:text="'Página ' + ${paginacao.paginaAtual} + ' de ' + ${paginacao.totalPaginas}">Página 1 de 2</p>
+    </nav>
+
+    <!-- Rodapé da loja (vitrine, detalhes e páginas institucionais) -->
+    <footer class="rodape" th:fragment="rodape">
+        <div class="rodape-topo">
+
+            <div class="rodape-marca">
+                <span class="rodape-logo" th:text="${txt['geral.nomeCurto']}">Estilo London</span>
+                <div class="rodape-redes">
+                    <a href="#" aria-label="Facebook">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.5-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.8 1.4-3.8 3.9v2.3H7.9v3h2.6V21h3z"/></svg>
+                    </a>
+                    <a href="#" aria-label="Instagram">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4.5"/><circle cx="12" cy="12" r="3.6"/><circle cx="17" cy="7" r=".6" fill="currentColor"/></svg>
+                    </a>
+                    <a href="#" aria-label="TikTok">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 3h-2.8v11.4a2.4 2.4 0 1 1-2.4-2.4c.2 0 .4 0 .6.1V9.2a5.2 5.2 0 1 0 4.6 5.2V8.6a6.5 6.5 0 0 0 3.8 1.2V7a3.8 3.8 0 0 1-3.8-4z"/></svg>
+                    </a>
+                    <a href="#" aria-label="YouTube">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 0 0 2.4 7.2C2 8.8 2 12 2 12s0 3.2.4 4.8a2.5 2.5 0 0 0 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8c.4-1.6.4-4.8.4-4.8s0-3.2-.4-4.8zM10 15V9l5.2 3L10 15z"/></svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="rodape-colunas">
+                <div class="rodape-col">
+                    <h4 th:text="${txt['geral.rodapeInstitucional']}">Institucional</h4>
+                    <a th:href="@{/sobre}" th:text="${txt['geral.rodapeSobre']}">Sobre nós</a>
+                    <a th:href="@{/frete-e-entrega}" th:text="${txt['geral.rodapeFrete']}">Frete e Entrega</a>
+                    <a th:href="@{/trocas-e-devolucoes}" th:text="${txt['geral.rodapeTrocas']}">Trocas e Devoluções</a>
+                    <a th:href="@{/politica-de-privacidade}" th:text="${txt['geral.rodapePrivacidade']}">Política de Privacidade</a>
+
+                    <h4 th:text="${txt['geral.rodapeAtendimento']}">Atendimento</h4>
+                    <a href="#" th:unless="${#strings.isEmpty(txt['geral.rodapeWhatsapp'])}" th:text="${txt['geral.rodapeWhatsapp']}">WhatsApp (SAC)</a>
+                    <a th:unless="${#strings.isEmpty(txt['geral.rodapeEmail'])}" th:href="'mailto:' + ${txt['geral.rodapeEmail']}"
+                       th:text="${txt['geral.rodapeEmail']}">contato@seudominio.com.br</a>
+                </div>
+
+                <div class="rodape-col">
+                    <h4 th:text="${txt['geral.rodapeColecoes']}">Coleções</h4>
+                    <a th:href="@{/home(ordem='novidades')}" th:text="${txt['geral.rodapeNovidades']}">Novidades</a>
+                    <a th:href="@{/home(categoria='CAMISETA')}" th:text="${txt['geral.rodapeCamisetas']}">Camisetas</a>
+                    <a th:href="@{/home(busca='oversized')}" th:text="${txt['geral.rodapeOversized']}">Oversized</a>
+                    <a th:href="@{/home(categoria='CALCA')}" th:text="${txt['geral.rodapeCalcas']}">Calças</a>
+                    <a th:href="@{/home(categoria='ACESSORIOS')}" th:text="${txt['geral.rodapeAcessorios']}">Acessórios</a>
+                    <a th:href="@{/outlet}" th:text="${txt['geral.rodapeOutlet']}">Outlet</a>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="rodape-base">
+            <p th:unless="${#strings.isEmpty(txt['geral.rodapeCopyright'])}" th:text="${txt['geral.rodapeCopyright']}">© 2026 Estilo London Store. CNPJ: 00.000.000/0001-00.</p>
+            <p th:unless="${#strings.isEmpty(txt['geral.rodapeEndereco'])}" th:text="${txt['geral.rodapeEndereco']}">Rua Exemplo, 123 - Cidade/UF | CEP 00000-000</p>
+        </div>
+    </footer>
 
 </body>
 </html>
-
-
-<div class="sidebar" id="sidebar" th:fragment="sidebar">
-	<nav>
-        <a th:href="@{/home}">Início</a>
-        <a th:href="@{/admin/produto/listar}" sec:authorize="hasRole('ADMIN')">Produtos</a>
-        <a th:href="@{/admin/produto/cadastrar}" sec:authorize="hasRole('ADMIN')" >Novo produto</a>
-		<a href="#" sec:authorize="isAuthenticated()"> Perfil</a>
-        <a href="#" sec:authorize="hasRole('ADMIN')">Configurações</a>
-        <a th:href="@{/logout}" sec:authorize="isAuthenticated()">Sair</a>
-    </nav>
-       
-</div>
-
-<button class="menu-btn" id="menuBtn" th:fragment="botao-sidebar">
-    <span></span>
-    <span></span>
-    <span></span>
-</button>

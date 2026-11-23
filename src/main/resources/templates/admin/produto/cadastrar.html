@@ -3,26 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
- 
-    <link rel="stylesheet" th:href="@{/css/global.css(v=1)}">
-    <!-- Ajustes de layout e usabilidade das telas de administração -->
-    <link rel="stylesheet" th:href="@{/css/admin.css(v=1)}">
-    <title>Cadastro de Produtos - Estilo London Store</title>
-    <link rel="icon" type="image/png" href="/Gemini_Generated_Image_kujj8zkujj8zkujj-removebg-preview.png">
+
+    <!-- CSS único do site: fontes, site.css e cores do painel (ver AGENTS.md) -->
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
+
+    <title th:replace="~{fragments/fragmentos :: titulo(${txt['pg.adminCadastrar.titulo']})}">Cadastro de Produtos - Estilo London Store</title>
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico(v=2)}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png(v=2)}">
 </head>
  
-<body class="admin-ui">
+<body class="admin-ui pg-adminCadastrar">
  
     <!-- Barra de anúncios -->
-    <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
  
     <!-- Barra branca com menu e busca -->
     <div class="barrabranca">
-        <button class="menu-btn" id="menuBtn" aria-label="Abrir menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
  
         <form class="search-form" onsubmit="return false;">
             <input type="text" id="filtro" placeholder="Pesquisar produto cadastrado...">
@@ -38,12 +36,12 @@
  
         <a class="adm-voltar" th:href="@{/admin/produto/listar}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
-            Voltar para produtos
+            <th:block th:text="${txt['pg.adminCadastrar.voltar']}">Voltar para produtos</th:block>
         </a>
 
         <!-- Formulário de cadastro -->
         <section class="cadastro-form-box">
-            <h2>Novo produto</h2>
+            <h2 th:text="${txt['pg.adminCadastrar.h2']}">Novo produto</h2>
 
             <form th:action="@{/admin/produto/salvar}" method="post" enctype="multipart/form-data" class="cadastro-form">
 
@@ -70,27 +68,18 @@
                     <input type="text" id="tipo" name="tipo" placeholder="Ex.: Camisa">
                 </div>
 
-                <div class="cadastro-campo adm-c6">
-                    <span class="adm-rotulo" id="rotuloTamanhos">Tamanhos disponíveis</span>
-                    <p class="adm-ajuda">Marque todos os tamanhos que você tem para este produto.</p>
-                    <div class="adm-chips" role="group" aria-labelledby="rotuloTamanhos"
-                         th:with="tamanhos=${'PP,P,M,G,GG,XG,Único'.split(',')}">
-                        <label th:each="t : ${tamanhos}" class="adm-chip">
-                            <input type="checkbox" name="tamanho" th:value="${t}">
-                            <span th:text="${t}"></span>
-                        </label>
-                    </div>
-                </div>
+                <div th:replace="~{fragments/campos-produto :: categoria(${produto})}"></div>
+                <div th:replace="~{fragments/campos-produto :: genero(${produto})}"></div>
 
-                <div class="cadastro-campo cadastro-campo-imagem adm-c6">
-                    <label for="imagem">Imagem</label>
-                    <input type="file" id="imagem" name="arquivoImagem" accept="image/*">
-                    <img id="previa" class="cadastro-previa" alt="Prévia da imagem" hidden>
-                </div>
+                <div th:replace="~{fragments/campos-produto :: outlet(${produto})}"></div>
+                <div th:replace="~{fragments/campos-produto :: descricao(${produto})}"></div>
+                <div th:replace="~{fragments/campos-produto :: tamanhos(${produto})}"></div>
+
+                <div th:replace="~{fragments/campos-produto :: imagens(${produto})}"></div>
 
                 <div class="adm-acoes">
-                    <a th:href="@{/admin/produto/listar}" class="adm-btn adm-btn-sec">Cancelar</a>
-                    <button type="submit" class="btn-comprar cadastro-btn-salvar adm-btn">Salvar produto</button>
+                    <a th:href="@{/admin/produto/listar}" class="adm-btn adm-btn-sec" th:text="${txt['pg.adminCadastrar.btnCancelar']}">Cancelar</a>
+                    <button type="submit" class="btn-comprar cadastro-btn-salvar adm-btn" th:text="${txt['pg.adminCadastrar.btnSalvar']}">Salvar produto</button>
                 </div>
             </form>
         </section>
@@ -98,7 +87,7 @@
         <!-- Grid de produtos já cadastrados -->
         <section>
             <div class="cadastro-titulo">
-                <h2>Produtos cadastrados</h2>
+                <h2 th:text="${txt['pg.adminCadastrar.lista']}">Produtos cadastrados</h2>
                 <span class="cadastro-contador" th:text="${#lists.size(listaProdutos)} + ' no total'"></span>
             </div>
  
@@ -108,20 +97,16 @@
  
             <div class="produtos-grid" id="gridProdutos">
                 <div th:each="produto : ${listaProdutos}" class="produto-card" th:attr="data-nome=${#strings.toLowerCase(produto.nome)}">
-                    <img th:src="${produto.imagem != null} ? @{'/img/' + ${produto.imagem}} : 'https://placehold.co/400x500/ffb6c1/ffffff?text=Sem+foto'"
+                    <img th:src="${produto.imagemFrente != null} ? @{'/img/' + ${produto.imagemFrente}} : 'https://placehold.co/400x500/ffb6c1/ffffff?text=Sem+foto'"
                          th:alt="${produto.nome}" alt="Produto" loading="lazy">
  
                     <h3 th:text="${produto.nome}"></h3>
                     <p class="preco" th:text="'R$ ' + ${#numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')}"></p>
  
                     <div class="cadastro-acoes-card">
-                        <a th:href="@{'/detalhes/' + ${produto.id}}" class="btn-comprar adm-btn adm-btn-pq">Ver</a>
+                        <a th:href="@{'/admin/produto/visualizar/' + ${produto.id}}" class="btn-comprar adm-btn adm-btn-pq">Ver</a>
                         <a th:href="@{'/admin/produto/editar/' + ${produto.id}}" class="adm-btn adm-btn-sec adm-btn-pq">Editar</a>
  
-                        <form th:action="@{'/admin/produtos/' + ${produto.id} + '/excluir'}" method="post"
-                              onsubmit="return confirm('Excluir este produto?');">
-                            <button type="submit" class="cadastro-btn-excluir adm-btn adm-btn-pq">Excluir</button>
-                        </form>
                     </div>
                 </div>
             </div>
@@ -131,7 +116,7 @@
     <div th:replace="~{fragments/fragmentos :: sidebar}" ></div>
     <div class="overlay" id="overlay"></div>
  
-    <script th:src="@{/jshome.js(v=4)}"></script>
+    <script th:src="@{/jshome.js(v=11)}"></script>
     <script>
         // Filtra os cards já cadastrados pela barra de pesquisa
         const filtro = document.getElementById('filtro');
@@ -145,22 +130,8 @@
         // Aviso de sucesso some sozinho
         const ok = document.querySelector('.cadastro-alerta-ok');
         if (ok) {
-            setTimeout(() => {
-                ok.style.transition = 'opacity .4s';
-                ok.style.opacity = '0';
-                setTimeout(() => ok.remove(), 400);
-            }, 5000);
+            setTimeout(() => ok.remove(), 5000);
         }
-
-        // Prévia da imagem escolhida
-        const input = document.getElementById('imagem');
-        const previa = document.getElementById('previa');
-        input.addEventListener('change', () => {
-            const arquivo = input.files[0];
-            if (!arquivo) { previa.hidden = true; return; }
-            previa.src = URL.createObjectURL(arquivo);
-            previa.hidden = false;
-        });
     </script>
 </body>
 </html>

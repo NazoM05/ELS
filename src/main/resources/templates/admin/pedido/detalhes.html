@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSS único do site: fontes, site.css e cores do painel (ver AGENTS.md) -->
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
+
+    <title th:text="${txt['pg.adminPedido.titulo']} + ' ' + ${pedido.codigo} + ' - ' + ${txt['geral.nomeLoja']}">Pedido - Estilo London Store</title>
+
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico(v=2)}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png(v=2)}">
+</head>
+
+<body class="admin-ui checkout-pagina pg-adminPedido">
+
+
+    <div class="barrabranca">
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
+        <form class="search-form" data-servidor th:action="@{/admin/pedidos/buscar}" method="get">
+            <input type="text" name="codigo" autocomplete="off" th:placeholder="${txt['pg.adminPedidos.buscaPlaceholder']}"
+                   placeholder="Código do pedido" th:aria-label="${txt['pg.adminPedidos.buscaPlaceholder']}">
+            <button type="submit" th:text="${txt['pg.adminPedidos.btnBuscar']}">Abrir pedido</button>
+        </form>
+    </div>
+
+    <main class="cadastro-container pedido-admin">
+
+        <a class="adm-voltar" th:href="@{/admin/pedidos}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+            <th:block th:text="${txt['pg.adminPedido.voltar']}">Voltar para pedidos</th:block>
+        </a>
+
+        <div th:if="${param.sucesso != null}" class="cadastro-alerta cadastro-alerta-ok" role="status">Acompanhamento salvo.</div>
+        <div th:if="${param.semMudanca != null}" class="cadastro-alerta cadastro-alerta-ok" role="status">Nada mudou: escolha outra etapa, altere o rastreio ou escreva uma observação.</div>
+        <div th:if="${erro != null}" class="cadastro-alerta cadastro-alerta-erro" role="alert" th:text="${erro}">Erro</div>
+
+        <header class="adm-topo">
+            <div>
+                <p class="adm-sub pedido-admin-rotulo">Código do pedido</p>
+                <h1 class="adm-titulo pedido-admin-codigo">
+                    <span id="codigoPedido" th:text="${pedido.codigo}">EL-000000-AAAA</span>
+                    <button type="button" class="adm-btn adm-btn-sec adm-btn-pq" id="copiarCodigo" th:attr="data-codigo=${pedido.codigo}">Copiar</button>
+                </h1>
+                <p class="adm-sub">
+                    <span class="status-pedido" th:classappend="'status-pedido-' + ${pedido.status.classe}" th:text="${pedido.status.rotulo}">Etapa</span>
+                    Feito em <span th:text="${pedido.criadoEmFormatado}">01/01/2026</span>
+                    · atualizado em <span th:text="${pedido.atualizadoEmFormatado}">01/01/2026</span>
+                </p>
+            </div>
+        </header>
+
+        <div class="checkout-grid">
+            <div class="checkout-coluna">
+                <section class="cadastro-form-box checkout-box">
+                    <h2 th:text="|Itens (${pedido.quantidadeTotal})|">Itens</h2>
+                    <ul class="checkout-itens">
+                        <li class="checkout-item" th:each="item : ${pedido.itens}">
+                            <img th:src="${item.imagem != null} ? @{'/img/' + ${item.imagem}} : @{/img/sem-foto.svg}"
+                                 th:alt="${item.nomeProduto}" alt="" loading="lazy">
+                            <div class="checkout-item-info">
+                                <span class="checkout-item-nome" th:text="${item.nomeProduto}">Produto</span>
+                                <p>
+                                    Tam. <strong th:text="${item.tamanho}">M</strong>
+                                    · Qtd. <strong th:text="${item.quantidade}">1</strong>
+                                    · Unit. <span th:text="${'R$ ' + #numbers.formatDecimal(item.precoUnitario, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</span>
+                                </p>
+                            </div>
+                            <span class="checkout-item-preco" th:text="${'R$ ' + #numbers.formatDecimal(item.total, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</span>
+                        </li>
+                    </ul>
+                    <dl class="checkout-totais pedido-admin-totais">
+                        <div>
+                            <dt>Subtotal</dt>
+                            <dd th:text="${'R$ ' + #numbers.formatDecimal(pedido.subtotal, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</dd>
+                        </div>
+                        <div>
+                            <dt th:text="${pedido.servicoFrete != null} ? |Frete (${pedido.servicoFrete})| : 'Frete'">Frete</dt>
+                            <dd th:text="${pedido.freteGratis} ? 'Grátis' : ${'R$ ' + #numbers.formatDecimal(pedido.frete, 1, 'POINT', 2, 'COMMA')}">Grátis</dd>
+                        </div>
+                        <div class="checkout-total">
+                            <dt>Total</dt>
+                            <dd th:text="${'R$ ' + #numbers.formatDecimal(pedido.total, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</dd>
+                        </div>
+                    </dl>
+                </section>
+
+                <section class="cadastro-form-box checkout-box">
+                    <h2>Cliente e entrega</h2>
+                    <dl class="perfil-dados">
+                        <div>
+                            <dt>Recebe</dt>
+                            <dd th:text="${pedido.nomeDestinatario}">Nome</dd>
+                        </div>
+                        <div>
+                            <dt>Conta</dt>
+                            <dd th:text="${pedido.usuario.username}">email</dd>
+                        </div>
+                        <div>
+                            <dt>Telefone</dt>
+                            <dd class="pedido-admin-telefone">
+                                <span th:text="${pedido.telefoneFormatado}">(51) 99999-9999</span>
+                                <a class="adm-btn adm-btn-sec adm-btn-pq pedido-whatsapp"
+                                   th:if="${pedido.telefone != null and !#strings.isEmpty(pedido.telefone)}"
+                                   th:href="${whatsappUrl}" target="_blank" rel="noopener noreferrer"
+                                   aria-label="Conversar com o cliente pelo WhatsApp">WhatsApp</a>
+                            </dd>
+                        </div>
+                        <div>
+                            <dt>Pagamento</dt>
+                            <dd th:text="${pedido.formaPagamento.rotulo}">Pix</dd>
+                        </div>
+                        <div class="pedido-endereco">
+                            <dt>Endereço</dt>
+                            <dd th:text="${pedido.enderecoCompleto}">Rua</dd>
+                        </div>
+                        <div th:if="${pedido.prazoFreteDias != null}">
+                            <dt>Prazo do frete</dt>
+                            <dd th:text="|até ${pedido.prazoFreteDias} dias úteis|">até 5 dias úteis</dd>
+                        </div>
+                        <div th:if="${pedido.codigoRastreio != null}">
+                            <dt>Rastreio</dt>
+                            <dd th:text="${pedido.codigoRastreio}">AA123456789BR</dd>
+                        </div>
+                    </dl>
+                </section>
+
+                <section class="cadastro-form-box checkout-box">
+                    <h2 th:text="${txt['pg.adminPedido.historico']}">Histórico</h2>
+                    <ol class="pedido-historico">
+                        <li th:each="h : ${pedido.historicoRecente}">
+                            <span class="hist-mudanca">
+                                <th:block th:if="${h.mudouEtapa}">
+                                    <span class="status-pedido" th:classappend="'status-pedido-' + ${h.statusAnterior.classe}" th:text="${h.statusAnterior.rotulo}">Anterior</span>
+                                    <span class="hist-seta" aria-label="para">→</span>
+                                </th:block>
+                                <span class="status-pedido" th:classappend="'status-pedido-' + ${h.status.classe}" th:text="${h.status.rotulo}">Etapa</span>
+                            </span>
+                            <p class="pedido-historico-meta">
+                                <strong th:text="${h.responsavel}">Equipe</strong>
+                                <th:block th:if="${h.usuarioLogin != null and h.usuarioLogin != h.responsavel}"> (<span th:text="${h.usuarioLogin}">login</span>)</th:block>
+                                · <span th:text="${h.criadoEmFormatado}">01/01/2026 10:00</span>
+                            </p>
+                            <p class="pedido-historico-obs" th:if="${h.observacao != null}" th:text="${h.observacao}">Observação</p>
+                        </li>
+                    </ol>
+                    <a class="pedido-historico-link" th:href="@{/admin/historico(codigo=${pedido.codigo})}">Ver no histórico de alterações →</a>
+                </section>
+            </div>
+
+            <!-- Acompanhamento: etapa, rastreio e observação (cada salvamento vira uma linha no histórico) -->
+            <aside class="checkout-resumo pedido-admin-form" aria-label="Acompanhamento do pedido">
+                <h2 th:text="${txt['pg.adminPedido.atualizar']}">Acompanhamento</h2>
+                <form th:action="@{'/admin/pedidos/' + ${pedido.codigo} + '/atualizar'}" method="post" class="pedido-admin-campos">
+                    <label class="adm-rotulo" for="status">Etapa</label>
+                    <select id="status" name="status" class="adm-campo" th:disabled="${pedido.status.name() == 'CANCELADO'}">
+                        <option th:each="s : ${statusPedido}" th:value="${s.name()}" th:text="${s.rotulo}"
+                                th:selected="${s == pedido.status}">Etapa</option>
+                    </select>
+                    <input type="hidden" name="status" value="CANCELADO" th:if="${pedido.status.name() == 'CANCELADO'}">
+                    <p class="adm-ajuda" th:if="${pedido.status.name() == 'CANCELADO'}">Pedido cancelado: o estoque já voltou para a loja e a etapa não muda mais.</p>
+                    <p class="adm-ajuda" th:unless="${pedido.status.name() == 'CANCELADO'}">Cancelar devolve as peças ao estoque.</p>
+
+                    <label class="adm-rotulo" for="codigoRastreio">Código de rastreio</label>
+                    <input type="text" id="codigoRastreio" name="codigoRastreio" class="adm-campo" maxlength="40"
+                           placeholder="Ex.: AA123456789BR" th:value="${pedido.codigoRastreio}">
+
+                    <label class="adm-rotulo" for="observacao">Observação para a equipe</label>
+                    <textarea id="observacao" name="observacao" class="adm-campo" rows="3" maxlength="300"
+                              placeholder="Ex.: cliente pediu para entregar à tarde" th:text="${observacaoDigitada}"></textarea>
+
+                    <button type="submit" class="btn-comprar" th:text="${txt['pg.adminPedido.btnSalvar']}">Salvar acompanhamento</button>
+                </form>
+            </aside>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
+    <div class="overlay" id="overlay"></div>
+
+    <script th:src="@{/jshome.js(v=11)}"></script>
+    <script>
+        var copiar = document.getElementById('copiarCodigo');
+        copiar.addEventListener('click', function () {
+            var codigo = copiar.dataset.codigo;
+            (navigator.clipboard ? navigator.clipboard.writeText(codigo) : Promise.reject()).then(function () {
+                copiar.textContent = 'Copiado!';
+            }, function () {
+                window.prompt('Copie o código:', codigo);
+            });
+            setTimeout(function () { copiar.textContent = 'Copiar'; }, 2000);
+        });
+        if (document.querySelector('.cadastro-alerta') && window.history.replaceState) {
+            window.history.replaceState(null, '', window.location.pathname);
+        }
+    </script>
+</body>
+</html>

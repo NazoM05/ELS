@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+
+    <!-- CSS único do site: fontes, site.css e cores do painel (ver AGENTS.md) -->
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
+
+    <title th:replace="~{fragments/fragmentos :: titulo('Histórico de alterações')}">Histórico de alterações - Estilo London Store</title>
+
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico(v=2)}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png(v=2)}">
+</head>
+
+<body class="admin-ui pg-adminHistorico">
+
+    <div class="barrabranca">
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
+    </div>
+
+    <main class="listagem-container">
+
+        <header class="adm-topo">
+            <div>
+                <h1 class="adm-titulo">Histórico de alterações</h1>
+                <p class="adm-sub">
+                    Quem alterou cada pedido, quando, e o que mudou.
+                    · <strong th:text="${total == 1} ? '1 registro' : ${total} + ' registros'">0 registros</strong>
+                </p>
+            </div>
+        </header>
+
+        <!-- Filtros (GET: o endereço pode ser salvo ou compartilhado) -->
+        <form class="hist-filtros" th:action="@{/admin/historico}" method="get" aria-label="Filtrar histórico">
+            <label class="hist-campo">
+                <span class="adm-rotulo">Pedido</span>
+                <input type="search" name="codigo" th:value="${filtros['codigo']}" placeholder="Código do pedido" autocomplete="off">
+            </label>
+            <label class="hist-campo">
+                <span class="adm-rotulo">Quem alterou</span>
+                <input type="search" name="usuario" th:value="${filtros['usuario']}" placeholder="Nome ou e-mail" autocomplete="off">
+            </label>
+            <label class="hist-campo">
+                <span class="adm-rotulo">Etapa</span>
+                <select name="etapa">
+                    <option value="">Todas</option>
+                    <option th:each="s : ${statusPedido}" th:value="${s.name()}" th:text="${s.rotulo}"
+                            th:selected="${filtros['etapa'] == s.name()}">Etapa</option>
+                </select>
+            </label>
+            <label class="hist-campo">
+                <span class="adm-rotulo">De</span>
+                <input type="date" name="de" th:value="${filtros['de']}">
+            </label>
+            <label class="hist-campo">
+                <span class="adm-rotulo">Até</span>
+                <input type="date" name="ate" th:value="${filtros['ate']}">
+            </label>
+            <label class="hist-check">
+                <input type="checkbox" name="soEtapas" value="true" th:checked="${filtros['soEtapas'] == 'true'}">
+                <span>Só mudanças de etapa</span>
+            </label>
+            <div class="hist-botoes">
+                <button type="submit" class="adm-btn adm-btn-sec">Filtrar</button>
+                <a class="hist-limpar" th:if="${temFiltro}" th:href="@{/admin/historico}">Limpar filtros</a>
+            </div>
+        </form>
+
+        <section class="listagem-painel ativo">
+            <table class="listagem-tabela hist-tabela">
+                <thead>
+                    <tr>
+                        <th>Quando</th>
+                        <th>Pedido</th>
+                        <th>Quem alterou</th>
+                        <th>Etapa (anterior → nova)</th>
+                        <th>Rastreio (anterior → novo)</th>
+                        <th>Observação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="h : ${registros}" class="hist-linha">
+                        <td class="hist-quando" data-rotulo="Quando" th:text="${h.criadoEmCompleto}">01/01/2026 10:00:00</td>
+                        <td data-rotulo="Pedido">
+                            <a class="pedidos-codigo" th:href="@{'/admin/pedidos/' + ${h.pedido.codigo}}" th:text="${h.pedido.codigo}">EL-000000-AAAA</a>
+                        </td>
+                        <td data-rotulo="Quem alterou">
+                            <div class="hist-cel">
+                                <strong class="hist-quem" th:text="${h.responsavel != null} ? ${h.responsavel} : 'Equipe'">Equipe</strong>
+                                <small class="listagem-meta" th:if="${h.usuarioLogin != null and h.usuarioLogin != h.responsavel}" th:text="${h.usuarioLogin}">login</small>
+                            </div>
+                        </td>
+                        <td data-rotulo="Etapa">
+                            <div class="hist-cel">
+                                <span class="hist-mudanca">
+                                    <th:block th:if="${h.mudouEtapa}">
+                                        <span class="status-pedido" th:classappend="'status-pedido-' + ${h.statusAnterior.classe}" th:text="${h.statusAnterior.rotulo}">Anterior</span>
+                                        <span class="hist-seta" aria-label="para">→</span>
+                                    </th:block>
+                                    <span class="hist-novo" th:if="${h.criacao}">Pedido criado:</span>
+                                    <span class="status-pedido" th:classappend="'status-pedido-' + ${h.status.classe}" th:text="${h.status.rotulo}">Nova</span>
+                                </span>
+                                <small class="listagem-meta" th:if="${!h.criacao and !h.mudouEtapa}">Etapa mantida</small>
+                            </div>
+                        </td>
+                        <td data-rotulo="Rastreio">
+                            <span class="hist-mudanca" th:if="${h.alterouRastreio}">
+                                <span class="hist-valor" th:text="${h.rastreioAnterior != null} ? ${h.rastreioAnterior} : '(vazio)'">—</span>
+                                <span class="hist-seta" aria-label="para">→</span>
+                                <span class="hist-valor" th:text="${h.rastreioNovo != null} ? ${h.rastreioNovo} : '(removido)'">—</span>
+                            </span>
+                            <span class="hist-vazio" th:unless="${h.alterouRastreio}">—</span>
+                        </td>
+                        <td class="hist-obs" data-rotulo="Observação" th:text="${h.observacao != null} ? ${h.observacao} : '—'">—</td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(registros)}" class="listagem-vazio">
+                        <td colspan="6" th:text="${temFiltro} ? 'Nenhuma alteração encontrada com esses filtros.' : 'Nenhuma alteração registrada ainda.'">Nenhuma alteração registrada ainda.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <nav th:replace="~{fragments/fragmentos :: paginacao}"></nav>
+    </main>
+
+    <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
+    <div class="overlay" id="overlay"></div>
+
+    <script th:src="@{/jshome.js(v=11)}"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Conheça a Estilo London Store: moda masculina, feminina e unissex com estilo urbano e preço justo.">
+
+    <!-- CSS único do site: fontes, site.css e cores do painel (ver AGENTS.md) -->
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
+
+    <title th:replace="~{fragments/fragmentos :: titulo(${txt['pg.sobre.titulo']})}">Sobre nós - Estilo London Store</title>
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico(v=2)}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png(v=2)}">
+</head>
+
+<body class="institucional-pagina pg-sobre">
+    <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
+
+    <div class="barrabranca">
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
+        <button th:replace="~{fragments/fragmentos :: botao-carrinho}"></button>
+    </div>
+
+    <main class="institucional">
+        <nav class="institucional-menu" aria-label="Páginas institucionais">
+            <a th:href="@{/sobre}" th:classappend="${paginaInstitucional == 'sobre'} ? 'atual'" th:attr="aria-current=${paginaInstitucional == 'sobre'} ? 'page'" th:text="${txt['geral.rodapeSobre']}">Sobre nós</a>
+            <a th:href="@{/frete-e-entrega}" th:classappend="${paginaInstitucional == 'frete'} ? 'atual'" th:attr="aria-current=${paginaInstitucional == 'frete'} ? 'page'" th:text="${txt['geral.rodapeFrete']}">Frete e Entrega</a>
+            <a th:href="@{/trocas-e-devolucoes}" th:classappend="${paginaInstitucional == 'trocas'} ? 'atual'" th:attr="aria-current=${paginaInstitucional == 'trocas'} ? 'page'" th:text="${txt['geral.rodapeTrocas']}">Trocas e Devoluções</a>
+            <a th:href="@{/politica-de-privacidade}" th:classappend="${paginaInstitucional == 'privacidade'} ? 'atual'" th:attr="aria-current=${paginaInstitucional == 'privacidade'} ? 'page'" th:text="${txt['geral.rodapePrivacidade']}">Política de Privacidade</a>
+        </nav>
+
+        <article class="institucional-texto">
+            <div class="inst-topic-mark inst-topic-sobre" aria-label="IDENTIDADE E ESTILO"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16l-1 12H5zM8 8l1-4h6l1 4"/><path d="m12 11 1.2 2.3 2.6.4-1.9 1.8.5 2.6-2.4-1.2-2.4 1.2.5-2.6-1.9-1.8 2.6-.4z"/></svg></span><strong>IDENTIDADE E ESTILO</strong><i aria-hidden="true"></i></div>
+
+            <header class="inst-hero">
+                <div class="inst-hero-copy">
+                    <p class="institucional-kicker" th:unless="${#strings.isEmpty(txt['pg.sobre.kicker'])}" th:text="${txt['pg.sobre.kicker']}">Estilo London Store</p>
+                    <h1 class="adm-titulo" th:text="${txt['pg.sobre.h1']}">Sobre nós</h1>
+                    <p class="institucional-lead" th:text="${txt['pg.sobre.lead']}">Somos uma loja de moda com estilo urbano, feita para quem quer se vestir bem no dia a dia sem complicação.</p>
+                    <div class="institucional-acoes"><a class="btn-comprar" th:href="@{/home}" th:text="${txt['pg.sobre.btn']}">Conhecer a coleção</a></div>
+                </div>
+                <aside class="inst-hero-aside"><span class="inst-aside-eyebrow">NOSSA ESSÊNCIA</span><strong>Estilo para acompanhar você.</strong><p>Uma experiência de compra simples, com informações claras para ajudar na escolha de cada peça.</p><span class="inst-aside-mark">ESTILO LONDON STORE</span></aside>
+            </header>
+
+            <section class="inst-section" aria-labelledby="sobre-proposta"><div class="inst-section-heading"><span class="inst-index">01 / A LOJA</span><h2 id="sobre-proposta">Moda para diferentes estilos e momentos</h2><p>Uma seleção pensada para compor o dia a dia, com variedade de categorias e opções para diferentes públicos.</p></div>
+                <div class="inst-feature-grid">
+                    <div class="inst-feature-card"><span class="inst-card-number">01</span><h3>Moda masculina</h3><p>Camisetas, camisas, calças, bermudas, jaquetas, moletons e acessórios.</p></div>
+                    <div class="inst-feature-card"><span class="inst-card-number">02</span><h3>Moda feminina</h3><p>Vestidos, saias, camisetas, calças, jaquetas e outras peças para compor combinações.</p></div>
+                    <div class="inst-feature-card"><span class="inst-card-number">03</span><h3>Estilo unissex</h3><p>Opções versáteis para quem busca conforto e liberdade na hora de se vestir.</p></div>
+                </div>
+            </section>
+            <section class="inst-section" aria-labelledby="sobre-experiencia"><div class="inst-section-heading"><span class="inst-index">02 / EXPERIÊNCIA</span><h2 id="sobre-experiencia">Uma compra mais simples, do início ao fim</h2><p>Organizamos informações importantes para que você escolha com mais segurança.</p></div>
+                <div class="inst-benefit-list">
+                    <div class="inst-benefit"><span class="inst-icon">✓</span><div><h3>Estoque informado</h3><p>As opções disponíveis são apresentadas na página do produto. Quando um tamanho acaba, ele aparece como esgotado.</p></div></div>
+                    <div class="inst-benefit"><span class="inst-icon">↔</span><div><h3>Guia de medidas</h3><p>Consulte a tabela de tamanhos disponível nas peças para comparar as medidas antes de escolher.</p></div></div>
+                    <div class="inst-benefit"><span class="inst-icon">♡</span><div><h3>Compra e pós-venda</h3><p>Você encontra informações sobre pagamento, entrega, trocas e devoluções nas páginas institucionais.</p></div></div>
+                </div>
+            </section>
+            <section class="inst-contact-panel"><div><span class="inst-index">03 / CONTE COM A GENTE</span><h2>Estamos aqui para ajudar.</h2><p>Dúvidas, sugestões ou elogios? Entre em contato por e-mail. Respondemos em dias úteis.</p></div><a href="mailto:contato@seudominio.com.br" class="inst-contact-link">contato@seudominio.com.br <span>↗</span></a></section>
+
+        </article>
+    </main>
+
+    <footer th:replace="~{fragments/fragmentos :: rodape}"></footer>
+
+    <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
+    <th:block th:replace="~{fragments/fragmentos :: carrinho-drawer}"></th:block>
+    <div class="overlay" id="overlay"></div>
+
+    <script th:src="@{/jshome.js(v=11)}"></script>
+    <script th:src="@{/institucional.js(v=3)}"></script>
+</body>
+</html>

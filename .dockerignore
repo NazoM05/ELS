@@ -1,0 +1,14 @@
+target/
+dados/
+uploads/
+.git/
+.idea/
+.vscode/
+.settings/
+.classpath
+.project
+.factorypath
+*.md
+docs/
+src/main/resources/secrets-local.properties
+.env

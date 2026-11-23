@@ -4,43 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" th:href="@{/css/global.css(v=1)}">
-    <!-- Ajustes de layout e usabilidade das telas de administração -->
-    <link rel="stylesheet" th:href="@{/css/admin.css(v=1)}">
-    <title>Editar produto - Estilo London Store</title>
-    <link rel="icon" type="image/png" href="/Gemini_Generated_Image_kujj8zkujj8zkujj-removebg-preview.png">
+    <!-- CSS único do site: fontes, site.css e cores do painel (ver AGENTS.md) -->
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
+
+    <title th:replace="~{fragments/fragmentos :: titulo(${txt['pg.adminEditar.titulo']})}">Editar produto - Estilo London Store</title>
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico(v=2)}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png(v=2)}">
 </head>
 
-<body class="admin-ui">
+<body class="admin-ui pg-adminEditar">
 
     <!-- Barra de anúncios -->
-    <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
 
     <!-- Barra branca com menu -->
     <div class="barrabranca">
-        <button class="menu-btn" id="menuBtn" aria-label="Abrir menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
     </div>
 
     <main class="cadastro-container">
 
         <a class="adm-voltar" th:href="@{/admin/produto/listar}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
-            Voltar para produtos
+            <th:block th:text="${txt['pg.adminEditar.voltar']}">Voltar para produtos</th:block>
         </a>
 
         <section class="cadastro-form-box">
-            <h2>Editar produto</h2>
+            <h2 th:text="${txt['pg.adminEditar.h2']}">Editar produto</h2>
 
             <!-- Envia para AdminController: POST /admin/produto/salvar -->
             <form th:action="@{/admin/produto/salvar}" th:object="${produto}" method="post" enctype="multipart/form-data" class="cadastro-form">
 
                 <!-- Campos preservados: sem o id o Spring criaria um produto novo -->
                 <input type="hidden" th:field="*{id}">
-                <input type="hidden" th:field="*{imagem}">
+                <input type="hidden" th:field="*{imagemFrente}">
+                <input type="hidden" th:field="*{imagemCostas}">
+                <input type="hidden" th:field="*{imagemModelo}">
+                <input type="hidden" th:field="*{imagemGuiaTamanhos}">
 
                 <div class="cadastro-campo adm-c4">
                     <label for="nome">Nome do produto</label>
@@ -65,17 +66,14 @@
                     <input type="text" id="tipo" th:field="*{tipo}">
                 </div>
 
-                <div class="cadastro-campo adm-c3">
-                    <label for="tamanhoDisponivel">Tamanhos disponíveis</label>
-                    <!-- Guarda a lista completa (ex.: "P,M,G") para não perder tamanhos ao salvar -->
-                    <input type="hidden" th:field="*{tamanho}">
-                    <select id="tamanhoDisponivel">
-                        <option th:each="t : ${produto.tamanhosDisponiveis}" th:value="${t}" th:text="${t}"></option>
-                        <option th:if="${#lists.isEmpty(produto.tamanhosDisponiveis)}" value="">Nenhum tamanho cadastrado</option>
-                    </select>
-                </div>
+                <div th:replace="~{fragments/campos-produto :: categoria(${produto})}"></div>
+                <div th:replace="~{fragments/campos-produto :: genero(${produto})}"></div>
 
-                <div class="cadastro-campo adm-c3">
+                <div th:replace="~{fragments/campos-produto :: outlet(${produto})}"></div>
+                <div th:replace="~{fragments/campos-produto :: descricao(${produto})}"></div>
+                <div th:replace="~{fragments/campos-produto :: tamanhos(${produto})}"></div>
+
+                <div class="cadastro-campo adm-c6">
                     <span class="adm-rotulo" id="rotuloStatus">Situação</span>
                     <div class="adm-chips" role="radiogroup" aria-labelledby="rotuloStatus">
                         <label class="adm-chip">
@@ -89,17 +87,11 @@
                     </div>
                 </div>
 
-                <div class="cadastro-campo cadastro-campo-imagem adm-c6">
-                    <span class="adm-rotulo" id="rotuloImagem">Imagem</span>
-                    <img id="imagemAtual" class="cadastro-previa" alt="Imagem do produto"
-                         th:src="*{imagem != null} ? @{'/img/' + *{imagem}} : 'https://placehold.co/400x500/ffb6c1/ffffff?text=Sem+foto'">
-                    <label for="arquivoImagem" class="adm-ajuda">Para trocar a imagem, escolha um novo arquivo (opcional).</label>
-                    <input type="file" id="arquivoImagem" name="arquivoImagem" accept="image/*">
-                </div>
+                <div th:replace="~{fragments/campos-produto :: imagens(${produto})}"></div>
 
                 <div class="adm-acoes">
-                    <a th:href="@{/admin/produto/listar}" class="adm-btn adm-btn-sec">Cancelar</a>
-                    <button type="submit" class="btn-comprar cadastro-btn-salvar adm-btn">Salvar alterações</button>
+                    <a th:href="@{/admin/produto/listar}" class="adm-btn adm-btn-sec" th:text="${txt['pg.adminEditar.btnCancelar']}">Cancelar</a>
+                    <button type="submit" class="btn-comprar cadastro-btn-salvar adm-btn" th:text="${txt['pg.adminEditar.btnSalvar']}">Salvar alterações</button>
                 </div>
             </form>
         </section>
@@ -108,15 +100,6 @@
    <div th:replace="~{fragments/fragmentos :: sidebar}" ></div>
     <div class="overlay" id="overlay"></div>
 
-    <script th:src="@{/jshome.js(v=4)}"></script>
-    <script>
-        // Mostra a nova imagem escolhida no lugar da atual, antes de salvar
-        const entrada = document.getElementById('arquivoImagem');
-        const atual = document.getElementById('imagemAtual');
-        entrada.addEventListener('change', () => {
-            const arquivo = entrada.files[0];
-            if (arquivo) { atual.src = URL.createObjectURL(arquivo); }
-        });
-    </script>
+    <script th:src="@{/jshome.js(v=11)}"></script>
 </body>
 </html>

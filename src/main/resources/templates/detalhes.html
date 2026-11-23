@@ -1,153 +1,219 @@
 <!DOCTYPE html>
-
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- CSS global único do site -->
-    <link rel="stylesheet" th:href="@{/css/global.css(v=1)}">
+    <!-- CSS único do site: fontes, site.css e cores do painel (ver AGENTS.md) -->
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
 
-    <title>Detalhes do produto - Estilo London Store</title>
+    <th:block th:with="ogImagem=${not #lists.isEmpty(produto.galeria)} ? @{'/img/' + ${produto.galeria[0].arquivo}} : (${produto.imagemFrente != null} ? @{'/img/' + ${produto.imagemFrente}} : @{/img/sem-foto.svg})">
+        <title th:text="${produto.nome} + ' - ' + ${txt['geral.nomeLoja']}">Detalhes do produto - Estilo London Store</title>
+        <meta property="og:title" th:content="${produto.nome} + ' - ' + ${txt['geral.nomeLoja']}">
+        <meta property="og:description" th:content="${'R$ ' + #numbers.formatDecimal(produto.precoComDescontoOutlet, 1, 'POINT', 2, 'COMMA') + ' · Confira este produto na ' + txt['geral.nomeLoja']}">
+        <meta property="og:image" th:content="${siteBaseUrl + ogImagem}">
+        <meta property="og:url" th:content="${siteBaseUrl + '/detalhes/' + produto.id}">
+        <meta property="og:type" content="product">
+    </th:block>
 
-    <link rel="icon" type="image/png" href="/Gemini_Generated_Image_kujj8zkujj8zkujj-removebg-preview.png">
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico(v=2)}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png(v=2)}">
 </head>
 
+<body class="pg-detalhes">
 
-<body>
-
-    <!-- Barra de anúncios (a mesma da home) -->
     <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
 
-    <!-- Mesma barra branca da home -->
     <div class="barrabranca">
-        <button class="menu-btn" id="menuBtn">
+        <button class="menu-btn" id="menuBtn" aria-label="Abrir menu">
             <span></span>
             <span></span>
             <span></span>
         </button>
-        <form class="search-form" action="#" method="get">
-            <input type="text" name="search" placeholder="Pesquisar...">
-            <button type="submit">Buscar</button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
+        <form class="search-form busca-loja" action="#" method="get">
+            <input type="text" name="search" th:placeholder="${txt['geral.buscaPlaceholder']}">
+            <button type="submit" th:aria-label="${txt['geral.buscaBotao']}" th:title="${txt['geral.buscaBotao']}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></button>
         </form>
+        <button th:replace="~{fragments/fragmentos :: botao-carrinho}"></button>
     </div>
 
-    <main class="detalhes-container"
-          th:with="foto=${produto.imagem != null} ? @{'/img/' + ${produto.imagem}} : 'https://placehold.co/400x500/ffb6c1/ffffff?text=Sem+foto'">
+    <main class="detalhes-container">
 
-        <!-- Voltar / caminho -->
         <nav class="detalhes-voltar">
-            <a th:href="@{/}">Voltar</a>
+            <a th:href="@{/home}" th:text="${txt['pg.detalhes.voltar']}">Voltar</a>
             <span>›</span>
-            <span>Roupas</span>
-            <span>›</span>
+
+            <th:block th:if="${produto.genero == null and produto.categoria == null}">
+                <span>Roupas</span>
+                <span>›</span>
+            </th:block>
+            <th:block th:if="${produto.genero != null}">
+                <a class="detalhes-voltar-filtro" th:href="@{/home(genero=${produto.genero.name()})}"
+                   th:text="${produto.genero.rotulo}">Masculino</a>
+                <span>›</span>
+            </th:block>
+            <th:block th:if="${produto.categoria != null}">
+                <a class="detalhes-voltar-filtro"
+                   th:href="${produto.genero != null} ? @{/home(genero=${produto.genero.name()},categoria=${produto.categoria.name()})} : @{/home(categoria=${produto.categoria.name()})}"
+                   th:text="${produto.categoria.rotulo}">Camisa</a>
+                <span>›</span>
+            </th:block>
             <span th:text="${produto.nome}">Produto</span>
         </nav>
 
-        <!-- --cor-produto vem da coluna "cor" (null/desconhecida => cinza neutro definido no CSS) -->
-        <section class="detalhes-box"
-                 th:style="${produto.corCss != null} ? |--cor-produto: ${produto.corCss}|">
+		<section class="detalhes-box"
+		     th:with="galeria=${produto.galeria},
+		              imgCarr=${not #lists.isEmpty(galeria)} ? @{'/img/' + ${galeria[0].arquivo}} : (${produto.imagemFrente != null} ? @{'/img/' + ${produto.imagemFrente}} : @{/img/sem-foto.svg})"
+		     th:classappend="${#lists.size(galeria) lt 2} ? 'sem-miniaturas'"
+		     th:style="${produto.corCss != null} ? |--cor-produto: ${produto.corCss}|"
+		     th:attr="data-produto-id=${produto.id},
+		              data-produto-nome=${produto.nome},
+		              data-produto-preco=${produto.precoComDescontoOutlet},
+		              data-produto-imagem=${imgCarr},
+		              data-produto-link=@{'/detalhes/' + ${produto.id}}">
 
-            <!-- Miniaturas -->
-            <div class="detalhes-miniaturas">
-                <img class="ativa" th:src="${foto}" alt="Foto 1">
-                <img th:src="${foto}" alt="Foto 2">
-                <img th:src="${foto}" alt="Foto 3">
-                <img th:src="${foto}" alt="Foto 4">
+            <div class="detalhes-miniaturas" id="galeriaMiniaturas" role="group" aria-label="Fotos do produto"
+                 th:if="${#lists.size(galeria) gt 1}">
+                <button type="button" class="detalhes-mini" th:each="item, st : ${galeria}"
+                        th:classappend="${st.first} ? 'ativa'"
+                        th:title="${item.rotulo}"
+                        th:attr="data-chave=${item.chave},data-src=@{'/img/' + ${item.arquivo}},data-rotulo=${item.rotulo},aria-label=|Ver foto: ${item.rotulo}|,aria-pressed=${st.first ? 'true' : 'false'}">
+                    <img th:src="@{'/img/' + ${item.arquivo}}" alt="" loading="lazy" decoding="async">
+                    <span th:text="${item.rotuloCurto}">Frente</span>
+                </button>
             </div>
 
-            <!-- Imagem principal -->
             <div class="detalhes-imagem">
-                <img id="imagemPrincipal" th:src="${foto}"
-                     th:alt="${produto.nome}" alt="Produto">
+                <img id="imagemPrincipal"
+                     th:src="${#lists.isEmpty(galeria)} ? @{/img/sem-foto.svg} : @{'/img/' + ${galeria[0].arquivo}}"
+                     th:alt="${#lists.isEmpty(galeria)} ? |${produto.nome} (sem foto disponível)| : |${produto.nome} - ${galeria[0].rotulo}|"
+                     th:data-nome="${produto.nome}"
+                     th:data-sem-foto="@{/img/sem-foto.svg}"
+                     alt="Produto">
+                <button type="button" class="btn-favorito js-btn-favorito" aria-pressed="false"
+                        aria-label="Adicionar aos favoritos" title="Adicionar aos favoritos">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                </button>
+                <button type="button" class="detalhes-ampliar" id="btnAmpliar" aria-label="Ampliar imagem"
+                        th:if="${not #lists.isEmpty(galeria)}" th:text="'🔍 ' + ${txt['pg.detalhes.ampliar']}">&#x1F50D; Ampliar</button>
+                <p class="detalhes-legenda" id="legendaImagem" aria-live="polite"
+                   th:if="${not #lists.isEmpty(galeria)}" th:text="${galeria[0].rotulo}">Frente</p>
             </div>
 
-            <!-- Informações -->
             <div class="detalhes-info">
-                <p class="detalhes-status">Novo | +100 vendidos</p>
+                <p class="detalhes-status" th:unless="${#strings.isEmpty(txt['pg.detalhes.status'])}" th:text="${txt['pg.detalhes.status']}">Novo | +100 vendidos</p>
 
                 <h1 class="detalhes-titulo" th:text="${produto.nome}">Nome do produto</h1>
 
-                <p class="detalhes-avaliacao">4.9 ★★★★★ (120)</p>
+                <p class="detalhes-avaliacao" th:unless="${#strings.isEmpty(txt['pg.detalhes.avaliacao'])}" th:text="${txt['pg.detalhes.avaliacao']}">4.9 ★★★★★ (120)</p>
 
-                <p class="preco-antigo">R$ 199,90</p>
-                <p class="preco detalhes-preco" th:text="${produto.preco}">R$ 0,00</p>
-                <p class="detalhes-pagamento">ou em até 3x sem juros</p>
+                <p class="preco-antigo preco-antigo-outlet" th:if="${produto.outlet}"
+                   th:text="${'R$ ' + #numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')}">R$ 199,90</p>
+                <p class="preco detalhes-preco" th:text="${'R$ ' + #numbers.formatDecimal(produto.precoComDescontoOutlet, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</p>
+                <p class="outlet-desconto" th:if="${produto.outlet}" th:text="${produto.descontoOutlet} + '% OFF no Outlet'"></p>
+                <p class="detalhes-pagamento" th:unless="${#strings.isEmpty(txt['pg.detalhes.pagamento'])}" th:text="${txt['pg.detalhes.pagamento']}">ou em até 3x sem juros</p>
 
                 <p class="detalhes-opcao detalhes-cor">
-                    Cor:
+                    <th:block th:text="${txt['pg.detalhes.rotuloCor']}">Cor:</th:block>
                     <span class="detalhes-cor-amostra" aria-hidden="true"></span>
                     <strong th:text="${produto.cor != null and !#strings.isEmpty(#strings.trim(produto.cor))} ? ${produto.cor} : 'Não informada'">Rosa</strong>
                 </p>
 
-                <p class="detalhes-opcao">Tamanho:</p>
-                <div class="detalhes-tamanhos">
-                    <button type="button">P</button>
-                    <button type="button" class="ativo">M</button>
-                    <button type="button">G</button>
-                    <button type="button">GG</button>
+                <p class="detalhes-opcao" th:text="${txt['pg.detalhes.rotuloTamanho']}">Tamanho:</p>
+                <!-- Tamanhos do cadastro do produto; sem estoque fica desabilitado -->
+                <div class="detalhes-tamanhos" role="radiogroup" aria-label="Tamanho do produto">
+                    <button type="button" th:each="linha : ${produto.estoquePorTamanho}"
+                            th:with="esgotado=${linha.quantidade == null or linha.quantidade le 0},
+                                     ativo=${linha.tamanho == produto.tamanhoInicial}"
+                            th:text="${linha.tamanho}"
+                            th:classappend="${ativo} ? 'ativo'"
+                            th:disabled="${esgotado}"
+                            th:title="${esgotado} ? 'Esgotado' : (${linha.situacao == 'BAIXO'} ? |Últimas ${linha.quantidade} unidades| : null)"
+                            th:attr="data-tamanho=${linha.tamanho},aria-checked=${ativo ? 'true' : 'false'}">M</button>
                 </div>
+                <p class="detalhes-sem-tamanho" th:if="${produto.tamanhoInicial == null}">Nenhum tamanho disponível no momento.</p>
 
-                <h2 class="detalhes-subtitulo">O que você precisa saber sobre este produto</h2>
+                <h2 class="detalhes-subtitulo" th:text="${txt['pg.detalhes.subtitulo']}">O que você precisa saber sobre este produto</h2>
                 <ul class="detalhes-lista">
-                    <li>Tecido macio e confortável.</li>
-                    <li>Modelagem que veste bem no dia a dia.</li>
-                    <li>Lavagem fácil.</li>
+                    <li th:each="n : ${ {1, 2, 3} }" th:unless="${#strings.isEmpty(txt['pg.detalhes.item' + n])}"
+                        th:text="${txt['pg.detalhes.item' + n]}">Tecido macio e confortável.</li>
                 </ul>
             </div>
 
-            <!-- Caixa de compra -->
             <aside class="detalhes-compra">
-                <p class="detalhes-frete"><strong>Frete grátis</strong> acima de R$ 99</p>
-                <p>Chegará em poucos dias úteis.</p>
+                <p class="detalhes-frete" th:unless="${#strings.isEmpty(txt['pg.detalhes.freteDestaque']) and #strings.isEmpty(txt['pg.detalhes.freteTexto'])}"><strong th:text="${txt['pg.detalhes.freteDestaque']}">Frete grátis</strong> <th:block th:text="${txt['pg.detalhes.freteTexto']}">a partir de R$ 99 no Sul e de R$ 250 nas demais regiões</th:block></p>
+                <p th:unless="${#strings.isEmpty(txt['pg.detalhes.prazo'])}" th:text="${txt['pg.detalhes.prazo']}">Chegará em poucos dias úteis.</p>
 
-                <p class="detalhes-estoque">Estoque disponível</p>
+                <p class="detalhes-estoque" th:text="${produto.tamanhoInicial != null} ? ${txt['pg.detalhes.estoque']} : ${txt['pg.detalhes.esgotado']}">Estoque disponível</p>
 
-                <label for="quantidade">Quantidade:</label>
-                <select id="quantidade">
-                    <option>1 unidade</option>
-                    <option>2 unidades</option>
-                    <option>3 unidades</option>
+                <label for="quantidade" th:text="${txt['pg.detalhes.quantidade']}">Quantidade:</label>
+                <select id="quantidade" class="js-qtd-input">
+                    <option value="1">1 unidade</option>
+                    <option value="2">2 unidades</option>
+                    <option value="3">3 unidades</option>
                 </select>
 
-                <button type="button" class="btn-comprar">Comprar agora</button>
-                <button type="button" class="btn-comprar btn-secundario">Adicionar ao carrinho</button>
+                <!-- "Comprar agora" põe no carrinho e já leva para a finalização da compra -->
+                <button type="button" class="btn-comprar js-add-carrinho" data-ir-checkout
+                        th:attr="data-tamanho=${produto.tamanhoInicial}" th:disabled="${produto.tamanhoInicial == null}" th:text="${txt['pg.detalhes.btnComprar']}">Comprar agora</button>
+                <button type="button" class="btn-comprar btn-secundario js-add-carrinho"
+                        th:attr="data-tamanho=${produto.tamanhoInicial}" th:disabled="${produto.tamanhoInicial == null}" th:text="${txt['pg.detalhes.btnCarrinho']}">Adicionar ao carrinho</button>
 
-                <p class="detalhes-vendedor">Vendido por <strong>Estilo London Store</strong></p>
+                <p class="detalhes-vendedor"><th:block th:text="${txt['pg.detalhes.vendidoPor']}">Vendido por</th:block> <strong th:text="${txt['geral.nomeLoja']}">Estilo London Store</strong></p>
             </aside>
 
         </section>
+
+        <section class="container-produtos" th:if="${produtosRecomendados != null and !#lists.isEmpty(produtosRecomendados)}"
+                 aria-label="Produtos recomendados">
+            <h2 class="secao-titulo" th:text="${txt['pg.detalhes.recomendados']}">Produtos recomendados</h2>
+
+            <div class="produtos-grid">
+                <div th:each="rec : ${produtosRecomendados}" class="produto-card"
+                     th:with="temCostas=${rec.imagemCostas != null and !#strings.isEmpty(rec.imagemCostas)}">
+
+                    <a class="produto-media" th:classappend="${temCostas} ? 'tem-costas'"
+                       th:href="@{'/detalhes/' + ${rec.id}}" th:aria-label="'Ver detalhes de ' + ${rec.nome}">
+                        <img class="img-frente"
+                             th:src="${rec.imagemFrente != null} ? @{'/img/' + ${rec.imagemFrente}} : 'https://placehold.co/400x500/e5e5e5/0a0a0a?text=Sem+foto'"
+                             th:alt="${rec.nome}" alt="Produto" loading="lazy">
+                        <img class="img-costas" th:if="${temCostas}"
+                             th:src="@{'/img/' + ${rec.imagemCostas}}"
+                             alt="" aria-hidden="true" loading="lazy">
+                    </a>
+
+                    <h3><a class="produto-titulo" th:href="@{'/detalhes/' + ${rec.id}}" th:text="${rec.nome}"></a></h3>
+
+                    <p class="preco">
+                        <span th:text="${'R$ ' + #numbers.formatDecimal(rec.preco, 1, 'POINT', 2, 'COMMA')}"></span>
+                    </p>
+
+                    <p class="parcelamento" th:if="${rec.preco instanceof T(java.lang.Number)}"
+                       th:text="${txt['geral.cardParcelamento']} + ' R$ ' + ${#numbers.formatDecimal(rec.preco / 12, 1, 'POINT', 2, 'COMMA')}"></p>
+                </div>
+            </div>
+        </section>
     </main>
 
-    <!-- Mesma sidebar e overlay da home -->
-    <div th:replace="~{fragments/fragmentos :: sidebar}" ></div>
+    <footer th:replace="~{fragments/fragmentos :: rodape}"></footer>
 
+    <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
+    <th:block th:replace="~{fragments/fragmentos :: carrinho-drawer}"></th:block>
     <div class="overlay" id="overlay"></div>
 
-    <script th:src="@{/jshome.js(v=4)}"></script>
+    <div class="zoom-modal" id="zoomModal" role="dialog" aria-modal="true" aria-label="Visualizador de imagem" hidden>
+        <button type="button" class="zoom-fechar" id="zoomFechar" aria-label="Fechar">&times;</button>
+        <button type="button" class="zoom-nav zoom-ant" id="zoomAnt" aria-label="Foto anterior">&#8249;</button>
+        <figure class="zoom-figura">
+            <img id="zoomImg" alt="">
+            <figcaption id="zoomLegenda"></figcaption>
+        </figure>
+        <button type="button" class="zoom-nav zoom-prox" id="zoomProx" aria-label="Próxima foto">&#8250;</button>
+    </div>
 
-    <!-- Troca a imagem principal ao clicar numa miniatura -->
-    <script>
-        document.querySelectorAll('.detalhes-miniaturas img').forEach(function (mini) {
-            mini.addEventListener('click', function () {
-                document.getElementById('imagemPrincipal').src = mini.src;
-                document.querySelectorAll('.detalhes-miniaturas img').forEach(function (i) {
-                    i.classList.remove('ativa');
-                });
-                mini.classList.add('ativa');
-            });
-        });
-        document.querySelectorAll('.detalhes-tamanhos button').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                document.querySelectorAll('.detalhes-tamanhos button').forEach(function (b) {
-                    b.classList.remove('ativo');
-                });
-                btn.classList.add('ativo');
-            });
-        });
-    </script>
-
+    <script th:src="@{/jshome.js(v=11)}"></script>
 </body>
-
 </html>

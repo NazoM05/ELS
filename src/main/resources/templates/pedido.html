@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSS único do site: fontes, site.css e cores do painel (ver AGENTS.md) -->
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
+
+    <title th:text="${txt['pg.pedido.titulo']} + ' ' + ${pedido.codigo} + ' - ' + ${txt['geral.nomeLoja']}">Pedido - Estilo London Store</title>
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico(v=2)}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png(v=2)}">
+</head>
+
+<body class="checkout-pagina pg-pedido">
+    <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
+
+    <div class="barrabranca">
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
+        <button th:replace="~{fragments/fragmentos :: botao-carrinho}"></button>
+    </div>
+
+    <main class="checkout-container pedido-container">
+
+        <section class="pedido-sucesso">
+            <span class="pedido-check" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+            </span>
+            <h1 class="adm-titulo" th:text="${pedidoNovo} ? ${txt['pg.pedido.confirmado']} : ${txt['pg.pedido.titulo']}">Pedido confirmado!</h1>
+            <div class="pedido-codigo-box">
+                <small th:text="${txt['pg.pedido.codigoRotulo']}">Código do pedido</small>
+                <span class="pedido-codigo" th:text="${pedido.codigo}">EL-000000-AAAA</span>
+            </div>
+            <p th:text="${txt['pg.pedido.codigoAviso']}">Guarde este código: é com ele que nossa equipe acompanha o seu pedido.</p>
+            <p>
+                Feito em <span th:text="${pedido.criadoEmFormatado}">01/01/2026</span>.
+                Pagamento por <strong th:text="${pedido.formaPagamento.rotulo}">Pix</strong>.
+                Situação: <span class="status-pedido" th:classappend="'status-pedido-' + ${pedido.status.classe}" th:text="${pedido.status.rotulo}">Aguardando pagamento</span>
+            </p>
+            <p th:if="${pedido.codigoRastreio != null}">
+                Rastreio: <strong th:text="${pedido.codigoRastreio}">AA123456789BR</strong>
+            </p>
+        </section>
+
+        <section class="cadastro-form-box checkout-box pedido-pix" id="pix-box"
+                 th:if="${pixDisponivel and pedido.aguardandoPix}"
+                 th:attr="data-status-url=@{'/pedido/' + ${pedido.id} + '/status'}">
+            <h2>Pague com Pix</h2>
+            <p class="campo-erro" th:if="${pixErro}" role="alert">Não foi possível gerar o Pix agora. Tente novamente em instantes.</p>
+
+            <div class="pix-conteudo" th:if="${pedido.pixAtivo}">
+                <img class="pix-qr" th:if="${pixQrImagem != null}"
+                     th:src="${pixQrImagem}" alt="QR Code do Pix" width="220" height="220">
+                <div class="pix-texto">
+                    <p>Abra o app do seu banco, escolha pagar com Pix e escaneie o QR Code, ou use o código copia e cola:</p>
+                    <textarea id="pix-codigo" class="pix-codigo" readonly rows="4" th:text="${pedido.pixCopiaECola}"></textarea>
+                    <button type="button" class="btn-comprar" id="pix-copiar">Copiar código</button>
+                    <p class="pix-validade">Vale até <strong th:text="${pedido.pixExpiraEmFormatado}">01/01/2026 às 12:00</strong>.
+                        Esta página se atualiza sozinha quando o pagamento for confirmado.</p>
+                </div>
+            </div>
+
+            <div class="pix-conteudo" th:unless="${pedido.pixAtivo}">
+                <div class="pix-texto">
+                    <p>Não há um Pix válido para este pedido (ele ainda não foi gerado ou já venceu).</p>
+                    <form th:action="@{'/pedido/' + ${pedido.id} + '/pix'}" method="post">
+                        <button type="submit" class="btn-comprar">Gerar Pix</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section class="cadastro-form-box checkout-box" th:if="${!pixDisponivel and pedido.aguardandoPix}">
+            <h2>Pagamento Pix indisponível</h2>
+            <p>O Asaas ainda não está configurado neste ambiente. O pedido foi registrado, mas o pagamento Pix será liberado quando a integração Sandbox estiver ativada.</p>
+        </section>
+
+        <div class="checkout-grid">
+            <div class="checkout-coluna">
+                <section class="cadastro-form-box checkout-box">
+                    <h2 th:text="${txt['pg.pedido.itens']}">Itens</h2>
+                    <ul class="checkout-itens">
+                        <li class="checkout-item" th:each="item : ${pedido.itens}">
+                            <img th:src="${item.imagem != null} ? @{'/img/' + ${item.imagem}} : @{/img/sem-foto.svg}"
+                                 th:alt="${item.nomeProduto}" alt="" loading="lazy">
+                            <div class="checkout-item-info">
+                                <span class="checkout-item-nome" th:text="${item.nomeProduto}">Produto</span>
+                                <p>
+                                    Tam. <strong th:text="${item.tamanho}">M</strong>
+                                    · Qtd. <strong th:text="${item.quantidade}">1</strong>
+                                    · Unit. <span th:text="${'R$ ' + #numbers.formatDecimal(item.precoUnitario, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</span>
+                                </p>
+                            </div>
+                            <span class="checkout-item-preco"
+                                  th:text="${'R$ ' + #numbers.formatDecimal(item.total, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</span>
+                        </li>
+                    </ul>
+                </section>
+
+                <section class="cadastro-form-box checkout-box">
+                    <h2 th:text="${txt['pg.pedido.entrega']}">Entrega</h2>
+                    <dl class="perfil-dados">
+                        <div>
+                            <dt>Recebe</dt>
+                            <dd th:text="${pedido.nomeDestinatario}">Nome</dd>
+                        </div>
+                        <div>
+                            <dt>Telefone</dt>
+                            <dd th:text="${#strings.length(pedido.telefone) == 11}
+                                    ? |(${#strings.substring(pedido.telefone,0,2)}) ${#strings.substring(pedido.telefone,2,7)}-${#strings.substring(pedido.telefone,7)}|
+                                    : |(${#strings.substring(pedido.telefone,0,2)}) ${#strings.substring(pedido.telefone,2,6)}-${#strings.substring(pedido.telefone,6)}|">(51) 99999-9999</dd>
+                        </div>
+                        <div class="pedido-endereco">
+                            <dt>Endereço</dt>
+                            <dd th:text="${pedido.enderecoCompleto}">Rua</dd>
+                        </div>
+                    </dl>
+                </section>
+            </div>
+
+            <aside class="checkout-resumo" aria-label="Valores do pedido">
+                <h2 th:text="${txt['pg.pedido.valores']}">Valores</h2>
+                <dl class="checkout-totais">
+                    <div>
+                        <dt th:text="|Subtotal (${pedido.quantidadeTotal} ${pedido.quantidadeTotal == 1 ? 'item' : 'itens'})|">Subtotal</dt>
+                        <dd th:text="${'R$ ' + #numbers.formatDecimal(pedido.subtotal, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</dd>
+                    </div>
+                    <div>
+                        <dt th:text="${pedido.servicoFrete != null} ? (${pedido.prazoFreteDias != null} ? |Frete (${pedido.servicoFrete}, até ${pedido.prazoFreteDias} dias úteis)| : |Frete (${pedido.servicoFrete})|) : 'Frete'">Frete</dt>
+                        <dd th:text="${pedido.freteGratis} ? 'Grátis' : ${'R$ ' + #numbers.formatDecimal(pedido.frete, 1, 'POINT', 2, 'COMMA')}">Grátis</dd>
+                    </div>
+                    <div class="checkout-total">
+                        <dt>Total</dt>
+                        <dd th:text="${'R$ ' + #numbers.formatDecimal(pedido.total, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</dd>
+                    </div>
+                </dl>
+                <a class="btn-comprar" th:href="@{/home}" th:text="${txt['pg.pedido.btnContinuar']}">Continuar comprando</a>
+            </aside>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
+    <th:block th:replace="~{fragments/fragmentos :: carrinho-drawer}"></th:block>
+    <div class="overlay" id="overlay"></div>
+
+    <script th:src="@{/jshome.js(v=11)}"></script>
+    <script th:if="${pedidoNovo}">
+        // Compra concluída: esvazia o carrinho guardado no navegador
+        window.EstiloLondonCarrinho?.limpar();
+    </script>
+    <script th:if="${pixDisponivel and pedido.aguardandoPix}">
+        (function () {
+            var box = document.getElementById('pix-box');
+            if (!box) return;
+            var botao = document.getElementById('pix-copiar');
+            var campo = document.getElementById('pix-codigo');
+            if (botao && campo) {
+                botao.addEventListener('click', function () {
+                    campo.select();
+                    var ok = navigator.clipboard ? navigator.clipboard.writeText(campo.value) : Promise.resolve(document.execCommand('copy'));
+                    Promise.resolve(ok).then(function () { botao.textContent = 'Código copiado!'; });
+                });
+            }
+            // Pergunta ao servidor a cada 5 s; quando o webhook confirmar o pagamento, recarrega a página
+            var url = box.getAttribute('data-status-url');
+            setInterval(function () {
+                fetch(url, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+                    .then(function (r) { return r.ok ? r.json() : null; })
+                    .then(function (d) { if (d && d.status !== 'AGUARDANDO_PAGAMENTO') location.reload(); })
+                    .catch(function () { });
+            }, 5000);
+        })();
+    </script>
+
+</body>
+</html>

@@ -109,6 +109,68 @@ body {
     transform: translateY(0);
 }
 
+/* Barra de anúncios — coleção Neon Miami 80s (Vice City)
+   Rotação só com CSS (não depende do JS da barra preta, então as duas
+   convivem). Cada aviso fica ~5s no ar; ciclo de 20s para 4 avisos.
+   Para mudar o texto, edite os <p> em fragmentos.html. */
+.barra-vicecity {
+    position: relative;
+    width: 100%;
+    height: 40px;
+    overflow: hidden;
+    color: #fff;
+    background: linear-gradient(90deg, #2a1650 0%, #7a2a8f 35%, #ff4fa3 70%, #ff8a3d 100%);
+}
+
+/* Faixa retrô de pôr do sol na base */
+.barra-vicecity::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #ffd23f, #ff8a3d, #ff4fa3, #1fd1c7);
+}
+
+.barra-vicecity .anuncio-vc {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 3px;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    font-family: var(--font-display, Impact, "Arial Narrow", sans-serif);
+    font-size: 15px;
+    line-height: 1.2;
+    letter-spacing: 0.1em;
+    text-align: center;
+    text-transform: uppercase;
+    text-shadow: 0 0 8px rgba(255, 79, 163, 0.65);
+    opacity: 0;
+    pointer-events: none;
+    animation: vc-gira 20s infinite backwards;
+}
+
+.barra-vicecity .anuncio-vc:nth-child(1) { animation-delay: 0s; }
+.barra-vicecity .anuncio-vc:nth-child(2) { animation-delay: 5s; }
+.barra-vicecity .anuncio-vc:nth-child(3) { animation-delay: 10s; }
+.barra-vicecity .anuncio-vc:nth-child(4) { animation-delay: 15s; }
+
+.barra-vicecity:hover .anuncio-vc { animation-play-state: paused; }
+
+@keyframes vc-gira {
+    0%   { opacity: 0; transform: translateY(8px); }
+    3%   { opacity: 1; transform: translateY(0); }
+    22%  { opacity: 1; transform: translateY(0); }
+    25%  { opacity: 0; transform: translateY(-8px); }
+    100% { opacity: 0; transform: translateY(-8px); }
+}
+
+
 /* Barra branca com menu e busca */
 .barrabranca {
     display: flex;
@@ -847,6 +909,11 @@ body {
         font-size: 12px;
     }
 
+    .barra-vicecity .anuncio-vc {
+        font-size: 12px;
+        letter-spacing: 0.06em;
+    }
+
     .detalhes-box {
         grid-template-columns: 1fr;
         padding: 14px;
@@ -881,5 +948,13 @@ body {
 @media (prefers-reduced-motion: reduce) {
     .barra-anuncios .anuncio {
         transition: none;
+    }
+
+    .barra-vicecity .anuncio-vc {
+        animation: none;
+    }
+
+    .barra-vicecity .anuncio-vc:first-child {
+        opacity: 1;
     }
 }

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Quais dados a Estilo London Store coleta, para que usa, com quem compartilha e como exercer seus direitos pela LGPD.">
+
+    <!-- CSS único do site: fontes, site.css e cores do painel (ver AGENTS.md) -->
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
+
+    <title th:replace="~{fragments/fragmentos :: titulo(${txt['pg.privacidade.titulo']})}">Política de Privacidade - Estilo London Store</title>
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico(v=2)}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png(v=2)}">
+</head>
+
+<body class="institucional-pagina pg-privacidade">
+    <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
+
+    <div class="barrabranca">
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
+        <button th:replace="~{fragments/fragmentos :: botao-carrinho}"></button>
+    </div>
+
+    <main class="institucional">
+        <nav class="institucional-menu" aria-label="Páginas institucionais">
+            <a th:href="@{/sobre}" th:classappend="${paginaInstitucional == 'sobre'} ? 'atual'" th:attr="aria-current=${paginaInstitucional == 'sobre'} ? 'page'" th:text="${txt['geral.rodapeSobre']}">Sobre nós</a>
+            <a th:href="@{/frete-e-entrega}" th:classappend="${paginaInstitucional == 'frete'} ? 'atual'" th:attr="aria-current=${paginaInstitucional == 'frete'} ? 'page'" th:text="${txt['geral.rodapeFrete']}">Frete e Entrega</a>
+            <a th:href="@{/trocas-e-devolucoes}" th:classappend="${paginaInstitucional == 'trocas'} ? 'atual'" th:attr="aria-current=${paginaInstitucional == 'trocas'} ? 'page'" th:text="${txt['geral.rodapeTrocas']}">Trocas e Devoluções</a>
+            <a th:href="@{/politica-de-privacidade}" th:classappend="${paginaInstitucional == 'privacidade'} ? 'atual'" th:attr="aria-current=${paginaInstitucional == 'privacidade'} ? 'page'" th:text="${txt['geral.rodapePrivacidade']}">Política de Privacidade</a>
+        </nav>
+
+        <article class="institucional-texto">
+            <div class="inst-topic-mark inst-topic-privacidade" aria-label="SEUS DADOS PROTEGIDOS"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v5c0 5-3.4 8.2-8 10-4.6-1.8-8-5-8-10V6z"/><rect x="8" y="10" width="8" height="6" rx="1"/><path d="M10 10V8a2 2 0 0 1 4 0v2"/></svg></span><strong>SEUS DADOS PROTEGIDOS</strong><i aria-hidden="true"></i></div>
+
+            <header class="inst-page-head"><p class="institucional-kicker" th:unless="${#strings.isEmpty(txt['pg.privacidade.kicker'])}" th:text="${txt['pg.privacidade.kicker']}">Seus dados</p><h1 class="adm-titulo" th:text="${txt['pg.privacidade.h1']}">Política de Privacidade</h1><p class="institucional-lead" th:text="${txt['pg.privacidade.lead']}">Explicamos aqui quais dados coletamos quando você usa a loja, para que usamos e quais são os seus direitos.</p><p class="institucional-data">Última atualização: 19 de novembro de 2026.</p></header>
+            <div class="inst-privacy-intro"><span class="inst-privacy-mark">i</span><div><strong>Privacidade com transparência</strong><p>Reunimos nesta página as informações sobre os dados tratados durante o uso da loja, os motivos desse tratamento e os canais para falar conosco.</p></div></div>
+            <nav class="inst-toc" aria-label="Nesta política"><strong>NESTA PÁGINA</strong><div><a href="#privacidade-responsavel">Quem somos</a><a href="#privacidade-dados">Dados coletados</a><a href="#privacidade-uso">Como usamos</a><a href="#privacidade-cookies">Cookies</a><a href="#privacidade-terceiros">Terceiros</a><a href="#privacidade-prazos">Armazenamento</a><a href="#privacidade-direitos">Seus direitos</a><a href="#privacidade-seguranca">Segurança</a><a href="#privacidade-atualizacoes">Atualizações</a></div></nav>
+            <section class="inst-privacy-section" id="privacidade-responsavel"><span class="inst-index">01 / RESPONSÁVEL</span><h2>Quem somos</h2><p>Estilo London Store, CNPJ 00.000.000/0001-00, Rua Exemplo, 123 - Cidade/UF, CEP 00000-000. Somos responsáveis pelos dados pessoais tratados nesta loja.</p><div class="inst-inline-contact"><span>Canal de contato</span><a href="mailto:contato@seudominio.com.br">contato@seudominio.com.br</a></div></section>
+            <section class="inst-privacy-section" id="privacidade-dados"><span class="inst-index">02 / DADOS</span><h2>Quais informações coletamos</h2><p>Os dados variam conforme as funcionalidades que você utiliza e as informações que decide fornecer.</p><div class="inst-privacy-cards"><div><span>01</span><h3>Conta</h3><p>Nome e e-mail usados na criação e no acesso à conta. A senha é guardada de forma criptografada; nem nós conseguimos lê-la.</p></div><div><span>02</span><h3>Perfil opcional</h3><p>CPF e data de nascimento, caso você escolha preencher esses campos no seu perfil.</p></div><div><span>03</span><h3>Pedidos</h3><p>Nome de quem recebe, telefone, endereço de entrega, peças compradas e forma de pagamento escolhida. Não pedimos nem guardamos número de cartão.</p></div><div><span>04</span><h3>Navegação</h3><p>Contamos quantas vezes a página de cada produto é aberta, sem saber quem a abriu.</p></div></div></section>
+            <section class="inst-privacy-section" id="privacidade-uso"><span class="inst-index">03 / FINALIDADE</span><h2>Para que usamos os dados</h2><div class="inst-privacy-purpose"><p><b>01</b><span>Criar e manter sua conta e permitir que você entre na loja.</span></p><p><b>02</b><span>Processar, entregar e dar suporte aos seus pedidos, incluindo trocas e devoluções.</span></p><p><b>03</b><span>Controlar o estoque e entender quais produtos interessam mais aos clientes.</span></p><p><b>04</b><span>Cumprir obrigações legais e fiscais.</span></p></div><div class="inst-privacy-callout"><strong>Transparência importa</strong><p>Não vendemos seus dados e não usamos seus dados para enviar propaganda.</p></div></section>
+            <section class="inst-privacy-section" id="privacidade-cookies"><span class="inst-index">04 / NAVEGADOR</span><h2>Cookies e dados guardados no navegador</h2><div class="inst-privacy-split"><div><h3>Cookie de sessão</h3><p>Quando você entra na sua conta, o navegador guarda um cookie que mantém você conectado. Ele é necessário para a loja funcionar e é apagado quando você sai ou fecha o navegador.</p></div><div><h3>Carrinho e lista de desejos</h3><p>Ficam guardados apenas no seu navegador (armazenamento local), não em um cookie. Os itens do carrinho só são enviados para nós quando você vai finalizar a compra. Você pode apagá-los limpando os dados do site no navegador.</p></div></div><p class="inst-muted-note">A loja não usa cookies de publicidade nem ferramentas de análise de terceiros.</p></section>
+            <section class="inst-privacy-section" id="privacidade-terceiros"><span class="inst-index">05 / COMPARTILHAMENTO</span><h2>Serviços de terceiros</h2><div class="inst-third-party-list"><div><h3>Google Fonts</h3><p>As fontes do site são carregadas dos servidores do Google. Ao abrir a página, seu navegador se conecta ao Google, que recebe dados técnicos como endereço IP e tipo de navegador. Consulte a <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">política de privacidade do Google</a>.</p></div><div><h3>Placehold.co</h3><p>Quando um produto ainda não tem foto, uma imagem de reserva é carregada desse serviço, que recebe os mesmos dados técnicos da conexão.</p></div><div><h3>Transportadoras</h3><p>Recebem nome, telefone e endereço de entrega para levar seu pedido.</p></div></div></section>
+            <section class="inst-privacy-section" id="privacidade-prazos"><span class="inst-index">06 / ARMAZENAMENTO</span><h2>Por quanto tempo guardamos</h2><div class="inst-retention-grid"><div><strong>Dados da conta</strong><p>Ficam guardados enquanto a conta existir.</p></div><div><strong>Dados dos pedidos</strong><p>São mantidos pelo prazo exigido pela legislação fiscal e de defesa do consumidor.</p></div></div></section>
+            <section class="inst-privacy-section" id="privacidade-direitos"><span class="inst-index">07 / LGPD</span><h2>Seus direitos</h2><p>Pela Lei Geral de Proteção de Dados (Lei nº 13.709/2018), você pode pedir a qualquer momento:</p><div class="inst-rights-grid"><div><b>01</b><h3>Confirmação e acesso</h3><p>Confirmação de que tratamos seus dados e acesso a eles.</p></div><div><b>02</b><h3>Correção</h3><p>Correção de dados incompletos ou desatualizados. Nome, e-mail, senha, CPF e data de nascimento também podem ser alterados no seu perfil.</p></div><div><b>03</b><h3>Exclusão</h3><p>Exclusão dos dados, exceto os que a lei nos obriga a guardar.</p></div><div><b>04</b><h3>Compartilhamento</h3><p>Informações sobre com quem compartilhamos seus dados.</p></div></div><div class="inst-inline-contact"><span>Para exercer seus direitos</span><a href="mailto:contato@seudominio.com.br">contato@seudominio.com.br</a></div></section>
+            <section class="inst-privacy-section" id="privacidade-seguranca"><span class="inst-index">08 / PROTEÇÃO</span><h2>Segurança</h2><p>Usamos medidas técnicas para proteger seus dados, como senhas criptografadas e acesso restrito à área administrativa.</p></section>
+            <section class="inst-privacy-section" id="privacidade-atualizacoes"><span class="inst-index">09 / REVISÕES</span><h2>Mudanças nesta política</h2><p>Podemos atualizar esta política. A data da última atualização fica sempre no topo desta página.</p></section>
+            <div class="inst-bottom-note"><strong>Ficou com alguma dúvida sobre seus dados?</strong><span>Entre em contato pelo canal indicado nesta política.</span><a href="mailto:contato@seudominio.com.br">Falar sobre privacidade ↗</a></div>
+
+        </article>
+    </main>
+
+    <footer th:replace="~{fragments/fragmentos :: rodape}"></footer>
+
+    <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
+    <th:block th:replace="~{fragments/fragmentos :: carrinho-drawer}"></th:block>
+    <div class="overlay" id="overlay"></div>
+
+    <script th:src="@{/jshome.js(v=11)}"></script>
+    <script th:src="@{/institucional.js(v=3)}"></script>
+</body>
+</html>

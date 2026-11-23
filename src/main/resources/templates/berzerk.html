@@ -5,127 +5,111 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
+    <!-- CSS único do site: fontes, site.css e cores do painel (ver AGENTS.md) -->
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
 
-    <link rel="stylesheet" th:href="@{/css/global.css(v=1)}">
-    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=1)}">
-    <title>Estilo London Store</title>
-    <link rel="icon" type="image/png" href="/Gemini_Generated_Image_kujj8zkujj8zkujj-removebg-preview.png">
+    <title th:replace="~{fragments/fragmentos :: titulo(${txt['pg.inicio.titulo']})}">Estilo London Store</title>
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico(v=2)}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png(v=2)}">
 </head>
 
-<body>
+<body class="pg-inicio">
 
     <!-- Barra de anúncios -->
     <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
 
-    <!-- Barra fixa com menu e busca -->
+    <!-- Barra fixa com menu, busca e carrinho -->
     <div class="barrabranca">
         <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
 
-        <form class="search-form" action="#" method="get">
-            <input type="text" name="search" placeholder="Pesquisar...">
-            <button type="submit">Buscar</button>
-        </form>
-    </div>
+        <form th:replace="~{fragments/fragmentos :: busca-loja}"></form>
 
+        <button th:replace="~{fragments/fragmentos :: botao-carrinho}"></button>
+    
+	</div>
+	
+    <!-- Banner promocional: somente na primeira página da Home (nunca no Outlet nem na coleção Vice City). -->
+    <th:block th:if="${paginacao != null and paginacao.paginaAtual == 1 and (paginaOutlet == null or !paginaOutlet) and (paginaColecao == null or !paginaColecao)}">
+        <section th:replace="~{fragments/fragmentos :: banner-novidades}"></section>
+    </th:block>
+	
     <main class="container-produtos">
 
-        <h2 class="secao-titulo">Produtos</h2>
+        <h2 class="secao-titulo" th:text="${paginaColecao} ? ${colecaoTitulo} : (${paginaOutlet} ? 'Outlet' : (${ordem != null} ? ${ordem.titulo} : ${txt['pg.inicio.tituloSecao']}))">Produtos</h2>
+
+        <!-- Subtítulo da coleção especial (gradiente no estilo GTA 6: classe colecao-subtitulo no site.css) -->
+        <p class="colecao-subtitulo colecao-subtitulo-tricolor" th:if="${colecaoTema == 'tricolor'}"><span class="tri-azul">Azul,</span> <span class="tri-preto">preto</span> <span class="tri-branco">e branco:</span> <span class="tri-azul">o manto</span> <span class="tri-preto">que</span> <span class="tri-branco">não morre.</span></p>
+        <p class="colecao-subtitulo" th:if="${paginaColecao != null and colecaoTema != 'tricolor'}">Coleção especial, enquanto durarem os estoques: corre pra não ficar sem!</p>
+
+        <!-- Filtros combináveis: gênero + categoria + termo de busca -->
+        <div th:replace="~{fragments/fragmentos :: filtros-catalogo}"></div>
 
         <div class="produtos-grid">
 
-            <div th:each="produto : ${listaProdutos}" class="produto-card">
+            <div th:each="produto : ${listaProdutos}" class="produto-card"
+                 th:with="temCostas=${produto.imagemCostas != null and !#strings.isEmpty(produto.imagemCostas)},
+                          imgCard=${produto.imagemFrente != null} ? @{'/img/' + ${produto.imagemFrente}} : @{/img/sem-foto.svg}"
+                 th:attr="data-produto-id=${produto.id},data-produto-nome=${produto.nome},data-produto-preco=${produto.precoComDescontoOutlet},data-produto-imagem=${imgCard},data-produto-link=@{'/detalhes/' + ${produto.id}}">
 
-                <div class="produto-media">
-                    <img th:src="${produto.imagem != null} ? @{'/img/' + ${produto.imagem}} : 'https://placehold.co/400x500/e5e5e5/0a0a0a?text=Sem+foto'"
-                         th:alt="${produto.nome}" alt="Produto" loading="lazy">
+                <!-- Imagem clicável: leva aos detalhes. No hover, troca a frente pelas costas (se cadastrada) -->
+                <div class="produto-media-box">
+                    <a class="produto-media" th:classappend="${temCostas} ? 'tem-costas'"
+                       th:href="@{'/detalhes/' + ${produto.id}}" th:aria-label="'Ver detalhes de ' + ${produto.nome}">
+                        <img class="img-frente"
+                             th:src="${produto.imagemFrente != null} ? @{'/img/' + ${produto.imagemFrente}} : 'https://placehold.co/400x500/e5e5e5/0a0a0a?text=Sem+foto'"
+                             th:alt="${produto.nome}" alt="Produto" loading="lazy">
+                        <img class="img-costas" th:if="${temCostas}"
+                             th:src="@{'/img/' + ${produto.imagemCostas}}"
+                             alt="" aria-hidden="true" loading="lazy">
 
-                    <!-- OPCIONAL: ative quando o Produto tiver esses campos
-                    <span class="badge-desconto" th:text="${produto.desconto} + '% OFF'"></span>
-                    <span class="badge-vendidas" th:text="'+' + ${produto.vendidasSemana} + ' vendidas na semana'"></span>
-                    -->
+                        <span class="badge-desconto" th:if="${produto.outlet}" th:text="${produto.descontoOutlet} + '% OFF'"></span>
+                    </a>
+                    <button type="button" class="btn-favorito js-btn-favorito" aria-pressed="false"
+                            aria-label="Adicionar aos favoritos" title="Adicionar aos favoritos">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    </button>
                 </div>
 
-                <h3 th:text="${produto.nome}"></h3>
+                <h3><a class="produto-titulo" th:href="@{'/detalhes/' + ${produto.id}}" th:text="${produto.nome}"></a></h3>
 
                 <p class="preco">
-                    <!-- OPCIONAL: <span class="preco-antigo" th:text="${produto.precoAntigo}"></span> -->
-                    <span th:text="${produto.preco}"></span>
+                    <del class="preco-outlet-antigo" th:if="${produto.outlet}"
+                         th:text="${'R$ ' + #numbers.formatDecimal(produto.precoComDescontoOutlet, 1, 'POINT', 2, 'COMMA')}"></del>
+                    <span th:text="${'R$ ' + #numbers.formatDecimal(produto.precoComDescontoOutlet, 1, 'POINT', 2, 'COMMA')}"></span>
                 </p>
 
                 <!-- Parcelamento calculado só quando o preço é numérico (BigDecimal, Double...) -->
                 <p class="parcelamento" th:if="${produto.preco instanceof T(java.lang.Number)}"
-                   th:text="'Até 12x de R$ ' + ${#numbers.formatDecimal(produto.preco / 12, 1, 'POINT', 2, 'COMMA')}"></p>
+                   th:text="${txt['geral.cardParcelamento']} + ' R$ ' + ${#numbers.formatDecimal((produto.precoComDescontoOutlet) / 12, 1, 'POINT', 2, 'COMMA')}"></p>
 
-                <!-- OPCIONAL: <span class="tag-promo">Black November</span> -->
-
-                <button th:onclick="|window.location.href='/detalhes/' + ${produto.id}|" class="btn-comprar">Ver Detalhes</button>
+                
             </div>
 
         </div>
+
+        <section class="catalogo-sem-resultados" th:if="${#lists.isEmpty(listaProdutos)}" aria-live="polite">
+            <h2 th:text="${filtrosAtivos} ? 'Nenhum produto encontrado' : 'Nenhum produto disponível'">Nenhum produto encontrado</h2>
+            <p th:text="${filtrosAtivos} ? 'Não encontramos itens com os filtros ou a busca informada.' : 'No momento não há produtos para exibir.'">Não encontramos itens com os filtros ou a busca informada.</p>
+            <a class="btn-comprar" th:href="${paginaColecao} ? @{${colecaoCaminho}} : (${paginaOutlet} ? @{/outlet} : @{/home})"
+               th:text="${filtrosAtivos} ? 'Limpar filtros' : 'Ver todos os produtos'">Limpar filtros</a>
+        </section>
+
+        <!-- Paginação: aparece só com mais de uma página (mantém os filtros ativos) -->
+        <nav th:replace="~{fragments/fragmentos :: paginacao}"></nav>
     </main>
 
     <!-- Rodapé (textos, links e dados da empresa são genéricos: troque pelos seus) -->
-    <footer class="rodape">
-        <div class="rodape-topo">
-
-            <div class="rodape-marca">
-                <span class="rodape-logo">Estilo London</span>
-                <div class="rodape-redes">
-                    <a href="#" aria-label="Facebook">
-                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.5-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.8 1.4-3.8 3.9v2.3H7.9v3h2.6V21h3z"/></svg>
-                    </a>
-                    <a href="#" aria-label="Instagram">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4.5"/><circle cx="12" cy="12" r="3.6"/><circle cx="17" cy="7" r=".6" fill="currentColor"/></svg>
-                    </a>
-                    <a href="#" aria-label="TikTok">
-                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 3h-2.8v11.4a2.4 2.4 0 1 1-2.4-2.4c.2 0 .4 0 .6.1V9.2a5.2 5.2 0 1 0 4.6 5.2V8.6a6.5 6.5 0 0 0 3.8 1.2V7a3.8 3.8 0 0 1-3.8-4z"/></svg>
-                    </a>
-                    <a href="#" aria-label="YouTube">
-                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 0 0 2.4 7.2C2 8.8 2 12 2 12s0 3.2.4 4.8a2.5 2.5 0 0 0 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8c.4-1.6.4-4.8.4-4.8s0-3.2-.4-4.8zM10 15V9l5.2 3L10 15z"/></svg>
-                    </a>
-                </div>
-            </div>
-
-            <div class="rodape-colunas">
-                <div class="rodape-col">
-                    <h4>Institucional</h4>
-                    <a href="#">Sobre nós</a>
-                    <a href="#">Frete e Entrega</a>
-                    <a href="#">Trocas e Devoluções</a>
-                    <a href="#">Política de Privacidade</a>
-
-                    <h4>Atendimento</h4>
-                    <a href="#">WhatsApp (SAC)</a>
-                    <a href="#">contato@seudominio.com.br</a>
-                </div>
-
-                <div class="rodape-col">
-                    <h4>Coleções</h4>
-                    <a href="#">Novidades</a>
-                    <a href="#">Camisetas</a>
-                    <a href="#">Oversized</a>
-                    <a href="#">Calças</a>
-                    <a href="#">Acessórios</a>
-                    <a href="#">Outlet</a>
-                </div>
-            </div>
-
-        </div>
-
-        <div class="rodape-base">
-            <p>© 2026 Estilo London Store. CNPJ: 00.000.000/0001-00.</p>
-            <p>Rua Exemplo, 123 - Cidade/UF | CEP 00000-000</p>
-        </div>
-    </footer>
+    <footer th:replace="~{fragments/fragmentos :: rodape}"></footer>
 
     <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
 
+    <th:block th:replace="~{fragments/fragmentos :: carrinho-drawer}"></th:block>
+
     <div class="overlay" id="overlay"></div>
 
-    <script th:src="@{/jshome.js(v=4)}"></script>
+    <script th:src="@{/jshome.js(v=11)}"></script>
 
 </body>
 </html>

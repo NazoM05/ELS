@@ -1,81 +1,103 @@
 <!DOCTYPE html>
-
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- CSS único do site: fontes, site.css e cores do painel (ver AGENTS.md) -->
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
 
-
-    <link rel="stylesheet" th:href="@{/css/global.css(v=1)}">
-
-    <title>Estilo London Store</title>
-
-    <link rel="icon" type="image/png" href="/Gemini_Generated_Image_kujj8zkujj8zkujj-removebg-preview.png">
-
+    <title th:replace="~{fragments/fragmentos :: titulo(${txt['pg.london.titulo']})}">Estilo London Store</title>
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico(v=2)}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png(v=2)}">
 </head>
 
-
-
-
-
-<body>
-
-
-
-
+<body class="pg-london">
 
     <!-- Barra de anúncios -->
-    <div th:replace="~{fragmentos/fragmentos :: anuncios}"></div>
+    <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
 
-    <!-- Barra branca com menu e busca -->
+    <!-- Barra fixa com menu e busca -->
     <div class="barrabranca">
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
 
-    <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
-
-    <form class="search-form" action="#" method="get">
-
-        <input type="text" name="search" placeholder="Pesquisar...">
-
-        <button type="submit">Buscar</button>
-
-        </form>
-
+        <form th:replace="~{fragments/fragmentos :: busca-loja}"></form>
     </div>
-
 
     <main class="container-produtos">
 
-    <div class="produtos-grid">
+        <h2 class="secao-titulo" th:text="${ordem != null} ? ${ordem.titulo} : ${txt['pg.london.tituloSecao']}">Produtos</h2>
 
-        <div th:each="produto : ${listaProdutos}" class="produto-card">
+        <!-- Filtros combináveis: gênero + categoria + termo de busca -->
+        <div th:replace="~{fragments/fragmentos :: filtros-catalogo}"></div>
 
-            <img th:src="${produto.imagem != null} ? @{'/img/' + ${produto.imagem}} : 'https://placehold.co/400x500/ffb6c1/ffffff?text=Sem+foto'" th:alt="${produto.nome}" alt="Produto">
+        <div class="produtos-grid">
 
-            <h3 th:text="${produto.nome}"></h3>
+            <div th:each="produto : ${listaProdutos}" class="produto-card"
+                 th:with="temCostas=${produto.imagemCostas != null and !#strings.isEmpty(produto.imagemCostas)},
+                          imgCard=${produto.imagemFrente != null} ? @{'/img/' + ${produto.imagemFrente}} : @{/img/sem-foto.svg}"
+                 th:attr="data-produto-id=${produto.id},data-produto-nome=${produto.nome},data-produto-preco=${produto.preco},data-produto-imagem=${imgCard},data-produto-link=@{'/detalhes/' + ${produto.id}}">
 
-            <p class="preco" th:text="${produto.preco}"></p>
+                <!-- Imagem clicável: leva aos detalhes. No hover, troca a frente pelas costas (se cadastrada) -->
+                <div class="produto-media-box">
+                    <a class="produto-media" th:classappend="${temCostas} ? 'tem-costas'"
+                       th:href="@{'/detalhes/' + ${produto.id}}" th:aria-label="'Ver detalhes de ' + ${produto.nome}">
+                        <img class="img-frente"
+                             th:src="${produto.imagemFrente != null} ? @{'/img/' + ${produto.imagemFrente}} : 'https://placehold.co/400x500/e5e5e5/0a0a0a?text=Sem+foto'"
+                             th:alt="${produto.nome}" alt="Produto" loading="lazy">
+                        <img class="img-costas" th:if="${temCostas}"
+                             th:src="@{'/img/' + ${produto.imagemCostas}}"
+                             alt="" aria-hidden="true" loading="lazy">
 
-            <button th:onclick="|window.location.href='/detalhes/' + ${produto.id}|" class="btn-comprar">Ver Detalhes</button>
+                        <!-- OPCIONAL: ative quando o Produto tiver esses campos
+                        <span class="badge-desconto" th:text="${produto.desconto} + '% OFF'"></span>
+                        <span class="badge-vendidas" th:text="'+' + ${produto.vendidasSemana} + ' vendidas na semana'"></span>
+                        -->
+                    </a>
+                    <button type="button" class="btn-favorito js-btn-favorito" aria-pressed="false"
+                            aria-label="Adicionar aos favoritos" title="Adicionar aos favoritos">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    </button>
+                </div>
 
+                <h3><a class="produto-titulo" th:href="@{'/detalhes/' + ${produto.id}}" th:text="${produto.nome}"></a></h3>
+
+                <p class="preco">
+                    <!-- OPCIONAL: <span class="preco-antigo" th:text="${produto.precoAntigo}"></span> -->
+                    <span th:text="${produto.preco}"></span>
+                </p>
+
+                <!-- Parcelamento calculado só quando o preço é numérico (BigDecimal, Double...) -->
+                <p class="parcelamento" th:if="${produto.preco instanceof T(java.lang.Number)}"
+                   th:text="${txt['geral.cardParcelamento']} + ' R$ ' + ${#numbers.formatDecimal(produto.preco / 12, 1, 'POINT', 2, 'COMMA')}"></p>
+
+                
+            </div>
 
         </div>
 
-    </div>
+        <section class="catalogo-sem-resultados" th:if="${#lists.isEmpty(listaProdutos)}" aria-live="polite">
+            <h2 th:text="${filtrosAtivos} ? 'Nenhum produto encontrado' : 'Nenhum produto disponível'">Nenhum produto encontrado</h2>
+            <p th:text="${filtrosAtivos} ? 'Não encontramos itens com os filtros ou a busca informada.' : 'No momento não há produtos para exibir.'">Não encontramos itens com os filtros ou a busca informada.</p>
+            <a class="btn-comprar" th:href="${paginaOutlet} ? @{/outlet} : @{/home}"
+               th:text="${filtrosAtivos} ? 'Limpar filtros' : 'Ver todos os produtos'">Limpar filtros</a>
+        </section>
 
-</main>
+        <!-- Paginação: aparece só com mais de uma página (mantém os filtros ativos) -->
+        <nav th:replace="~{fragments/fragmentos :: paginacao}"></nav>
+    </main>
+
+    <!-- Rodapé (textos, links e dados da empresa são genéricos: troque pelos seus) -->
+    <footer th:replace="~{fragments/fragmentos :: rodape}"></footer>
 
     <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
 
     <div class="overlay" id="overlay"></div>
 
-    <script th:src="@{/jshome.js(v=4)}"></script>
-
-
+    <script th:src="@{/jshome.js(v=11)}"></script>
 
 </body>
-
 </html>

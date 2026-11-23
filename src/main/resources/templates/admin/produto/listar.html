@@ -6,29 +6,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- CSS global único do site -->
-    <link rel="stylesheet" th:href="@{/css/global.css(v=1)}">
-    <!-- Ajustes de layout e usabilidade das telas de administração -->
-    <link rel="stylesheet" th:href="@{/css/admin.css(v=1)}">
+    <!-- CSS único do site: fontes, site.css e cores do painel (ver AGENTS.md) -->
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
 
-    <title>Listagem de produtos - Estilo London Store</title>
+    <title th:replace="~{fragments/fragmentos :: titulo(${txt['pg.adminProdutos.titulo']})}">Listagem de produtos - Estilo London Store</title>
 
-    <link rel="icon" type="image/png" href="/Gemini_Generated_Image_kujj8zkujj8zkujj-removebg-preview.png">
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico(v=2)}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png(v=2)}">
 </head>
 
 
-<body class="admin-ui">
+<body class="admin-ui pg-adminProdutos">
 
     <!-- Barra de anúncios (a mesma da home) -->
-    <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
 
     <!-- Mesma barra branca da home -->
     <div class="barrabranca">
-        <button class="menu-btn" id="menuBtn" aria-label="Abrir menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
         <form class="search-form" action="#" method="get">
             <input type="text" name="search" id="filtroBusca" placeholder="Pesquisar...">
             <button type="submit">Buscar</button>
@@ -46,16 +42,16 @@
         <!-- Mensagens de retorno do AdminController (?sucesso / ?erro=...) -->
         <div th:if="${param.sucesso != null}" class="cadastro-alerta cadastro-alerta-ok" role="status">Alteração salva com sucesso.</div>
         <div th:if="${param.erro != null}" class="cadastro-alerta cadastro-alerta-erro" role="alert"
-             th:text="${param.erro[0] == 'naoEncontrado'} ? 'Produto não encontrado.' : 'Não foi possível salvar. Verifique se já existe um produto com o mesmo nome (veja o console para detalhes).'"></div>
+             th:text="${param.erro[0] == 'naoEncontrado'} ? 'Produto não encontrado.' : (${param.erro[0] == 'invalido'} ? 'Dados inválidos. Informe categoria e gênero, use preço não negativo e envie apenas imagens.' : 'Não foi possível salvar. Verifique se já existe um produto com o mesmo nome (veja o console para detalhes).')"></div>
 
         <!-- Título da página + botão para a tela de cadastro (AdminController: GET /admin/produto/cadastrar) -->
         <header class="adm-topo">
             <div>
-                <h1 class="adm-titulo">Produtos</h1>
+                <h1 class="adm-titulo" th:text="${txt['pg.adminProdutos.h1']}">Produtos</h1>
                 <p class="adm-sub"
                    th:text="${listaProdutos.size() == 1} ? '1 produto cadastrado' : ${listaProdutos.size()} + ' produtos cadastrados'">0 produtos cadastrados</p>
             </div>
-            <a class="btn-comprar adm-btn" th:href="@{/admin/produto/cadastrar}">+ Novo produto</a>
+            <a class="btn-comprar adm-btn" th:href="@{/admin/produto/cadastrar}" th:text="${txt['pg.adminProdutos.btnNovo']}">+ Novo produto</a>
         </header>
 
         <!-- Abas -->
@@ -84,15 +80,21 @@
                 <tbody>
                     <tr th:each="produto : ${ativos}">
                         <td class="listagem-col-foto">
-                            <img th:src="${produto.imagem != null} ? @{'/img/' + ${produto.imagem}} : 'https://placehold.co/80x100/ffb6c1/ffffff?text=Sem+foto'"
+                            <img th:src="${produto.imagemFrente != null} ? @{'/img/' + ${produto.imagemFrente}} : 'https://placehold.co/80x100/ffb6c1/ffffff?text=Sem+foto'"
                                  th:alt="${produto.nome}" alt="Produto" width="56" height="70" loading="lazy">
                         </td>
-                        <td class="listagem-col-nome" th:text="${produto.nome}">Nome</td>
+                        <td class="listagem-col-nome">
+                            <span th:text="${produto.nome}">Nome</span>
+                            <small class="listagem-meta" th:if="${produto.classificacao != null}" th:text="${produto.classificacao}">Camiseta · Unissex</small>
+                            <span class="adm-estoque-alerta" th:if="${produto.estoqueTotal != null and produto.estoqueTotal le 2}">
+                                <span th:text="${produto.estoqueTotal == 0} ? 'Estoque zerado' : |Estoque baixo: ${produto.estoqueTotal}|">Estoque baixo</span>
+                            </span>
+                        </td>
                         <td class="listagem-col-preco preco" th:text="'R$ ' + ${#numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</td>
                         <td class="listagem-col-acoes">
                             <div class="listagem-icones">
                                 <!-- Visualizar -->
-                                <a class="listagem-icone" th:href="@{'/detalhes/' + ${produto.id}}"
+                                <a class="listagem-icone" th:href="@{'/admin/produto/visualizar/' + ${produto.id}}"
                                    title="Visualizar" aria-label="Visualizar">
                                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
                                 </a>
@@ -132,14 +134,20 @@
                 <tbody>
                     <tr th:each="produto : ${inativos}" class="listagem-linha-inativa">
                         <td class="listagem-col-foto">
-                            <img th:src="${produto.imagem != null} ? @{'/img/' + ${produto.imagem}} : 'https://placehold.co/80x100/ffb6c1/ffffff?text=Sem+foto'"
+                            <img th:src="${produto.imagemFrente != null} ? @{'/img/' + ${produto.imagemFrente}} : 'https://placehold.co/80x100/ffb6c1/ffffff?text=Sem+foto'"
                                  th:alt="${produto.nome}" alt="Produto" width="56" height="70" loading="lazy">
                         </td>
-                        <td class="listagem-col-nome" th:text="${produto.nome}">Nome</td>
+                        <td class="listagem-col-nome">
+                            <span th:text="${produto.nome}">Nome</span>
+                            <small class="listagem-meta" th:if="${produto.classificacao != null}" th:text="${produto.classificacao}">Camiseta · Unissex</small>
+                            <span class="adm-estoque-alerta" th:if="${produto.estoqueTotal != null and produto.estoqueTotal le 2}">
+                                <span th:text="${produto.estoqueTotal == 0} ? 'Estoque zerado' : |Estoque baixo: ${produto.estoqueTotal}|">Estoque baixo</span>
+                            </span>
+                        </td>
                         <td class="listagem-col-preco preco" th:text="'R$ ' + ${#numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</td>
                         <td class="listagem-col-acoes">
                             <div class="listagem-icones">
-                                <a class="listagem-icone" th:href="@{'/detalhes/' + ${produto.id}}"
+                                <a class="listagem-icone" th:href="@{'/admin/produto/visualizar/' + ${produto.id}}"
                                    title="Visualizar" aria-label="Visualizar">
                                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
                                 </a>
@@ -172,7 +180,7 @@
     <div th:replace="~{fragments/fragmentos :: sidebar}" ></div>
     <div class="overlay" id="overlay"></div>
 
-    <script th:src="@{/jshome.js(v=4)}"></script>
+    <script th:src="@{/jshome.js(v=11)}"></script>
 
     <!-- Alterna as abas, filtra as linhas pela busca e cuida dos avisos -->
     <script>
@@ -223,11 +231,7 @@
         }
         var ok = document.querySelector('.cadastro-alerta-ok');
         if (ok) {
-            setTimeout(function () {
-                ok.style.transition = 'opacity .4s';
-                ok.style.opacity = '0';
-                setTimeout(function () { ok.remove(); }, 400);
-            }, 5000);
+            setTimeout(function () { ok.remove(); }, 5000);
         }
     </script>
 

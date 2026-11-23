@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Valores de frete, frete grátis, prazos e como acompanhar a entrega do seu pedido na Estilo London Store.">
+
+    <!-- CSS único do site: fontes, site.css e cores do painel (ver AGENTS.md) -->
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
+
+    <title th:replace="~{fragments/fragmentos :: titulo(${txt['pg.frete.titulo']})}">Frete e Entrega - Estilo London Store</title>
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico(v=2)}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png(v=2)}">
+</head>
+
+<body class="institucional-pagina pg-frete">
+    <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
+
+    <div class="barrabranca">
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
+        <button th:replace="~{fragments/fragmentos :: botao-carrinho}"></button>
+    </div>
+
+    <main class="institucional">
+        <nav class="institucional-menu" aria-label="Páginas institucionais">
+            <a th:href="@{/sobre}" th:classappend="${paginaInstitucional == 'sobre'} ? 'atual'" th:attr="aria-current=${paginaInstitucional == 'sobre'} ? 'page'" th:text="${txt['geral.rodapeSobre']}">Sobre nós</a>
+            <a th:href="@{/frete-e-entrega}" th:classappend="${paginaInstitucional == 'frete'} ? 'atual'" th:attr="aria-current=${paginaInstitucional == 'frete'} ? 'page'" th:text="${txt['geral.rodapeFrete']}">Frete e Entrega</a>
+            <a th:href="@{/trocas-e-devolucoes}" th:classappend="${paginaInstitucional == 'trocas'} ? 'atual'" th:attr="aria-current=${paginaInstitucional == 'trocas'} ? 'page'" th:text="${txt['geral.rodapeTrocas']}">Trocas e Devoluções</a>
+            <a th:href="@{/politica-de-privacidade}" th:classappend="${paginaInstitucional == 'privacidade'} ? 'atual'" th:attr="aria-current=${paginaInstitucional == 'privacidade'} ? 'page'" th:text="${txt['geral.rodapePrivacidade']}">Política de Privacidade</a>
+        </nav>
+
+        <article class="institucional-texto">
+            <div class="inst-topic-mark inst-topic-frete" aria-label="ENTREGA COM ACOMPANHAMENTO"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h11v10H3zM14 10h4l3 4v3h-7zM7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM18 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M5 10h6M5 13h4"/></svg></span><strong>ENTREGA COM ACOMPANHAMENTO</strong><i aria-hidden="true"></i></div>
+
+            <header class="inst-page-head"><p class="institucional-kicker" th:unless="${#strings.isEmpty(txt['pg.frete.kicker'])}" th:text="${txt['pg.frete.kicker']}">Atendimento</p><h1 class="adm-titulo" th:text="${txt['pg.frete.h1']}">Frete e Entrega</h1><p class="institucional-lead" th:text="${txt['pg.frete.lead']}">Enviamos para todo o Brasil. O valor do frete aparece no resumo assim que você escolhe o estado de entrega, antes de confirmar o pedido.</p></header>
+            <div class="inst-shipping-summary">
+                <div class="inst-summary-card"><span class="inst-summary-label">REGIÃO SUL</span><strong th:text="${'R$ ' + #numbers.formatDecimal(freteGratisSul, 1, 'POINT', 2, 'COMMA')}">R$ 99,00</strong><small>Valor mínimo para frete grátis</small></div>
+                <div class="inst-summary-card"><span class="inst-summary-label">DEMAIS REGIÕES</span><strong th:text="${'R$ ' + #numbers.formatDecimal(freteGratisDemais, 1, 'POINT', 2, 'COMMA')}">R$ 250,00</strong><small>Valor mínimo para frete grátis</small></div>
+                <div class="inst-summary-card"><span class="inst-summary-label">ABAIXO DO MÍNIMO</span><strong th:text="${'R$ ' + #numbers.formatDecimal(valorFrete, 1, 'POINT', 2, 'COMMA')}">R$ 19,90</strong><small>Valor fixo de entrega</small></div>
+            </div>
+            <section class="inst-section"><div class="inst-section-heading"><span class="inst-index">01 / VALORES</span><h2>Como o frete é calculado</h2><p>O benefício considera o subtotal das peças e a região do endereço informado para entrega.</p></div>
+                <div class="inst-two-column"><div class="inst-info-panel"><h3>Frete grátis</h3><p><strong>Região Sul:</strong> Paraná, Santa Catarina e Rio Grande do Sul, para pedidos a partir de <strong th:text="${'R$ ' + #numbers.formatDecimal(freteGratisSul, 1, 'POINT', 2, 'COMMA')}">R$ 99,00</strong>.</p><p><strong>Demais estados:</strong> para pedidos a partir de <strong th:text="${'R$ ' + #numbers.formatDecimal(freteGratisDemais, 1, 'POINT', 2, 'COMMA')}">R$ 250,00</strong>.</p></div><div class="inst-info-panel inst-info-panel-dark"><h3>Pedidos abaixo do mínimo</h3><p>É aplicado o valor fixo de <strong th:text="${'R$ ' + #numbers.formatDecimal(valorFrete, 1, 'POINT', 2, 'COMMA')}">R$ 19,90</strong>, independente da quantidade de peças.</p></div></div>
+            </section>
+            <section class="inst-section"><div class="inst-section-heading"><span class="inst-index">02 / PREPARAÇÃO</span><h2>Quando o pedido é enviado</h2><p>A separação começa após a confirmação do pagamento.</p></div><div class="inst-step-grid">
+                <div class="inst-step"><span>01</span><h3>Pix</h3><p>A aprovação é imediata e o pedido segue para separação.</p></div><div class="inst-step"><span>02</span><h3>Cartão</h3><p>O pedido segue após a aprovação da operadora.</p></div><div class="inst-step"><span>03</span><h3>Boleto</h3><p>O pedido segue após a compensação, que leva até 3 dias úteis.</p></div>
+            </div></section>
+            <section class="inst-section inst-map-section"><div class="inst-section-heading"><span class="inst-index">03 / PRAZOS</span><h2>Consulte o prazo do seu estado</h2><p>Selecione um estado no mapa ou consulte a tabela completa. O prazo é contado em dias úteis a partir do envio do pedido.</p></div>
+                <div class="mapa-frete" data-mapa-frete th:attr="data-sul=${#numbers.formatDecimal(freteGratisSul, 1, 'POINT', 2, 'COMMA')},data-demais=${#numbers.formatDecimal(freteGratisDemais, 1, 'POINT', 2, 'COMMA')},data-ufs-sul=${ufsSul}">
+                    <div class="mapa-frete-mapa"><svg th:replace="~{fragments/mapa-brasil :: mapa}"></svg></div>
+                    <aside class="mapa-frete-info" aria-live="polite"><p class="mapa-frete-regiao" data-info-regiao>Prazo de entrega</p><strong class="mapa-frete-nome" data-info-nome>Escolha um estado</strong><p class="mapa-frete-prazo" data-info-prazo-bloco hidden><span data-info-prazo>2 a 4</span><small>dias úteis</small></p><p class="mapa-frete-dica" data-info-dica>O prazo aparece aqui assim que você apontar um estado no mapa.</p><p class="mapa-frete-gratis" data-info-frete hidden></p></aside>
+                </div>
+                <details class="mapa-frete-lista"><summary>Ver todos os prazos por estado</summary><table><thead><tr><th scope="col">Estado</th><th scope="col">Região</th><th scope="col">Prazo</th></tr></thead><tbody><tr th:each="p : ${prazos}" th:attr="data-uf=${p.uf},data-nome=${p.nome},data-regiao=${p.regiao},data-min=${p.diasMin},data-max=${p.diasMax}"><td th:text="${p.nome + ' (' + p.uf + ')'}">Paraná (PR)</td><td th:text="${p.regiao}">Sul</td><td th:text="${p.descricao}">2 a 4 dias úteis</td></tr></tbody></table></details>
+            </section>
+            <section class="inst-section"><div class="inst-section-heading"><span class="inst-index">04 / RECEBIMENTO</span><h2>Depois que a compra é enviada</h2><p>Alguns cuidados ajudam a evitar problemas no recebimento.</p></div><div class="inst-check-grid"><div><h3>Acompanhe</h3><p>O resumo do pedido fica disponível na sua conta após a confirmação. Para receber o código de rastreio ou tirar dúvidas, escreva para <a href="mailto:contato@seudominio.com.br">contato@seudominio.com.br</a> informando o número do pedido.</p></div><div><h3>Confira o endereço</h3><p>Revise os dados na finalização da compra. Depois do envio, não é possível alterar o endereço de entrega.</p></div><div><h3>Verifique a embalagem</h3><p>Se ninguém puder receber, a transportadora faz novas tentativas. Se o pedido retornar, entramos em contato para combinar o reenvio. Se houver avaria na embalagem, recuse a entrega e nos avise.</p></div></div></section>
+            <div class="inst-bottom-note"><strong>Precisa de ajuda com a entrega?</strong><span>Tenha o número do pedido em mãos para agilizar o atendimento.</span><a href="mailto:contato@seudominio.com.br">Falar com atendimento ↗</a></div>
+
+        </article>
+    </main>
+
+    <footer th:replace="~{fragments/fragmentos :: rodape}"></footer>
+
+    <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
+    <th:block th:replace="~{fragments/fragmentos :: carrinho-drawer}"></th:block>
+    <div class="overlay" id="overlay"></div>
+
+    <script th:src="@{/jshome.js(v=11)}"></script>
+    <script th:src="@{/institucional.js(v=3)}"></script>
+    <script th:src="@{/mapa-frete.js(v=3)}"></script>
+</body>
+</html>

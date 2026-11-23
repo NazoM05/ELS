@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+
+    <!-- CSS único do site: fontes, site.css e cores do painel (ver AGENTS.md) -->
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
+
+    <title th:replace="~{fragments/fragmentos :: titulo('Usuários')}">Usuários - Estilo London Store</title>
+
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico(v=2)}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png(v=2)}">
+</head>
+
+<body class="admin-ui pg-adminUsuarios">
+
+    <!-- Busca por nome, e-mail ou perfil: filtra a tabela enquanto digita -->
+    <div class="barrabranca">
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
+        <form class="search-form" data-servidor action="#" method="get" id="formBuscaUsuario">
+            <input type="text" id="filtroUsuarios" autocomplete="off" placeholder="Nome, e-mail ou perfil"
+                   aria-label="Buscar usuário por nome, e-mail ou perfil">
+            <button type="submit">Buscar</button>
+        </form>
+    </div>
+
+    <main class="listagem-container">
+
+        <div th:if="${mensagemOk != null}" class="cadastro-alerta cadastro-alerta-ok" role="status" th:text="${mensagemOk}">Conta desativada.</div>
+        <div th:if="${erro != null}" class="cadastro-alerta cadastro-alerta-erro" role="alert" th:text="${erro}">Erro</div>
+
+        <header class="adm-topo">
+            <div>
+                <h1 class="adm-titulo">Usuários</h1>
+                <p class="adm-sub">
+                    <span th:text="${usuarios.size() == 1} ? '1 usuário' : ${usuarios.size()} + ' usuários'">0 usuários</span>
+                    · <strong th:text="${totalAtivos == 1} ? '1 ativo' : ${totalAtivos} + ' ativos'">0 ativos</strong>
+                </p>
+            </div>
+        </header>
+
+        <div class="listagem-abas" role="tablist">
+            <button type="button" class="listagem-aba ativa" role="tab" aria-selected="true" data-filtro="todos">
+                Todos <span class="listagem-contador" th:text="${usuarios.size()}">0</span>
+            </button>
+            <button type="button" class="listagem-aba" role="tab" aria-selected="false" data-filtro="ativos">
+                Ativos <span class="listagem-contador" th:text="${totalAtivos}">0</span>
+            </button>
+            <button type="button" class="listagem-aba" role="tab" aria-selected="false" data-filtro="inativos">
+                Desativados <span class="listagem-contador" th:text="${totalInativos}">0</span>
+            </button>
+        </div>
+
+        <section class="listagem-painel ativo" role="tabpanel">
+            <table class="listagem-tabela usuarios-tabela">
+                <thead>
+                    <tr>
+                        <th>Usuário</th>
+                        <th>Perfil</th>
+                        <th>Situação</th>
+                        <th class="pedidos-col-num">Pedidos</th>
+                        <th class="listagem-col-preco">Total gasto</th>
+                        <th>Último pedido</th>
+                        <th class="listagem-col-acoes"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="r : ${usuarios}" th:with="u=${r.usuario}" class="usuarios-linha"
+                        th:classappend="${!u.ativo} ? 'usuario-inativo'"
+                        th:attr="data-ativo=${u.ativo},data-busca=${#strings.toLowerCase(u.nomeExibicao + ' ' + u.username + ' ' + u.rotuloPerfil)}">
+                        <td>
+                            <a class="listagem-col-nome usuario-link" th:href="@{'/admin/usuarios/' + ${u.id}}" th:text="${u.nomeExibicao}">Nome</a>
+                            <small class="listagem-meta" th:if="${!#strings.isEmpty(u.nome)}" th:text="${u.username}">email@exemplo.com</small>
+                        </td>
+                        <td th:text="${u.rotuloPerfil}">Cliente</td>
+                        <td>
+                            <span class="status-pedido" th:classappend="${u.ativo} ? 'status-usuario-ativo' : 'status-usuario-inativo'"
+                                  th:text="${u.ativo} ? 'Ativo' : 'Desativado'">Ativo</span>
+                        </td>
+                        <td class="pedidos-col-num" th:text="${r.totalPedidos}">0</td>
+                        <td class="listagem-col-preco" th:text="${'R$ ' + #numbers.formatDecimal(r.totalGasto, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</td>
+                        <td class="pedidos-data" th:text="${r.ultimoPedidoEmFormatado != null} ? ${r.ultimoPedidoEmFormatado} : '—'">—</td>
+                        <td class="listagem-col-acoes">
+                            <div class="listagem-icones">
+                                <a class="listagem-icone" th:href="@{'/admin/usuarios/' + ${u.id}}" title="Ver dados e pedidos" aria-label="Ver dados e pedidos">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </a>
+
+                                <!-- Desativar: pede confirmação; bloqueado para a própria conta e para o último administrador -->
+                                <form th:if="${u.ativo and r.bloqueioDesativar == null}" method="post"
+                                      th:action="@{'/admin/usuarios/' + ${u.id} + '/status'}"
+                                      th:attr="data-confirmar='Desativar a conta de ' + ${u.nomeExibicao} + '? A pessoa não poderá mais entrar e perde a sessão aberta.'">
+                                    <input type="hidden" name="ativo" value="false">
+                                    <button type="submit" class="listagem-icone" title="Desativar conta" aria-label="Desativar conta">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.8 0"/></svg>
+                                    </button>
+                                </form>
+                                <button type="button" class="listagem-icone" th:if="${u.ativo and r.bloqueioDesativar != null}" disabled
+                                        th:title="${r.bloqueioDesativar}" th:aria-label="${r.bloqueioDesativar}">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.8 0"/></svg>
+                                </button>
+
+                                <form th:unless="${u.ativo}" method="post" th:action="@{'/admin/usuarios/' + ${u.id} + '/status'}">
+                                    <input type="hidden" name="ativo" value="true">
+                                    <button type="submit" class="listagem-icone" title="Ativar conta" aria-label="Ativar conta">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(usuarios)}" class="listagem-vazio">
+                        <td colspan="7">Nenhum usuário cadastrado.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <p class="adm-sem-resultado" id="semResultados" role="status" hidden></p>
+        <p class="adm-sub">“Total gasto” soma os pedidos já pagos, sem os cancelados e os que aguardam pagamento.</p>
+    </main>
+
+    <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
+    <div class="overlay" id="overlay"></div>
+
+    <script th:src="@{/jshome.js(v=11)}"></script>
+    <script>
+        var abas = document.querySelectorAll('.listagem-aba');
+        var busca = document.getElementById('filtroUsuarios');
+        var semResultados = document.getElementById('semResultados');
+        var linhas = document.querySelectorAll('.usuarios-linha');
+        var filtro = 'todos';
+
+        abas.forEach(function (aba) {
+            aba.addEventListener('click', function () {
+                abas.forEach(function (a) { a.classList.remove('ativa'); a.setAttribute('aria-selected', 'false'); });
+                aba.classList.add('ativa');
+                aba.setAttribute('aria-selected', 'true');
+                filtro = aba.dataset.filtro;
+                filtrar();
+            });
+        });
+
+        function filtrar() {
+            var termo = busca.value.trim().toLowerCase();
+            var visiveis = 0;
+            linhas.forEach(function (linha) {
+                var ativo = linha.dataset.ativo === 'true';
+                var naAba = filtro === 'todos' || (filtro === 'ativos' ? ativo : !ativo);
+                var mostra = naAba && linha.dataset.busca.indexOf(termo) !== -1;
+                linha.style.display = mostra ? '' : 'none';
+                if (mostra) { visiveis++; }
+            });
+            if (linhas.length > 0 && visiveis === 0) {
+                semResultados.textContent = termo ? 'Nenhum usuário encontrado para “' + busca.value.trim() + '” nesta aba.' : 'Nenhum usuário nesta aba.';
+                semResultados.hidden = false;
+            } else {
+                semResultados.hidden = true;
+            }
+        }
+        busca.addEventListener('input', filtrar);
+        busca.closest('form').addEventListener('submit', function (e) { e.preventDefault(); });
+        filtrar();
+
+        // Confirmação antes de desativar uma conta
+        document.addEventListener('submit', function (e) {
+            var msg = e.target.dataset ? e.target.dataset.confirmar : null;
+            if (msg && !window.confirm(msg)) { e.preventDefault(); }
+        });
+    </script>
+</body>
+</html>
