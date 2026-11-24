@@ -81,7 +81,7 @@ public class SecurityConfig {
 		.addFilterBefore(new ContaAtivaFilter(usuarioRepository), AuthorizationFilter.class)
 		.authorizeHttpRequests(auth -> auth 
 				// Públicas: login/cadastro, a vitrine (home, busca e detalhes do produto) e os arquivos que ela usa
-				.requestMatchers("/login", "/criar-conta", "/acesso-negado", "/error").permitAll()
+				.requestMatchers("/login", "/criar-conta", "/esqueci-senha", "/redefinir-senha", "/acesso-negado", "/error").permitAll()
 				.requestMatchers("/", "/home", "/london", "/outlet", "/pesquisa", "/detalhes/**", "/favoritos").permitAll()
 				// Coleções (Vice City, Tricolor, Urban Culture): públicas; o login só é pedido ao adicionar ao carrinho/comprar
 				.requestMatchers("/colecao/**").permitAll()

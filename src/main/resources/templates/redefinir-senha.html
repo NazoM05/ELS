@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
+    <title>Redefinir senha | Nazo Moçambique</title>
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico(v=2)}">
+</head>
+<body class="pg-login">
+    <main class="login">
+        <section class="login-marca">
+            <img class="login-marca-fundo" th:src="${site.logoPersonalizada} ? @{'/logo-site/' + ${site.logoArquivo}} : @{/brand/logo-el-branca-hd.png}" alt="" aria-hidden="true">
+            <a class="login-logo" th:href="@{/}" th:text="${txt['geral.nomeCurto']}">Nazo Moçambique</a>
+            <h1 class="login-titulo">Nova<br>senha</h1>
+        </section>
+        <section class="login-area">
+            <form class="login-form" th:action="@{/redefinir-senha}" method="post">
+                <h2>Redefinir senha</h2>
+                <p class="login-info">Digite o código de 6 dígitos enviado para seu e-mail e escolha uma nova senha.</p>
+                <p class="login-erro" th:if="${erro}" th:text="${erro}" role="alert"></p>
+                <label for="email">E-mail cadastrado</label>
+                <input type="email" id="email" name="email" th:value="${email}" autocomplete="email" required maxlength="150">
+                <label for="codigo">Código de verificação</label>
+                <input type="text" id="codigo" name="codigo" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required>
+                <label for="novaSenha">Nova senha</label>
+                <input type="password" id="novaSenha" name="novaSenha" autocomplete="new-password" minlength="8" maxlength="64" required>
+                <label for="confirmarSenha">Confirmar nova senha</label>
+                <input type="password" id="confirmarSenha" name="confirmarSenha" autocomplete="new-password" minlength="8" maxlength="64" required>
+                <p class="login-info">A senha deve conter de 8 a 64 caracteres, incluindo pelo menos uma letra e um número.</p>
+                <button type="submit" class="login-btn">Salvar nova senha</button>
+                <a class="login-voltar" th:href="@{/esqueci-senha}">Solicitar outro código</a>
+                <a class="login-voltar" th:href="@{/login}">Voltar para entrar</a>
+            </form>
+        </section>
+    </main>
+    <footer th:replace="~{fragments/fragmentos :: rodape}"></footer>
+</body>
+</html>
