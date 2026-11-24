@@ -217,7 +217,13 @@ VALUES
     MERGE INTO USUARIO (nome, username, senha, role, ativo) KEY (username)
     VALUES ('Usuário', 'user', '$2a$10$oz8mJWjsca2yd5hdU5pvzO123repm3JNyZ9fxbFzMs5wVaaccsiZG', 'ROLE_USUARIO', TRUE);
 
-    -- Gestor (login: gestor, senha de teste 1234). Perfil ROLE_GESTOR: acessa SOMENTE a separação de pedidos (/admin/separacao).
+    -- Migração do perfil antigo (ROLE_GESTOR -> ROLE_SEPARADOR) para bancos H2 persistentes já existentes.
+    UPDATE USUARIO SET role = 'ROLE_SEPARADOR' WHERE role = 'ROLE_GESTOR';
+    UPDATE USUARIO SET username = 'separador', nome = 'Separador'
+     WHERE username = 'gestor' AND role = 'ROLE_SEPARADOR'
+       AND NOT EXISTS (SELECT 1 FROM (SELECT username FROM USUARIO) u2 WHERE u2.username = 'separador');
+
+    -- Separador (login: separador, senha de teste 1234). Perfil ROLE_SEPARADOR: acessa SOMENTE a separação de pedidos (/admin/separacao).
     -- Mesma senha de teste do admin: troque antes de colocar a loja no ar.
     MERGE INTO USUARIO (nome, username, senha, role, ativo) KEY (username)
-    VALUES ('Gestor', 'gestor', '$2a$10$oz8mJWjsca2yd5hdU5pvzO123repm3JNyZ9fxbFzMs5wVaaccsiZG', 'ROLE_GESTOR', TRUE);
+    VALUES ('Separador', 'separador', '$2a$10$oz8mJWjsca2yd5hdU5pvzO123repm3JNyZ9fxbFzMs5wVaaccsiZG', 'ROLE_SEPARADOR', TRUE);

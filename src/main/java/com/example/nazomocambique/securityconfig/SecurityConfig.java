@@ -29,7 +29,7 @@ import com.example.nazomocambique.service.ContaService;
 public class SecurityConfig {
 
 	/** Perfis (sem o prefixo ROLE_) que podem abrir a tela de separação e ler/alterar os dados dela. */
-	public static final String[] PERFIS_SEPARACAO = { "ADMIN", "GESTOR" };
+	public static final String[] PERFIS_SEPARACAO = { "ADMIN", "SEPARADOR" };
 
 	/**
 	 * Quem está logado mas não tem o perfil certo: páginas vão para /acesso-negado; chamadas de dados
@@ -51,16 +51,16 @@ public class SecurityConfig {
 	}
 	
 	/**
-	 * Depois do login: o gestor (que não é admin) vai direto para a separação de pedidos, a única área dele;
+	 * Depois do login: o separador (que não é admin) vai direto para a separação de pedidos, a única área dele;
 	 * os demais seguem para a página que tentaram abrir ou, se não houve, para o início.
 	 */
 	static AuthenticationSuccessHandler aposLogin() {
 		SavedRequestAwareAuthenticationSuccessHandler padrao = new SavedRequestAwareAuthenticationSuccessHandler();
 		padrao.setDefaultTargetUrl("/");
 		return (request, response, authentication) -> {
-			boolean gestor = authentication.getAuthorities().stream().anyMatch(a -> "ROLE_GESTOR".equals(a.getAuthority()));
+			boolean separador = authentication.getAuthorities().stream().anyMatch(a -> "ROLE_SEPARADOR".equals(a.getAuthority()));
 			boolean admin = authentication.getAuthorities().stream().anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
-			if (gestor && !admin) {
+			if (separador && !admin) {
 				response.sendRedirect(request.getContextPath() + "/admin/separacao");
 				return;
 			}
@@ -91,9 +91,11 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.POST, "/webhooks/asaas").permitAll()
 				// Console H2 (só existe nos perfis em que está ligado; PathRequest.toH2Console() exigia o bean e quebrava no Render)
 				.requestMatchers("/h2-console", "/h2-console/**").hasRole("ADMIN")
-				// Separação de pedidos: somente ADMIN e GESTOR (precisa vir antes da regra geral de /admin/**)
+				// Separação de pedidos: somente ADMIN e SEPARADOR (precisa vir antes da regra geral de /admin/**)
 				.requestMatchers("/admin/separacao", "/admin/separacao/**").hasAnyRole(PERFIS_SEPARACAO)
 				.requestMatchers("/admin/**").hasRole("ADMIN")
+				// Carteira, checkout e pedidos do cliente: o SEPARADOR (que só trabalha na separação) não entra
+				.requestMatchers("/carteira", "/carteira/**", "/checkout", "/checkout/**", "/pedido/**").hasAnyRole("ADMIN", "USUARIO")
 				.requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
 				.anyRequest().authenticated()
 				

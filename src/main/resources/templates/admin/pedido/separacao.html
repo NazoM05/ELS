@@ -50,7 +50,7 @@
     (function () {
         var base = /*[[@{/admin/separacao}]]*/ '/admin/separacao';
         var detalhe = /*[[@{/admin/pedidos/}]]*/ '/admin/pedidos/';
-        // Só o admin abre a ficha completa do pedido; para o gestor o código aparece sem link
+        // Só o admin abre a ficha completa do pedido; para o separador o código aparece sem link
         var verDetalhe = document.querySelector('main.sep').dataset.verDetalhe === 'true';
         var csrfToken = document.querySelector('meta[name="_csrf"]').content;
         var csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;

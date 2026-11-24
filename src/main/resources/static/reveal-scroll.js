@@ -36,7 +36,13 @@
             '.el-cart-drawer .el-cart-header'
         ];
 
-        var elementos = document.querySelectorAll(seletores.join(','));
+        /* Celular/tablet: o banner é a primeira coisa da página e o navegador muda a altura da área visível
+           (barra de endereço) o tempo todo. Com a revelação, o carrossel ficava com opacidade 0 e blur ao sair
+           da tela e, por vezes, não voltava, deixando um vazio no lugar. Nesses aparelhos ele nunca é animado. */
+        var telaPequena = window.matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+        var elementos = Array.prototype.filter.call(document.querySelectorAll(seletores.join(',')), function (el) {
+            return !(telaPequena && el.matches('.promo-miami, .banner-card'));
+        });
         if (!elementos.length) return;
 
         /* Cada elemento recebe um pequeno atraso relativo ao grupo em que está.

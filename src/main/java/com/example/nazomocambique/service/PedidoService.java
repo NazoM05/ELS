@@ -204,6 +204,7 @@ public class PedidoService {
 		pedido.setFrete(resumo.getFrete());
 		if (resumo.getFreteEscolhido() != null) {
 			pedido.setServicoFrete(resumo.getFreteEscolhido().nome());
+			pedido.setServicoFreteCodigo(resumo.getFreteEscolhido().codigo());
 			pedido.setPrazoFreteDias(resumo.getFreteEscolhido().prazoDias());
 		}
 		BigDecimal cashback = BigDecimal.ZERO;

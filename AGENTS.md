@@ -271,7 +271,7 @@ Status geral: `⬜ NÃO INICIADO`
 - [ ] Exibir indicadores de cashback emitido, utilizado, expirado (se houver validade) e estornado.
 - [ ] Melhorar gestão de produtos, variações, imagens e estoque por tamanho.
 - [ ] Adicionar alertas de estoque baixo e trilha de auditoria administrativa.
-- [ ] Revisar permissões de administrador e gestor pelo princípio do menor privilégio.
+- [ ] Revisar permissões de administrador e separador pelo princípio do menor privilégio.
 - [ ] Permitir exportações controladas (CSV) sem expor dados além da permissão do usuário.
 
 Critério de aceite: indicadores reconciliáveis com pedidos e pagamentos; operações administrativas
