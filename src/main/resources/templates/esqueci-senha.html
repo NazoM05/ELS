@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
+    <title>Esqueci minha senha | Nazo Moçambique</title>
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico(v=2)}">
+</head>
+<body class="pg-login">
+    <main class="login">
+        <section class="login-marca">
+            <img class="login-marca-fundo" th:src="${site.logoPersonalizada} ? @{'/logo-site/' + ${site.logoArquivo}} : @{/brand/logo-el-branca-hd.png}" alt="" aria-hidden="true">
+            <a class="login-logo" th:href="@{/}" th:text="${txt['geral.nomeCurto']}">Nazo Moçambique</a>
+            <h1 class="login-titulo">Recupere<br> sua conta</h1>
+        </section>
+        <section class="login-area">
+            <form class="login-form" th:action="@{/esqueci-senha}" method="post">
+                <h2>Esqueci minha senha</h2>
+                <p class="login-info">Informe o e-mail cadastrado. Enviaremos um código de verificação para redefinir sua senha.</p>
+                <p class="login-info" th:if="${sucesso}" th:text="${sucesso}" role="status"></p>
+                <p class="login-erro" th:if="${erro}" th:text="${erro}" role="alert"></p>
+                <label for="email">E-mail</label>
+                <input type="email" id="email" name="email" th:value="${email}" autocomplete="email" required maxlength="150" autofocus>
+                <button type="submit" class="login-btn">Enviar código</button>
+                <a class="login-voltar" th:href="@{/redefinir-senha(email=${email})}" th:if="${sucesso}">Já recebi o código — redefinir senha</a>
+                <a class="login-voltar" th:href="@{/login}">Voltar para entrar</a>
+            </form>
+        </section>
+    </main>
+    <footer th:replace="~{fragments/fragmentos :: rodape}"></footer>
+</body>
+</html>

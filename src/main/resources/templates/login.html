@@ -35,6 +35,7 @@
                 <p class="login-info" th:if="${param.logout}">Você saiu da sua conta.</p>
                 <p class="login-erro" th:if="${param.desativada}" role="alert">Esta conta foi desativada. Fale com a loja se achar que é um engano.</p>
                 <p class="login-info" th:if="${param.conta}" role="status">Conta criada com sucesso! Entre com o seu e-mail e a senha.</p>
+                <p class="login-info" th:if="${param.senhaRedefinida}" role="status">Senha redefinida com sucesso. Entre com sua nova senha.</p>
 
                 <label for="username" th:text="${txt['pg.login.email']}">E-mail</label>
                 <input type="text" id="username" name="username" autocomplete="username" required autofocus>
@@ -42,7 +43,7 @@
                 <label for="password" th:text="${txt['pg.login.senha']}">Senha</label>
                 <input type="password" id="password" name="password" autocomplete="current-password" required>
 
-                <a class="login-esqueci" href="#" th:unless="${#strings.isEmpty(txt['pg.login.esqueci'])}" th:text="${txt['pg.login.esqueci']}">Esqueci minha senha</a>
+                <a class="login-esqueci" th:href="@{/esqueci-senha}"  th:text="${txt['pg.login.esqueci']}">Esqueci minha senha</a>
 
                 <button type="submit" class="login-btn" th:text="${txt['pg.login.btnEntrar']}">Entrar</button>
 
