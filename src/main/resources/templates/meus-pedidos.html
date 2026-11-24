@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
+    <title>Meus pedidos | Estilo London Store</title>
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+</head>
+<body class="admin-ui pg-meus-pedidos">
+    <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
+    <div class="barrabranca">
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
+        <button th:replace="~{fragments/fragmentos :: botao-carrinho}"></button>
+    </div>
+
+    <main class="cadastro-container mp-container">
+        <header class="mp-topo">
+            <div>
+                <h1 class="adm-titulo">Meus pedidos</h1>
+                <p class="adm-sub">Todos os pedidos da sua conta, do mais recente ao mais antigo.</p>
+            </div>
+            <a class="mp-voltar" th:href="@{/perfil}">← Voltar ao perfil</a>
+        </header>
+
+        <nav class="mp-filtros" aria-label="Filtrar pedidos por situação" th:if="${totalGeral > 0}">
+            <a class="mp-filtro" th:each="o : ${opcoesFiltro}"
+               th:href="@{/meus-pedidos(filtro=${o.parametro})}"
+               th:classappend="${o.ativo} ? 'mp-filtro-ativo'"
+               th:attr="aria-current=${o.ativo} ? 'page'">
+                <span th:text="${o.rotulo}">Todos</span>
+                <span class="mp-filtro-qtd" th:text="${o.total}">0</span>
+            </a>
+        </nav>
+
+        <!-- Conta sem nenhum pedido -->
+        <section class="mp-vazio" th:if="${totalGeral == 0}">
+            <h2>Você ainda não fez pedidos</h2>
+            <p>Quando você finalizar uma compra, ela aparece aqui para você acompanhar pagamento, envio e rastreio.</p>
+            <a class="mp-btn mp-btn-destaque" th:href="@{/home}">Ver produtos</a>
+        </section>
+
+        <!-- Há pedidos, mas o filtro não encontrou nenhum -->
+        <section class="mp-vazio" th:if="${totalGeral > 0 and #lists.isEmpty(pedidos)}">
+            <h2>Nenhum pedido neste filtro</h2>
+            <p>Você não tem pedidos “<span th:text="${filtroAtual.rotulo}">Em andamento</span>” no momento.</p>
+            <a class="mp-btn" th:href="@{/meus-pedidos}">Ver todos os pedidos</a>
+        </section>
+
+        <ul class="mp-lista" th:unless="${#lists.isEmpty(pedidos)}">
+            <li class="mp-card" th:each="p : ${pedidos}">
+                <div class="mp-card-topo">
+                    <div class="mp-ident">
+                        <a class="mp-codigo" th:href="@{'/pedido/' + ${p.id}}" th:text="${p.codigo}">EL-000000-AAAA</a>
+                        <span class="mp-data" th:text="${p.criadoEmFormatado}">01/01/2026 às 12:00</span>
+                    </div>
+                    <span class="status-pedido" th:classappend="'status-pedido-' + ${p.status.classe}"
+                          th:text="${p.status.rotulo}">Aguardando pagamento</span>
+                </div>
+
+                <div class="mp-corpo">
+                    <div class="mp-fotos">
+                        <th:block th:each="item, st : ${p.itens}">
+                            <img class="mp-foto" th:if="${st.index < 3}"
+                                 th:src="${item.imagem != null} ? @{'/img/' + ${item.imagem}} : @{/img/sem-foto.svg}"
+                                 th:alt="${item.nomeProduto}" loading="lazy">
+                        </th:block>
+                        <span class="mp-foto mp-foto-mais" th:if="${#lists.size(p.itens) > 3}"
+                              th:text="'+' + ${#lists.size(p.itens) - 3}">+2</span>
+                    </div>
+                    <div class="mp-resumo">
+                        <p class="mp-itens">
+                            <span th:text="${#lists.isEmpty(p.itens)} ? 'Pedido sem itens' : ${p.itens[0].nomeProduto}">Produto</span>
+                            <span th:if="${#lists.size(p.itens) > 1}"
+                                  th:text="' e mais ' + ${#lists.size(p.itens) - 1} + (${#lists.size(p.itens) - 1} == 1 ? ' item' : ' itens')">e mais 1 item</span>
+                        </p>
+                        <p class="mp-meta">
+                            <span th:text="${p.quantidadeTotal} + (${p.quantidadeTotal} == 1 ? ' peça' : ' peças')">1 peça</span>
+                            <span th:if="${p.formaPagamento != null}" th:text="'Pagamento: ' + ${p.formaPagamento.rotulo}">Pagamento: Pix</span>
+                        </p>
+                        <p class="mp-rastreio" th:if="${p.codigoRastreio != null and !#strings.isEmpty(p.codigoRastreio)}">
+                            Rastreio: <strong th:text="${p.codigoRastreio}">AA123456789BR</strong>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mp-card-rodape">
+                    <p class="mp-total">
+                        <small>Total</small>
+                        <strong th:text="|R$ ${#numbers.formatDecimal(p.total,1,'POINT',2,'COMMA')}|">R$ 0,00</strong>
+                    </p>
+                    <div class="mp-acoes">
+                        <a class="mp-btn mp-btn-destaque" th:if="${p.aguardandoPix}"
+                           th:href="@{'/pedido/' + ${p.id}}">Pagar com Pix</a>
+                        <a class="mp-btn" th:href="@{'/pedido/' + ${p.id}}">Ver detalhes</a>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </main>
+
+    <footer th:replace="~{fragments/fragmentos :: rodape}"></footer>
+    <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
+    <th:block th:replace="~{fragments/fragmentos :: carrinho-drawer}"></th:block>
+    <div class="overlay" id="overlay"></div>
+    <script th:src="@{/jshome.js(v=11)}"></script>
+</body>
+</html>

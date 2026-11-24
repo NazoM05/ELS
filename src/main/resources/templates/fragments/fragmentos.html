@@ -194,7 +194,10 @@
             <a th:href="@{/criar-conta}" sec:authorize="isAnonymous()" th:text="${txt['geral.menuCriarConta']}">Criar conta</a>
 
             <div class="sidebar-conta" sec:authorize="isAuthenticated()">
-                <a class="sidebar-conta-link" th:href="@{/carteira}" sec:authorize="hasAnyRole('ADMIN', 'USUARIO')">Minha carteira</a>
+                <p class="sidebar-conta-titulo" sec:authorize="hasAnyRole('ADMIN', 'USUARIO')">Área do usuário</p>
+                <a class="sidebar-conta-link" th:href="@{/meus-pedidos}" th:classappend="${areaPedidos} ? 'sidebar-conta-ativo'" sec:authorize="hasAnyRole('ADMIN', 'USUARIO')">Meus pedidos</a>
+                <a class="sidebar-conta-link" th:href="@{/carteira}" sec:authorize="hasRole('ADMIN')">Minha carteira</a>
+                <a class="sidebar-conta-link" th:href="@{/carteira}" sec:authorize="hasRole('USUARIO')" th:if="${cashbackAtivo}">Minha carteira</a>
                 <a class="sidebar-conta-link" th:href="@{/perfil}" th:text="${txt['geral.menuPerfil']}">Perfil</a>
                 <a class="sidebar-conta-link sidebar-sair" th:href="@{/logout}" th:text="${txt['geral.menuSair']}">Sair</a>
             </div>

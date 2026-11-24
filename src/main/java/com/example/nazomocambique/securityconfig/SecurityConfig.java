@@ -94,8 +94,8 @@ public class SecurityConfig {
 				// Separação de pedidos: somente ADMIN e SEPARADOR (precisa vir antes da regra geral de /admin/**)
 				.requestMatchers("/admin/separacao", "/admin/separacao/**").hasAnyRole(PERFIS_SEPARACAO)
 				.requestMatchers("/admin/**").hasRole("ADMIN")
-				// Carteira, checkout e pedidos do cliente: o SEPARADOR (que só trabalha na separação) não entra
-				.requestMatchers("/carteira", "/carteira/**", "/checkout", "/checkout/**", "/pedido/**").hasAnyRole("ADMIN", "USUARIO")
+				// Carteira, meus pedidos, checkout e pedidos do cliente: o SEPARADOR (que só trabalha na separação) não entra
+				.requestMatchers("/carteira", "/carteira/**", "/meus-pedidos", "/meus-pedidos/**", "/checkout", "/checkout/**", "/pedido/**").hasAnyRole("ADMIN", "USUARIO")
 				.requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
 				.anyRequest().authenticated()
 				

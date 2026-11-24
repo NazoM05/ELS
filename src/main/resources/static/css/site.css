@@ -16,6 +16,7 @@
      4. Banner de campanhas / carrossel (antigo <style> do fragmento banner-novidades)
      5. Carrinho lateral (antigo <style> do fragmento carrinho-drawer)
      6. Utilitários que substituíram estilos inline (style="...")
+     7. Área do usuário: sidebar e página Meus pedidos (sidebar-conta-, mp-)
    ===================================================================== */
 
 
@@ -3780,3 +3781,89 @@ input, select, textarea { min-width: 0; }
         margin-bottom: 12px;
     }
 }
+
+
+/* =====================================================================
+   7. Área do usuário: sidebar e página Meus pedidos (meus-pedidos.html)
+   Mobile-first: o padrão vale para telas estreitas; os @media min-width
+   só ampliam o layout. Cores vêm das variáveis do tema.
+   ===================================================================== */
+
+/* --- Sidebar: título e item ativo da área do usuário --- */
+.sidebar-conta-titulo { margin: 0 0 4px; padding: 0 28px; color: var(--primary-faint); font: 800 10px var(--font-body); letter-spacing: .22em; text-transform: uppercase; }
+.sidebar nav .sidebar-conta a.sidebar-conta-link.sidebar-conta-ativo { color: var(--primary-contrast); }
+@media (max-width: 640px) {
+    .sidebar-conta-titulo { padding-inline: 22px; font-size: 9px; }
+}
+
+/* --- Cabeçalho da página --- */
+.mp-container { max-width: 960px; padding-inline: 14px; }
+.mp-topo { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 20px; }
+.mp-voltar { color: var(--ink); font: 700 12px var(--font-body); letter-spacing: .06em; text-transform: uppercase; text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: 5px; }
+.mp-voltar:hover { border-bottom-color: var(--ink); }
+.mp-voltar-pedido { display: inline-block; margin-bottom: 16px; }
+
+/* --- Filtros: uma linha rolável no celular --- */
+.mp-filtros { display: flex; gap: 8px; margin: 0 -14px 18px; padding: 2px 14px 6px; overflow-x: auto; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.mp-filtros::-webkit-scrollbar { display: none; }
+.mp-filtro { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; scroll-snap-align: start; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 999px; font: 700 12px var(--font-body); text-decoration: none; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+.mp-filtro:hover { border-color: var(--ink); }
+.mp-filtro:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.mp-filtro-qtd { min-width: 22px; padding: 2px 7px; text-align: center; color: var(--muted); background: var(--soft); border-radius: 999px; font: 800 10px var(--font-body); font-variant-numeric: tabular-nums; }
+.mp-filtro-ativo { color: var(--primary-contrast); background: var(--primary-color); border-color: var(--primary-color); }
+.mp-filtro-ativo .mp-filtro-qtd { color: var(--primary-color); background: var(--primary-contrast); }
+
+/* --- Lista e cartão do pedido --- */
+.mp-lista { display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; }
+.mp-card { min-width: 0; padding: 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; }
+.mp-card-topo { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.mp-ident { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.mp-codigo { color: var(--ink); font: 800 14px var(--font-body); letter-spacing: .04em; text-decoration: none; overflow-wrap: anywhere; }
+.mp-codigo:hover { text-decoration: underline; }
+.mp-data { color: var(--muted); font: 500 12px var(--font-body); }
+.mp-card .status-pedido { margin-right: 0; }
+
+.mp-corpo { display: flex; flex-direction: column; gap: 12px; padding: 14px 0; }
+.mp-fotos { display: flex; gap: 8px; }
+.mp-foto { flex: 0 0 auto; width: 56px; height: 56px; object-fit: cover; background: var(--tile); border: 1px solid var(--line); border-radius: 4px; }
+.mp-foto-mais { display: inline-flex; align-items: center; justify-content: center; color: var(--ink); background: var(--soft); font: 800 12px var(--font-body); }
+.mp-resumo { min-width: 0; }
+.mp-resumo p { margin: 0; }
+.mp-itens { color: var(--ink); font: 700 14px/1.4 var(--font-body); overflow-wrap: anywhere; }
+.mp-meta { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 4px !important; color: var(--muted); font: 500 12px/1.5 var(--font-body); }
+.mp-rastreio { margin-top: 6px !important; color: var(--muted); font: 500 12px/1.5 var(--font-body); overflow-wrap: anywhere; }
+.mp-rastreio strong { color: var(--ink); }
+
+.mp-card-rodape { display: flex; flex-direction: column; gap: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.mp-total { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0; }
+.mp-total small { color: var(--muted); font: 700 10px var(--font-body); letter-spacing: .14em; text-transform: uppercase; }
+.mp-total strong { font: 400 26px/1 var(--font-display); font-variant-numeric: tabular-nums; }
+.mp-acoes { display: grid; gap: 8px; }
+
+/* --- Botões (alvo de toque de 44 px no celular) --- */
+.mp-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 20px; color: var(--ink); background: var(--bg); border: 1px solid var(--ink); border-radius: 4px; font: 800 11px var(--font-body); letter-spacing: .08em; text-transform: uppercase; text-decoration: none; text-align: center; -webkit-tap-highlight-color: transparent; }
+.mp-btn:hover { background: var(--soft); }
+.mp-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.mp-btn-destaque { color: var(--primary-contrast); background: var(--primary-color); border-color: var(--primary-color); }
+.mp-btn-destaque:hover { background: var(--primary-hover); }
+
+/* --- Estados vazios --- */
+.mp-vazio { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 36px 16px; text-align: center; background: var(--soft); border: 1px dashed var(--line); border-radius: 6px; }
+.mp-vazio h2 { margin: 0; font: 400 clamp(24px, 6vw, 30px)/1.1 var(--font-display); text-transform: uppercase; }
+.mp-vazio p { max-width: 420px; margin: 0; color: var(--muted); font: 500 14px/1.6 var(--font-body); }
+.mp-vazio .mp-btn { margin-top: 8px; }
+
+/* --- Telas a partir de 560 px --- */
+@media (min-width: 560px) {
+    .mp-container { padding-inline: 20px; }
+    .mp-topo { flex-direction: row; align-items: flex-end; justify-content: space-between; }
+    .mp-filtros { flex-wrap: wrap; margin-inline: 0; padding-inline: 0; overflow: visible; }
+    .mp-card { padding: 18px; }
+    .mp-corpo { flex-direction: row; align-items: center; gap: 18px; }
+    .mp-foto { width: 64px; height: 64px; }
+    .mp-card-rodape { flex-direction: row; align-items: center; justify-content: space-between; }
+    .mp-total { flex-direction: column; align-items: flex-start; gap: 4px; }
+    .mp-acoes { display: flex; flex-wrap: wrap; justify-content: flex-end; }
+    .mp-btn { min-height: 42px; }
+}
+

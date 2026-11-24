@@ -42,9 +42,9 @@
         <section class="comercial-card" id="cashback">
             <span class="comercial-status" th:classappend="${cashback.ativo} ? ' on' : ' off'" th:text="${cashback.ativo} ? 'Cashback ativo' : 'Cashback desativado'">Cashback desativado</span>
             <h2 class="comercial-h2">Cashback</h2>
-            <p class="desc">Cashback fica desativado por padrão. Ative somente quando quiser lançar o benefício.</p>
+            <p class="desc">Cashback fica desativado por padrão. Ao ativá-lo, Minha Carteira também ficará visível para usuários; ao desativá-lo, a página será ocultada dos usuários e continuará acessível integralmente aos administradores.</p>
             <form class="comercial-form" method="post" th:action="@{/admin/comercial/cashback}">
-                <label class="comercial-check"><input type="checkbox" name="ativo" value="true" th:checked="${cashback.ativo}"> Gerar cashback nas compras</label>
+                <label class="comercial-check"><input type="checkbox" name="ativo" value="true" th:checked="${cashback.ativo}"> Gerar cashback nas compras. Disponibilizar Minha Carteira aos usuários</label>
                 <div class="comercial-fields-3">
                     <div class="comercial-field"><label for="percentual">Percentual (%)</label><input id="percentual" type="number" name="percentual" min="0" max="100" step="0.001" required th:value="${cashback.percentual}"></div>
                     <div class="comercial-field"><label for="minimoCompra">Compra mínima (R$)</label><input id="minimoCompra" type="number" name="minimoCompra" min="0" step="0.01" required th:value="${cashback.minimoCompra}"></div>

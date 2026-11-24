@@ -248,6 +248,11 @@ public class PedidoService {
 		return pedidoRepository.findByIdAndUsuarioId(pedidoId, usuarioId);
 	}
 
+	/** Todos os pedidos da conta, do mais recente para o mais antigo (tela "Meus pedidos"). */
+	public List<Pedido> listarDoUsuario(Long usuarioId) {
+		return pedidoRepository.findAllByUsuarioIdOrderByCriadoEmDesc(usuarioId);
+	}
+
 	// ---------------------------------------------------------------- apoio
 
 	/** Sorteia um código novo; repete no caso raro de já existir um igual. */
