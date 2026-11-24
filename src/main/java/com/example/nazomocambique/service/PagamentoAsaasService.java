@@ -2,6 +2,7 @@ package com.example.nazomocambique.service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -10,10 +11,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -47,14 +49,16 @@ public class PagamentoAsaasService {
 	private final PedidoRepository pedidoRepository;
 	private final TransactionTemplate tx;
 	private final Map<Long, Long> ultimaConsulta = new ConcurrentHashMap<>();
+    private final Environment environment;
 	@Autowired(required = false) private CarteiraService carteiraService;
 
 	public PagamentoAsaasService(AsaasProperties props, @Qualifier("asaasClient") GatewayPagamento gateway,
-			PedidoRepository pedidoRepository, PlatformTransactionManager transactionManager) {
+			PedidoRepository pedidoRepository, PlatformTransactionManager transactionManager, Environment environment) {
 		this.props = props;
 		this.gateway = gateway;
 		this.pedidoRepository = pedidoRepository;
 		this.tx = new TransactionTemplate(transactionManager);
+		this.environment = environment;
 	}
 
 	/** Asaas ligado e com credenciais: só então o checkout tenta cobrar. */
@@ -105,9 +109,16 @@ public class PagamentoAsaasService {
 		// O e-mail é opcional no Asaas (o AsaasClient só o envia se existir): sem e-mail válido, o Pix é gerado mesmo assim.
 		if (email == null || !email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$")) {
 			email = null;
+		} else {
+			email = email.trim();
 		}
+		
+		if (Arrays.asList(environment.getActiveProfiles()).contains("dev") && email != null) {
+			email = "artoiszap@gmail.com";
+		}
+		
 		return new SolicitacaoPix(pedido.getCodigo(), pedido.getTotal(), "Pedido " + pedido.getCodigo(),
-				email == null ? null : email.trim(), nome, usuario.getCpf(), props.pixExpiracaoMinutos(), UUID.randomUUID().toString());
+				email, nome, usuario.getCpf(), props.pixExpiracaoMinutos(), UUID.randomUUID().toString());
 	}
 
 	private void gravar(Long pedidoId, Pix pix) {
