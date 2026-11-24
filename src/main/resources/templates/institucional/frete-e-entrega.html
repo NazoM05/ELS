@@ -6,17 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Valores de frete, frete grátis, prazos e como acompanhar a entrega do seu pedido na Estilo London Store.">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=29)}">
-    <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
+    <!-- CSS único do site: fontes, site.css e cores do painel (ver AGENTS.md) -->
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
 
     <title th:replace="~{fragments/fragmentos :: titulo(${txt['pg.frete.titulo']})}">Frete e Entrega - Estilo London Store</title>
-    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
-    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
-    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png}">
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico(v=2)}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png(v=2)}">
 </head>
 
 <body class="institucional-pagina pg-frete">
@@ -37,86 +33,30 @@
         </nav>
 
         <article class="institucional-texto">
-            <p class="institucional-kicker" th:unless="${#strings.isEmpty(txt['pg.frete.kicker'])}" th:text="${txt['pg.frete.kicker']}">Atendimento</p>
-            <h1 class="adm-titulo" th:text="${txt['pg.frete.h1']}">Frete e Entrega</h1>
-            <p class="institucional-lead" th:text="${txt['pg.frete.lead']}">Enviamos para todo o Brasil. O valor do frete aparece no resumo assim que você escolhe o estado de entrega, antes de confirmar o pedido.</p>
+            <div class="inst-topic-mark inst-topic-frete" aria-label="ENTREGA COM ACOMPANHAMENTO"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h11v10H3zM14 10h4l3 4v3h-7zM7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM18 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M5 10h6M5 13h4"/></svg></span><strong>ENTREGA COM ACOMPANHAMENTO</strong><i aria-hidden="true"></i></div>
 
-            <div class="institucional-destaques">
-                <div>
-                    <span>Frete grátis no Sul</span>
-                    <strong th:text="${'a partir de R$ ' + #numbers.formatDecimal(freteGratisSul, 1, 'POINT', 2, 'COMMA')}">a partir de R$ 99,00</strong>
-                </div>
-                <div>
-                    <span>Frete grátis nas demais regiões</span>
-                    <strong th:text="${'a partir de R$ ' + #numbers.formatDecimal(freteGratisDemais, 1, 'POINT', 2, 'COMMA')}">a partir de R$ 250,00</strong>
-                </div>
-                <div>
-                    <span>Abaixo do valor mínimo</span>
-                    <strong th:text="${'R$ ' + #numbers.formatDecimal(valorFrete, 1, 'POINT', 2, 'COMMA')}">R$ 19,90</strong>
-                </div>
+            <header class="inst-page-head"><p class="institucional-kicker" th:unless="${#strings.isEmpty(txt['pg.frete.kicker'])}" th:text="${txt['pg.frete.kicker']}">Atendimento</p><h1 class="adm-titulo" th:text="${txt['pg.frete.h1']}">Frete e Entrega</h1><p class="institucional-lead" th:text="${txt['pg.frete.lead']}">Enviamos para todo o Brasil. O valor do frete aparece no resumo assim que você escolhe o estado de entrega, antes de confirmar o pedido.</p></header>
+            <div class="inst-shipping-summary">
+                <div class="inst-summary-card"><span class="inst-summary-label">REGIÃO SUL</span><strong th:text="${'R$ ' + #numbers.formatDecimal(freteGratisSul, 1, 'POINT', 2, 'COMMA')}">R$ 99,00</strong><small>Valor mínimo para frete grátis</small></div>
+                <div class="inst-summary-card"><span class="inst-summary-label">DEMAIS REGIÕES</span><strong th:text="${'R$ ' + #numbers.formatDecimal(freteGratisDemais, 1, 'POINT', 2, 'COMMA')}">R$ 250,00</strong><small>Valor mínimo para frete grátis</small></div>
+                <div class="inst-summary-card"><span class="inst-summary-label">ABAIXO DO MÍNIMO</span><strong th:text="${'R$ ' + #numbers.formatDecimal(valorFrete, 1, 'POINT', 2, 'COMMA')}">R$ 19,90</strong><small>Valor fixo de entrega</small></div>
             </div>
-
-            <h2>Valor do frete</h2>
-            <ul>
-                <li><strong>Região Sul (Paraná, Santa Catarina e Rio Grande do Sul):</strong> frete grátis para pedidos a partir de <strong th:text="${'R$ ' + #numbers.formatDecimal(freteGratisSul, 1, 'POINT', 2, 'COMMA')}">R$ 99,00</strong>.</li>
-                <li><strong>Demais estados:</strong> frete grátis para pedidos a partir de <strong th:text="${'R$ ' + #numbers.formatDecimal(freteGratisDemais, 1, 'POINT', 2, 'COMMA')}">R$ 250,00</strong>.</li>
-                <li>Abaixo desses valores, cobramos um valor fixo de <strong th:text="${'R$ ' + #numbers.formatDecimal(valorFrete, 1, 'POINT', 2, 'COMMA')}">R$ 19,90</strong>, independente da quantidade de peças.</li>
-            </ul>
-            <p>O valor considerado é o subtotal das peças, e a região é a do endereço de entrega.</p>
-
-            <h2>Quando o pedido é enviado</h2>
-            <ul>
-                <li><strong>Pix:</strong> a aprovação é imediata e o pedido segue logo para separação.</li>
-                <li><strong>Cartão de crédito:</strong> após a aprovação da operadora.</li>
-                <li><strong>Boleto bancário:</strong> após a compensação, que leva até 3 dias úteis.</li>
-            </ul>
-            <p>Depois do envio, o prazo de entrega depende do estado do endereço. Veja o prazo do seu estado no mapa abaixo.</p>
-
-            <h2>Prazo de entrega por estado</h2>
-            <p>Passe o mouse sobre um estado (ou toque nele, no celular) para ver o prazo de entrega. O prazo conta em dias úteis a partir do envio do pedido.</p>
-
-            <div class="mapa-frete" data-mapa-frete
-                 th:attr="data-sul=${#numbers.formatDecimal(freteGratisSul, 1, 'POINT', 2, 'COMMA')},data-demais=${#numbers.formatDecimal(freteGratisDemais, 1, 'POINT', 2, 'COMMA')},data-ufs-sul=${ufsSul}">
-                <div class="mapa-frete-mapa">
-                    <svg th:replace="~{fragments/mapa-brasil :: mapa}"></svg>
+            <section class="inst-section"><div class="inst-section-heading"><span class="inst-index">01 / VALORES</span><h2>Como o frete é calculado</h2><p>O benefício considera o subtotal das peças e a região do endereço informado para entrega.</p></div>
+                <div class="inst-two-column"><div class="inst-info-panel"><h3>Frete grátis</h3><p><strong>Região Sul:</strong> Paraná, Santa Catarina e Rio Grande do Sul, para pedidos a partir de <strong th:text="${'R$ ' + #numbers.formatDecimal(freteGratisSul, 1, 'POINT', 2, 'COMMA')}">R$ 99,00</strong>.</p><p><strong>Demais estados:</strong> para pedidos a partir de <strong th:text="${'R$ ' + #numbers.formatDecimal(freteGratisDemais, 1, 'POINT', 2, 'COMMA')}">R$ 250,00</strong>.</p></div><div class="inst-info-panel inst-info-panel-dark"><h3>Pedidos abaixo do mínimo</h3><p>É aplicado o valor fixo de <strong th:text="${'R$ ' + #numbers.formatDecimal(valorFrete, 1, 'POINT', 2, 'COMMA')}">R$ 19,90</strong>, independente da quantidade de peças.</p></div></div>
+            </section>
+            <section class="inst-section"><div class="inst-section-heading"><span class="inst-index">02 / PREPARAÇÃO</span><h2>Quando o pedido é enviado</h2><p>A separação começa após a confirmação do pagamento.</p></div><div class="inst-step-grid">
+                <div class="inst-step"><span>01</span><h3>Pix</h3><p>A aprovação é imediata e o pedido segue para separação.</p></div><div class="inst-step"><span>02</span><h3>Cartão</h3><p>O pedido segue após a aprovação da operadora.</p></div><div class="inst-step"><span>03</span><h3>Boleto</h3><p>O pedido segue após a compensação, que leva até 3 dias úteis.</p></div>
+            </div></section>
+            <section class="inst-section inst-map-section"><div class="inst-section-heading"><span class="inst-index">03 / PRAZOS</span><h2>Consulte o prazo do seu estado</h2><p>Selecione um estado no mapa ou consulte a tabela completa. O prazo é contado em dias úteis a partir do envio do pedido.</p></div>
+                <div class="mapa-frete" data-mapa-frete th:attr="data-sul=${#numbers.formatDecimal(freteGratisSul, 1, 'POINT', 2, 'COMMA')},data-demais=${#numbers.formatDecimal(freteGratisDemais, 1, 'POINT', 2, 'COMMA')},data-ufs-sul=${ufsSul}">
+                    <div class="mapa-frete-mapa"><svg th:replace="~{fragments/mapa-brasil :: mapa}"></svg></div>
+                    <aside class="mapa-frete-info" aria-live="polite"><p class="mapa-frete-regiao" data-info-regiao>Prazo de entrega</p><strong class="mapa-frete-nome" data-info-nome>Escolha um estado</strong><p class="mapa-frete-prazo" data-info-prazo-bloco hidden><span data-info-prazo>2 a 4</span><small>dias úteis</small></p><p class="mapa-frete-dica" data-info-dica>O prazo aparece aqui assim que você apontar um estado no mapa.</p><p class="mapa-frete-gratis" data-info-frete hidden></p></aside>
                 </div>
-                <aside class="mapa-frete-info" aria-live="polite">
-                    <p class="mapa-frete-regiao" data-info-regiao>Prazo de entrega</p>
-                    <strong class="mapa-frete-nome" data-info-nome>Escolha um estado</strong>
-                    <p class="mapa-frete-prazo" data-info-prazo-bloco hidden>
-                        <span data-info-prazo>2 a 4</span>
-                        <small>dias úteis</small>
-                    </p>
-                    <p class="mapa-frete-dica" data-info-dica>O prazo aparece aqui assim que você apontar um estado no mapa.</p>
-                    <p class="mapa-frete-gratis" data-info-frete hidden></p>
-                </aside>
-            </div>
+                <details class="mapa-frete-lista"><summary>Ver todos os prazos por estado</summary><table><thead><tr><th scope="col">Estado</th><th scope="col">Região</th><th scope="col">Prazo</th></tr></thead><tbody><tr th:each="p : ${prazos}" th:attr="data-uf=${p.uf},data-nome=${p.nome},data-regiao=${p.regiao},data-min=${p.diasMin},data-max=${p.diasMax}"><td th:text="${p.nome + ' (' + p.uf + ')'}">Paraná (PR)</td><td th:text="${p.regiao}">Sul</td><td th:text="${p.descricao}">2 a 4 dias úteis</td></tr></tbody></table></details>
+            </section>
+            <section class="inst-section"><div class="inst-section-heading"><span class="inst-index">04 / RECEBIMENTO</span><h2>Depois que a compra é enviada</h2><p>Alguns cuidados ajudam a evitar problemas no recebimento.</p></div><div class="inst-check-grid"><div><h3>Acompanhe</h3><p>O resumo do pedido fica disponível na sua conta após a confirmação. Para receber o código de rastreio ou tirar dúvidas, escreva para <a href="mailto:contato@seudominio.com.br">contato@seudominio.com.br</a> informando o número do pedido.</p></div><div><h3>Confira o endereço</h3><p>Revise os dados na finalização da compra. Depois do envio, não é possível alterar o endereço de entrega.</p></div><div><h3>Verifique a embalagem</h3><p>Se ninguém puder receber, a transportadora faz novas tentativas. Se o pedido retornar, entramos em contato para combinar o reenvio. Se houver avaria na embalagem, recuse a entrega e nos avise.</p></div></div></section>
+            <div class="inst-bottom-note"><strong>Precisa de ajuda com a entrega?</strong><span>Tenha o número do pedido em mãos para agilizar o atendimento.</span><a href="mailto:contato@seudominio.com.br">Falar com atendimento ↗</a></div>
 
-            <details class="mapa-frete-lista">
-                <summary>Ver todos os prazos</summary>
-                <table>
-                    <thead>
-                        <tr><th scope="col">Estado</th><th scope="col">Região</th><th scope="col">Prazo</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="p : ${prazos}" th:attr="data-uf=${p.uf},data-nome=${p.nome},data-regiao=${p.regiao},data-min=${p.diasMin},data-max=${p.diasMax}">
-                            <td th:text="${p.nome + ' (' + p.uf + ')'}">Paraná (PR)</td>
-                            <td th:text="${p.regiao}">Sul</td>
-                            <td th:text="${p.descricao}">2 a 4 dias úteis</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </details>
-
-            <h2>Acompanhar o pedido</h2>
-            <p>O resumo do pedido fica disponível na sua conta logo após a confirmação. Para receber o código de rastreio ou tirar dúvidas sobre a entrega, fale com <a href="mailto:contato@seudominio.com.br">contato@seudominio.com.br</a> informando o número do pedido.</p>
-
-            <h2>Endereço e recebimento</h2>
-            <ul>
-                <li>Confira o endereço com atenção na finalização da compra: depois do envio não é possível alterá-lo.</li>
-                <li>Se ninguém puder receber, a transportadora faz novas tentativas. Se o pedido voltar para nós, entramos em contato para combinar o reenvio.</li>
-                <li>Ao receber, confira se a embalagem está intacta. Se houver avaria, recuse a entrega e nos avise.</li>
-            </ul>
         </article>
     </main>
 
@@ -126,7 +66,8 @@
     <th:block th:replace="~{fragments/fragmentos :: carrinho-drawer}"></th:block>
     <div class="overlay" id="overlay"></div>
 
-    <script th:src="@{/jshome.js(v=10)}"></script>
-    <script th:src="@{/mapa-frete.js(v=2)}"></script>
+    <script th:src="@{/jshome.js(v=11)}"></script>
+    <script th:src="@{/institucional.js(v=3)}"></script>
+    <script th:src="@{/mapa-frete.js(v=3)}"></script>
 </body>
 </html>

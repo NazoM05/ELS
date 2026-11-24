@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.nazomocambique.model.ItemPedido;
@@ -28,6 +29,8 @@ public class GestaoPedidoService {
 
 	private final PedidoRepository pedidoRepository;
 	private final ProdutoRepository produtoRepository;
+	@Autowired(required = false) private PagamentoAsaasService pagamentoAsaasService;
+	@Autowired(required = false) private CarteiraService carteiraService;
 
 	public GestaoPedidoService(PedidoRepository pedidoRepository, ProdutoRepository produtoRepository) {
 		this.pedidoRepository = pedidoRepository;
@@ -105,8 +108,12 @@ public class GestaoPedidoService {
 			return false;
 		}
 
+		if (mudouStatus && novoStatus == StatusPedido.PAGO && carteiraService != null) {
+			carteiraService.creditarCashback(pedido.getUsuario().getId(), pedido.getSubtotal(), "CASHBACK-PEDIDO-" + pedido.getId());
+		}
 		if (mudouStatus && novoStatus == StatusPedido.CANCELADO) {
 			devolverEstoque(pedido);
+			if (carteiraService != null) carteiraService.tratarCancelamentoPedido(pedido.getUsuario().getId(), pedido.getId(), pedido.getCashbackUsado());
 		}
 		pedido.setStatus(novoStatus);
 		pedido.setCodigoRastreio(rastreioNovo.isEmpty() ? null : rastreioNovo);
@@ -127,6 +134,14 @@ public class GestaoPedidoService {
 				rastreioNovo.isEmpty() ? null : rastreioNovo, quem.length() > 80 ? quem.substring(0, 80) : quem, loginGravado,
 				texto.isEmpty() ? null : texto.toString());
 		pedidoRepository.save(pedido);
+		if (mudouStatus && novoStatus == StatusPedido.CANCELADO && pagamentoAsaasService != null) {
+			try {
+				pagamentoAsaasService.estornarPedido(pedido.getId());
+			} catch (RuntimeException e) {
+				pedido.registrarAlteracao(novoStatus, novoStatus, false, null, null, "Sistema", null,
+					"Estorno automático não concluído; requer nova tentativa: " + e.getMessage());
+			}
+		}
 		return true;
 	}
 

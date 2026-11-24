@@ -3,147 +3,6 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
 
-    <!-- Tema: cor principal/logo + cores personalizadas por item e por página (só seletores fixos e cores validadas) -->
-    <th:block th:fragment="tema">
-        <style th:utext="${site.cssTema}"></style>
-        <style id="estilo-london-responsive">
-            /* Base fluida: evita larguras rígidas e rolagem horizontal acidental. */
-            *, *::before, *::after { box-sizing: border-box; }
-            html { width: 100%; max-width: 100%; overflow-x: clip; }
-            body { width: 100%; max-width: 100%; margin: 0; overflow-x: clip; }
-            img, video, iframe, svg { max-width: 100%; }
-            input, select, textarea, button { max-width: 100%; }
-            button, a, input, select, textarea { touch-action: manipulation; }
-            :where(.container-produtos, .checkout-container, .cadastro-container,
-                   .listagem-container, .config-container, .institucional,
-                   .detalhes-container, .admin-ui) {
-                width: min(100% - 32px, 1280px);
-                margin-inline: auto;
-            }
-
-            /* Cabeçalho e busca */
-            .barrabranca {
-                width: 100%;
-                min-width: 0;
-                flex-wrap: wrap;
-                padding-left: max(12px, env(safe-area-inset-left));
-                padding-right: max(12px, env(safe-area-inset-right));
-            }
-            .barra-logo { min-width: 0; }
-            .barra-logo img { width: auto; max-height: 58px; object-fit: contain; }
-            .search-form { min-width: 0; }
-            .search-form input[type="text"] { min-width: 0; }
-            .el-top-actions { flex-shrink: 0; }
-
-            /* Vitrine: quantidade de colunas adaptada à largura real disponível. */
-            .produtos-grid {
-                display: grid;
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-                gap: clamp(12px, 2vw, 24px);
-                width: 100%;
-            }
-            .produto-card { min-width: 0; width: 100%; }
-            .produto-media, .produto-media-box { min-width: 0; }
-            .produto-media img, .produto-media-box img {
-                display: block; width: 100%; height: auto; object-fit: contain;
-            }
-            .produto-titulo { overflow-wrap: anywhere; }
-            .preco, .preco-antigo, .parcelamento { overflow-wrap: anywhere; }
-
-            /* Detalhe, checkout e formulários */
-            .detalhes-container, .checkout-grid, .config-layout {
-                min-width: 0;
-            }
-            .detalhes-imagem, .detalhes-info, .checkout-coluna,
-            .checkout-resumo, .cadastro-form-box { min-width: 0; }
-            .detalhes-imagem img { display: block; max-width: 100%; height: auto; }
-            .cadastro-form, .checkout-grid { min-width: 0; }
-            .cadastro-campo, .adm-campo, .config-campo { min-width: 0; }
-            input, select, textarea { min-width: 0; }
-            .btn-comprar, .adm-btn { min-height: 42px; }
-
-            /* Tabelas administrativas podem rolar sem estourar a página. */
-            .listagem-container { min-width: 0; max-width: 100%; }
-            .listagem-painel { max-width: 100%; overflow-x: auto; }
-            .listagem-tabela { width: 100%; }
-            .hist-filtros, .hist-botoes, .adm-topo, .adm-acoes {
-                min-width: 0; flex-wrap: wrap;
-            }
-
-            /* Rodapé */
-            .rodape { width: 100%; }
-            .rodape-topo, .rodape-colunas { min-width: 0; }
-            .rodape a { overflow-wrap: anywhere; }
-
-            @media (max-width: 1100px) {
-                .produtos-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-                .el-hero-slides { padding-left: 44px; padding-right: 44px; }
-            }
-
-            @media (max-width: 760px) {
-                .barrabranca { gap: 10px; }
-                .barra-logo img { max-height: 48px; }
-                .search-form {
-                    order: 5;
-                    flex: 1 1 100%;
-                    width: 100%;
-                }
-                .search-form input[type="text"] { flex: 1 1 auto; width: 1%; }
-                .produtos-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-                .detalhes-container, .checkout-grid, .config-layout {
-                    grid-template-columns: minmax(0, 1fr) !important;
-                }
-                .detalhes-container { gap: 20px; }
-                .checkout-container, .cadastro-container, .config-container,
-                .institucional, .container-produtos { width: min(100% - 24px, 680px); }
-                .cadastro-form, .cadastro-form-box { width: 100%; }
-                .cadastro-campo.adm-c2, .cadastro-campo.adm-c3,
-                .cadastro-campo.adm-c4, .cadastro-campo.adm-c6 {
-                    grid-column: 1 / -1;
-                }
-                .rodape-topo { grid-template-columns: 1fr; gap: 24px; }
-                .rodape-colunas { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
-                .el-cart-drawer { width: min(440px, 100vw); }
-                .el-cart-header, .el-cart-body, .el-cart-footer {
-                    padding-left: 16px; padding-right: 16px;
-                }
-                .el-cart-item { grid-template-columns: 56px minmax(0, 1fr); }
-                .el-cart-item img { width: 56px; height: 56px; }
-                .el-cart-item-controls {
-                    grid-column: 2; flex-direction: row; align-items: center;
-                    justify-content: space-between; flex-wrap: wrap;
-                }
-            }
-
-            @media (max-width: 480px) {
-                .barrabranca { gap: 8px; }
-                .barra-logo img { max-height: 42px; }
-                .el-top-actions { gap: 5px !important; }
-                .el-cart-trigger { padding: 7px 9px; }
-                .el-cart-trigger svg { width: 18px; height: 18px; }
-                .produtos-grid { gap: 9px; }
-                .produto-titulo { font-size: clamp(.78rem, 3.2vw, .95rem); }
-                .secao-titulo { font-size: clamp(1.2rem, 6vw, 1.7rem); }
-                .paginacao { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
-                .paginacao-resumo { flex: 1 1 100%; text-align: center; }
-                .rodape-colunas { grid-template-columns: 1fr; }
-                .rodape-base { padding-left: 12px; padding-right: 12px; }
-                .el-cart-item { gap: 9px; padding: 8px; }
-                .el-cart-subtotal-row { gap: 12px; font-size: .95rem; }
-            }
-
-            @media (prefers-reduced-motion: reduce) {
-                html { scroll-behavior: auto !important; }
-                *, *::before, *::after {
-                    scroll-behavior: auto !important;
-                    animation-duration: .01ms !important;
-                    animation-iteration-count: 1 !important;
-                    transition-duration: .01ms !important;
-                }
-            }
-        </style>
-        <style id="personalizacao-css" th:if="${!#strings.isEmpty(personalizacaoCss)}" th:utext="${personalizacaoCss}"></style>
-    </th:block>
 
     <!-- Título da aba: "Página - Loja" (sem nome de página, só a loja) -->
     <title th:fragment="titulo(pagina)"
@@ -158,18 +17,18 @@
     <section th:fragment="banner-novidades" class="promo-miami" aria-roledescription="carrossel" aria-label="Campanhas da loja" data-promo-carrossel>
         <div class="promo-miami-trilho">
 
-            <article class="promo-miami-slide ativo" aria-roledescription="slide" aria-label="1 de 3">
+            <article class="promo-miami-slide promo-miami-foco-direita ativo" aria-roledescription="slide" aria-label="1 de 4">
                 <img class="promo-miami-imagem" th:src="@{/img/banner-tricolor-neon.jpg(v=1)}" alt="Modelo com a nova camisa listrada tricolor ao pôr do sol em uma avenida neon" fetchpriority="high">
                 <div class="promo-miami-sombra" aria-hidden="true"></div>
                 <div class="promo-miami-conteudo">
                     <span class="promo-miami-selo">CHEGOU · NOVA TEMPORADA</span>
                     <h2>NOVO MANTO<br><span>DO TRICOLOR.</span></h2>
                     <p>Vista as cores da nossa história com a nova camisa oficial.</p>
-                    <a class="promo-miami-cta" th:href="@{/home(busca='Tricolor')}">VER NOVIDADES <span aria-hidden="true">↗</span></a>
+                    <a class="promo-miami-cta" th:href="@{/colecao/tricolor}">VER COLEÇÃO <span aria-hidden="true">↗</span></a>
                 </div>
             </article>
 
-            <article class="promo-miami-slide" aria-roledescription="slide" aria-label="2 de 3">
+            <article class="promo-miami-slide promo-miami-foco-esquerda" aria-roledescription="slide" aria-label="2 de 4">
                 <img class="promo-miami-imagem" th:src="@{/img/banner-miami-neon.png(v=3)}" alt="Campanha urbana ao pôr do sol em uma cidade tropical iluminada por neon" loading="lazy">
                 <div class="promo-miami-sombra" aria-hidden="true"></div>
                 <div class="promo-miami-conteudo">
@@ -180,7 +39,20 @@
                 </div>
             </article>
 
-            <article class="promo-miami-slide" aria-roledescription="slide" aria-label="3 de 3">
+            <article class="promo-miami-slide promo-miami-slide-arte promo-miami-foco-direita" aria-roledescription="slide" aria-label="3 de 4">
+                <!-- Arte pronta: selo, título e texto já estão na imagem (sem o botão). No computador só o botão VER COLEÇÃO é HTML,
+                     como nos outros slides; no celular (≤640px) o recorte esconde o texto da imagem e o bloco inteiro aparece. -->
+                <img class="promo-miami-imagem" th:src="@{/img/banner-vice-city-80s.jpg(v=2)}" alt="Sinta-se nos 80's. Vice City, nova coleção: homem de camisa havaiana encostado em um carro, com palmeiras, helicóptero e hotel neon ao pôr do sol" loading="lazy">
+                <div class="promo-miami-sombra" aria-hidden="true"></div>
+                <div class="promo-miami-conteudo">
+                    <span class="promo-miami-selo">VICE CITY · NOVA COLEÇÃO</span>
+                    <h2>SINTA-SE NOS 80'S.<br><span>VICE CITY.</span></h2>
+                    <p>Neon, praia e atitude. Conheça as peças da nova coleção.</p>
+                    <a class="promo-miami-cta" th:href="@{/colecao/vice-city}">VER COLEÇÃO <span aria-hidden="true">↗</span></a>
+                </div>
+            </article>
+
+            <article class="promo-miami-slide promo-miami-foco-direita" aria-roledescription="slide" aria-label="4 de 4">
                 <img class="promo-miami-imagem" th:src="@{/img/banner-outlet-neon.jpg(v=1)}" alt="Modelo saindo de uma loja iluminada por neon com sacolas de compras" loading="lazy">
                 <div class="promo-miami-sombra" aria-hidden="true"></div>
                 <div class="promo-miami-conteudo">
@@ -198,41 +70,6 @@
         <div class="promo-miami-pontos" role="group" aria-label="Escolher anúncio"></div>
         <span class="promo-miami-assinatura" aria-hidden="true">NAZO · URBAN CULTURE</span>
 
-        <style>
-            .promo-miami{--pm-rosa:#ff4fa6;--pm-laranja:#ff8b57;--pm-rosa-claro:#ff8acb;--pm-roxo:#7b36a4;--pm-fundo:#24102f;position:relative;isolation:isolate;width:min(calc(100% - 32px),1440px);height:420px;min-height:420px;max-height:420px;flex:0 0 420px;margin:22px auto 34px;overflow:hidden;border-radius:18px;background:var(--pm-fundo);color:#fff;box-shadow:0 18px 48px rgba(35,8,42,.22)}
-            .promo-miami-trilho{position:absolute;inset:0}
-            .promo-miami-slide{position:absolute;inset:0;isolation:isolate;display:flex;align-items:center;opacity:0;visibility:hidden;transition:opacity .7s ease,visibility 0s linear .7s}
-            .promo-miami-slide.ativo{opacity:1;visibility:visible;transition:opacity .7s ease,visibility 0s}
-            .promo-miami-imagem,.promo-miami-sombra{position:absolute;inset:0;width:100%;height:100%;z-index:-2}
-            .promo-miami-imagem{display:block;object-fit:cover;object-position:center 46%;transform:scale(1.04);transition:transform 6.5s ease-out}
-            .promo-miami-slide.ativo .promo-miami-imagem{transform:scale(1)}
-            .promo-miami-sombra{z-index:-1;background:linear-gradient(90deg,rgba(22,5,29,.9) 0%,rgba(38,8,47,.72) 36%,rgba(38,8,47,.08) 76%),linear-gradient(0deg,rgba(16,4,25,.38),transparent 45%)}
-            .promo-miami-conteudo{padding:clamp(28px,5vw,68px) clamp(28px,5vw,68px) clamp(28px,5vw,68px) clamp(64px,7vw,96px);max-width:760px;text-shadow:0 2px 18px rgba(0,0,0,.35)}
-            .promo-miami-slide.ativo .promo-miami-conteudo>*{animation:promoMiamiEntra .6s ease both}
-            .promo-miami-slide.ativo .promo-miami-conteudo>:nth-child(2){animation-delay:.08s}
-            .promo-miami-slide.ativo .promo-miami-conteudo>:nth-child(3){animation-delay:.16s}
-            .promo-miami-slide.ativo .promo-miami-conteudo>:nth-child(4){animation-delay:.24s}
-            @keyframes promoMiamiEntra{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-            .promo-miami-selo{display:inline-block;padding:8px 12px;border:1px solid rgba(255,255,255,.72);border-radius:3px;background:rgba(255,54,153,.24);font:800 10px/1.2 Montserrat,sans-serif;letter-spacing:.2em}
-            .promo-miami h2{margin:18px 0 12px;font:400 clamp(42px,7vw,88px)/.92 Anton,Impact,sans-serif;letter-spacing:.015em;color:#fff}
-            .promo-miami h2 span{color:var(--pm-rosa-claro);text-shadow:3px 3px 0 var(--pm-roxo),0 0 24px rgba(255,83,178,.55)}
-            .promo-miami p{margin:0 0 24px;max-width:520px;font:600 clamp(12px,1.35vw,16px)/1.5 Montserrat,sans-serif;letter-spacing:.02em}
-            .promo-miami-cta{display:inline-flex;align-items:center;gap:18px;padding:14px 20px;background:linear-gradient(100deg,var(--pm-rosa),var(--pm-laranja));color:#210d2b;text-decoration:none;font:800 11px Montserrat,sans-serif;letter-spacing:.12em;box-shadow:0 8px 28px rgba(255,70,151,.35);transition:transform .2s,filter .2s}
-            .promo-miami-cta:hover,.promo-miami-cta:focus-visible{transform:translateY(-3px);filter:brightness(1.12)}
-            .promo-miami-cta span{font-size:18px}
-            .promo-miami-seta{position:absolute;top:50%;z-index:3;display:grid;place-items:center;width:44px;height:44px;margin-top:-22px;padding:0;border:1px solid rgba(255,138,203,.7);border-radius:50%;background:rgba(22,5,29,.55);color:#fff;font:400 28px/1 Montserrat,sans-serif;cursor:pointer;backdrop-filter:blur(6px);box-shadow:0 0 18px rgba(255,79,166,.25);transition:background .2s,box-shadow .2s,transform .2s}
-            .promo-miami-seta:hover,.promo-miami-seta:focus-visible{background:linear-gradient(100deg,var(--pm-rosa),var(--pm-laranja));color:#210d2b;box-shadow:0 0 26px rgba(255,79,166,.55);transform:scale(1.06)}
-            .promo-miami-seta:focus-visible,.promo-miami-ponto:focus-visible,.promo-miami-cta:focus-visible{outline:2px solid #fff;outline-offset:3px}
-            .promo-miami-seta-anterior{left:16px}
-            .promo-miami-seta-proxima{right:16px}
-            .promo-miami-pontos{position:absolute;left:50%;bottom:18px;z-index:3;display:flex;gap:8px;transform:translateX(-50%)}
-            .promo-miami-ponto{width:26px;height:4px;padding:0;border:0;border-radius:4px;background:rgba(255,255,255,.45);cursor:pointer;transition:width .3s,background .3s,box-shadow .3s}
-            .promo-miami-ponto[aria-current="true"]{width:46px;background:linear-gradient(90deg,var(--pm-rosa),var(--pm-laranja));box-shadow:0 0 12px rgba(255,79,166,.7)}
-            .promo-miami-assinatura{position:absolute;right:22px;bottom:18px;z-index:3;font:800 9px Montserrat,sans-serif;letter-spacing:.25em;color:rgba(255,255,255,.8)}
-            .promo-miami:not(.js-pronto) .promo-miami-seta,.promo-miami:not(.js-pronto) .promo-miami-pontos{display:none}
-            @media(max-width:640px){.promo-miami{width:calc(100% - 20px);height:390px;min-height:390px;max-height:390px;flex-basis:390px;margin:12px auto 24px;border-radius:12px}.promo-miami-slide{align-items:flex-end}.promo-miami-imagem{object-position:72% center}.promo-miami-sombra{background:linear-gradient(0deg,rgba(20,4,29,.94),rgba(28,5,36,.58) 58%,rgba(28,5,36,.08))}.promo-miami-conteudo{padding:26px 22px 52px}.promo-miami h2{font-size:clamp(40px,12vw,60px)}.promo-miami-seta{top:22px;margin-top:0;width:38px;height:38px;font-size:24px}.promo-miami-seta-anterior{left:auto;right:62px}.promo-miami-seta-proxima{right:14px}.promo-miami-pontos{left:22px;bottom:20px;transform:none}.promo-miami-assinatura{right:14px;bottom:16px;font-size:8px}}
-            @media(prefers-reduced-motion:reduce){.promo-miami-slide,.promo-miami-imagem,.promo-miami-cta,.promo-miami-seta,.promo-miami-ponto{transition:none}.promo-miami-slide.ativo .promo-miami-conteudo>*{animation:none}}
-        </style>
         <script>
             (function () {
                 var raiz = document.currentScript && document.currentScript.closest('[data-promo-carrossel]');
@@ -253,19 +90,30 @@
                     return b;
                 });
 
-                function mostrar(i) {
-                    atual = (i + slides.length) % slides.length;
-                    slides.forEach(function (s, k) {
-                        var ativo = k === atual;
-                        s.classList.toggle('ativo', ativo);
-                        s.setAttribute('aria-hidden', ativo ? 'false' : 'true');
-                        if (ativo) s.removeAttribute('inert'); else s.setAttribute('inert', '');
+                function mostrar(indice) {
+                    atual = (indice + slides.length) % slides.length;
+                    slides.forEach(function (slide, i) {
+                        slide.classList.toggle('ativo', i === atual);
+                        slide.setAttribute('aria-hidden', i === atual ? 'false' : 'true');
                     });
-                    botoes.forEach(function (b, k) { b.setAttribute('aria-current', k === atual ? 'true' : 'false'); });
+                    botoes.forEach(function (botao, i) {
+                        botao.classList.toggle('ativo', i === atual);
+                        botao.setAttribute('aria-current', i === atual ? 'true' : 'false');
+                    });
                 }
-                function iniciar() { if (!semMovimento && !timer) timer = setInterval(function () { mostrar(atual + 1); }, INTERVALO); }
-                function pausar() { clearInterval(timer); timer = null; }
-                function reiniciar() { pausar(); iniciar(); }
+
+                function iniciar() {
+                    if (semMovimento) return;
+                    clearInterval(timer);
+                    timer = setInterval(function () { mostrar(atual + 1); }, INTERVALO);
+                }
+
+                function pausar() { clearInterval(timer); }
+
+                function reiniciar() {
+                    pausar();
+                    iniciar();
+                }
 
                 raiz.querySelector('.promo-miami-seta-anterior').addEventListener('click', function () { mostrar(atual - 1); reiniciar(); });
                 raiz.querySelector('.promo-miami-seta-proxima').addEventListener('click', function () { mostrar(atual + 1); reiniciar(); });
@@ -273,6 +121,22 @@
                 raiz.addEventListener('mouseleave', iniciar);
                 raiz.addEventListener('focusin', pausar);
                 raiz.addEventListener('focusout', function (e) { if (!raiz.contains(e.relatedTarget)) iniciar(); });
+
+                raiz.querySelectorAll('[data-promo-link]').forEach(function (slide) {
+                    var destino = slide.getAttribute('data-promo-link');
+                    if (!destino) return;
+                    slide.addEventListener('click', function (e) {
+                        if (e.target.closest('a, button')) return;
+                        window.location.href = destino;
+                    });
+                    slide.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            window.location.href = destino;
+                        }
+                    });
+                });
+
                 raiz.addEventListener('keydown', function (e) {
                     if (e.key === 'ArrowLeft') { mostrar(atual - 1); reiniciar(); }
                     if (e.key === 'ArrowRight') { mostrar(atual + 1); reiniciar(); }
@@ -299,13 +163,17 @@
             <img th:src="${site.logoPersonalizada} ? @{'/logo-site/' + ${site.logoArquivo}} : @{/brand/logo-el-branca.png}" th:alt="${txt['geral.nomeCurto']}">
         </a>
         <nav>
-            <a th:href="@{/home}" sec:authorize="!(hasRole('GESTOR') and !hasRole('ADMIN'))" th:text="${txt['geral.menuInicio']}">Início</a>
-            <a th:href="@{/outlet}" sec:authorize="!(hasRole('GESTOR') and !hasRole('ADMIN'))">Outlet</a>
-            <hr class="sidebar-divisor" sec:authorize="!(hasRole('GESTOR') and !hasRole('ADMIN'))">
+            <a th:href="@{/home}" sec:authorize="!(hasRole('SEPARADOR') and !hasRole('ADMIN'))" th:text="${txt['geral.menuInicio']}">Início</a>
+            <a class="sidebar-vice" th:href="@{/colecao/vice-city}" sec:authorize="!(hasRole('SEPARADOR') and !hasRole('ADMIN'))"><span class="sidebar-vice-texto">Coleção Vice City</span></a>
+            <a th:href="@{/colecao/tricolor}" sec:authorize="!(hasRole('SEPARADOR') and !hasRole('ADMIN'))">Imortal Tricolor</a>
+            <a th:href="@{/colecao/urban-culture}" sec:authorize="!(hasRole('SEPARADOR') and !hasRole('ADMIN'))">Nazo · Urban Culture</a>
+            <a th:href="@{/outlet}" sec:authorize="!(hasRole('SEPARADOR') and !hasRole('ADMIN'))">Outlet</a>
+            <hr class="sidebar-divisor" sec:authorize="!(hasRole('SEPARADOR') and !hasRole('ADMIN'))">
 
             <div class="sidebar-admin" sec:authorize="hasRole('ADMIN')">
                 <p class="sidebar-admin-titulo" th:text="${txt['geral.menuAdminTitulo']}">Opções de administrador</p>
                 <a th:href="@{/admin/configuracoes}" th:text="${txt['geral.menuConfiguracoes']}">Configurações</a>
+                <a th:href="@{/admin/comercial}">Pix e Cashback</a>
                 <a th:href="@{/admin/usuarios}">Gerenciar Usuários</a>
                 <a th:href="@{/admin/produto/listar}" th:text="${txt['geral.menuProdutos']}">Gerenciar produtos</a>
                 <a th:href="@{/admin/historico}">Auditoria</a>
@@ -317,8 +185,8 @@
                 <a th:href="@{/admin/separacao}">Separação de pedidos</a>
             </div>
 
-            <div class="sidebar-admin" sec:authorize="hasRole('GESTOR') and !hasRole('ADMIN')">
-                <p class="sidebar-admin-titulo">Área do gestor</p>
+            <div class="sidebar-admin" sec:authorize="hasRole('SEPARADOR') and !hasRole('ADMIN')">
+                <p class="sidebar-admin-titulo">Área do separador</p>
                 <a th:href="@{/admin/separacao}">Separação de pedidos</a>
             </div>
 
@@ -326,6 +194,10 @@
             <a th:href="@{/criar-conta}" sec:authorize="isAnonymous()" th:text="${txt['geral.menuCriarConta']}">Criar conta</a>
 
             <div class="sidebar-conta" sec:authorize="isAuthenticated()">
+                <p class="sidebar-conta-titulo" sec:authorize="hasAnyRole('ADMIN', 'USUARIO')">Área do usuário</p>
+                <a class="sidebar-conta-link" th:href="@{/meus-pedidos}" th:classappend="${areaPedidos} ? 'sidebar-conta-ativo'" sec:authorize="hasAnyRole('ADMIN', 'USUARIO')">Meus pedidos</a>
+                <a class="sidebar-conta-link" th:href="@{/carteira}" sec:authorize="hasRole('ADMIN')">Minha carteira</a>
+                <a class="sidebar-conta-link" th:href="@{/carteira}" sec:authorize="hasRole('USUARIO')" th:if="${cashbackAtivo}">Minha carteira</a>
                 <a class="sidebar-conta-link" th:href="@{/perfil}" th:text="${txt['geral.menuPerfil']}">Perfil</a>
                 <a class="sidebar-conta-link sidebar-sair" th:href="@{/logout}" th:text="${txt['geral.menuSair']}">Sair</a>
             </div>
@@ -339,7 +211,7 @@
     </button>
 
     <!-- Botões do Topo: Wishlist (Coração) + Carrinho (Sacola) -->
-    <div class="el-top-actions" th:fragment="botao-carrinho" th:classappend="${paginaFavoritos} ? 'el-top-actions-isolado'" style="display: inline-flex; align-items: center; gap: 8px;">
+    <div class="el-top-actions" th:fragment="botao-carrinho" th:classappend="${paginaFavoritos} ? 'el-top-actions-isolado'">
         <a class="el-cart-trigger" id="btnAbrirWishlist" th:unless="${paginaFavoritos}" th:href="@{/favoritos}" aria-label="Abrir lista de desejos" title="Lista de desejos">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
@@ -359,6 +231,7 @@
 
     <th:block th:fragment="carrinho-drawer">
         <div id="carrinhoBackdrop" class="el-cart-backdrop" aria-hidden="true"></div>
+        <div id="carrinhoToast" class="el-cart-toast" role="status" aria-live="polite" aria-atomic="true" hidden>Produto adicionado</div>
 
         <aside id="carrinhoDrawer" class="el-cart-drawer" aria-label="Carrinho de compras" aria-hidden="true"
                th:attr="data-texto-vazio=${txt['geral.carrinhoVazio']},data-texto-remover=${txt['geral.carrinhoRemover']}">
@@ -380,190 +253,9 @@
             </div>
         </aside>
 
-        <style>
-            .el-cart-trigger {
-                position: relative;
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                background: transparent;
-                border: 1px solid currentColor;
-                border-radius: 8px;
-                padding: 6px 12px;
-                cursor: pointer;
-                color: inherit;
-                font-weight: 600;
-            }
-            .el-cart-badge {
-                background: var(--primary-color, #111111);
-                color: #ffffff;
-                font-size: 0.75rem;
-                min-width: 20px;
-                height: 20px;
-                padding: 0 5px;
-                border-radius: 999px;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-            }
-            .el-cart-backdrop {
-                position: fixed;
-                inset: 0;
-                background: rgba(0, 0, 0, 0.5);
-                opacity: 0;
-                visibility: hidden;
-                transition: opacity 0.25s ease, visibility 0.25s ease;
-                z-index: 1040;
-            }
-            .el-cart-backdrop.is-open {
-                opacity: 1;
-                visibility: visible;
-            }
-            .el-cart-drawer {
-                position: fixed;
-                top: 0;
-                right: 0;
-                width: min(420px, 100vw);
-                height: 100dvh;
-                background: #ffffff;
-                color: #111111;
-                box-shadow: -8px 0 28px rgba(0, 0, 0, 0.18);
-                display: flex;
-                flex-direction: column;
-                transform: translateX(100%);
-                transition: transform 0.28s ease;
-                z-index: 1050;
-            }
-            .el-cart-drawer.is-open {
-                transform: translateX(0);
-            }
-            .el-cart-header {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 16px 20px;
-                border-bottom: 1px solid #e5e7eb;
-            }
-            .el-cart-title {
-                margin: 0;
-                font-size: 1.125rem;
-            }
-            .el-cart-close {
-                background: transparent;
-                border: none;
-                font-size: 1.6rem;
-                line-height: 1;
-                cursor: pointer;
-                color: inherit;
-                padding: 4px 8px;
-            }
-            .el-cart-body {
-                flex: 1;
-                overflow-y: auto;
-                padding: 16px 20px;
-                display: flex;
-                flex-direction: column;
-                gap: 12px;
-            }
-            .el-cart-empty {
-                text-align: center;
-                color: #6b7280;
-                margin-top: 40px;
-            }
-            .el-cart-item {
-                display: grid;
-                grid-template-columns: 64px 1fr auto;
-                gap: 12px;
-                align-items: center;
-                padding: 10px;
-                border: 1px solid #e5e7eb;
-                border-radius: 8px;
-            }
-            .el-cart-item img {
-                width: 64px;
-                height: 64px;
-                object-fit: cover;
-                border-radius: 6px;
-                background: #f3f4f6;
-            }
-            .el-cart-item-info h4 {
-                margin: 0 0 4px;
-                font-size: 0.95rem;
-            }
-            .el-cart-item-meta {
-                font-size: 0.82rem;
-                color: #4b5563;
-                margin-bottom: 4px;
-            }
-            .el-cart-item-price {
-                font-size: 0.9rem;
-                font-weight: 600;
-            }
-            .el-cart-item-controls {
-                display: flex;
-                flex-direction: column;
-                align-items: flex-end;
-                gap: 6px;
-            }
-            .el-cart-qty-box {
-                display: inline-flex;
-                align-items: center;
-                border: 1px solid #d1d5db;
-                border-radius: 6px;
-                overflow: hidden;
-            }
-            .el-cart-qty-box button {
-                background: #f9fafb;
-                border: none;
-                width: 26px;
-                height: 26px;
-                cursor: pointer;
-                font-weight: 700;
-            }
-            .el-cart-qty-box span {
-                padding: 0 8px;
-                font-size: 0.88rem;
-                min-width: 24px;
-                text-align: center;
-            }
-            .el-cart-remove {
-                background: transparent;
-                border: none;
-                color: #dc2626;
-                font-size: 0.78rem;
-                cursor: pointer;
-                padding: 0;
-                text-decoration: underline;
-            }
-            .el-cart-footer {
-                padding: 16px 20px;
-                border-top: 1px solid #e5e7eb;
-                background: #fafafa;
-            }
-            .el-cart-subtotal-row {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                font-size: 1.05rem;
-                margin-bottom: 12px;
-            }
-            .el-cart-checkout-btn {
-                display: block;
-                margin: 0 0 8px;
-            }
-            .el-cart-checkout-btn[hidden] {
-                display: none;
-            }
-            .el-cart-clear-btn {
-                width: 100%;
-                padding: 10px;
-                border: 1px solid #d1d5db;
-                background: #ffffff;
-                border-radius: 8px;
-                cursor: pointer;
-                font-weight: 500;
-            }
-        </style>
+
+        <!-- Só existe para quem não está logado: o carrinho pede login na hora de adicionar um produto -->
+        <span id="carrinhoExigeLogin" hidden sec:authorize="isAnonymous()" th:attr="data-url=@{/login}"></span>
 
         <script>
             (() => {
@@ -581,6 +273,8 @@
                 const subtotalEl = document.getElementById("carrinhoSubtotal");
                 const qtdTotalEl = document.getElementById("carrinhoQtdTotal");
                 const btnFinalizar = document.getElementById("btnFinalizarCompra");
+                const toast = document.getElementById("carrinhoToast");
+                let toastTimer = null;
 
                 if (!drawer || !backdrop || !listaEl || !subtotalEl) return;
 
@@ -624,6 +318,20 @@
                     return `${String(id).trim()}__${String(tamanho || "UNICO").trim().toUpperCase()}`;
                 }
 
+                function mostrarToast(mensagem = "Produto adicionado") {
+                    if (!toast) return;
+                    toast.textContent = mensagem;
+                    toast.hidden = false;
+                    toast.classList.remove("visivel");
+                    void toast.offsetWidth;
+                    toast.classList.add("visivel");
+                    clearTimeout(toastTimer);
+                    toastTimer = setTimeout(() => {
+                        toast.classList.remove("visivel");
+                        setTimeout(() => { toast.hidden = true; }, 180);
+                    }, 2200);
+                }
+
                 function abrirCarrinho() {
                     drawer.classList.add("is-open");
                     backdrop.classList.add("is-open");
@@ -639,7 +347,18 @@
                     window.dispatchEvent(new CustomEvent("carrinho:fechado"));
                 }
 
+                // Visitante sem login pode navegar por tudo (inclusive coleções), mas ao tentar
+                // colocar algo no carrinho é levado para o login.
+                function exigirLogin() {
+                    const marcador = document.getElementById("carrinhoExigeLogin");
+                    if (!marcador) return false;
+                    mostrarToast("Entre na sua conta para adicionar ao carrinho");
+                    setTimeout(() => { window.location.href = marcador.dataset.url || "/login"; }, 900);
+                    return true;
+                }
+
                 function adicionarItem({ id, nome, preco, tamanho, imagem, quantidade = 1 }) {
+                    if (exigirLogin()) return;
                     const precoNum = Number(String(preco).replace(",", "."));
                     const qtdAdd = Math.max(1, parseInt(quantidade, 10) || 1);
                     const tamNorm = String(tamanho || "UNICO").trim().toUpperCase();
@@ -666,7 +385,8 @@
 
                     salvarCarrinho(itens);
                     renderizarCarrinho();
-                    abrirCarrinho();
+                    // Só avisa e atualiza o número sobre a sacola; o carrinho abre apenas quando o cliente clica nele.
+                    mostrarToast("Produto adicionado");
                 }
 
                 function alterarQuantidade(chave, delta) {
@@ -720,7 +440,7 @@
                             const totalItem = item.preco * item.quantidade;
                             const imgHtml = item.imagem
                                 ? `<img src="${item.imagem}" alt="${item.nome}">`
-                                : `<div style="width:64px;height:64px;background:#f3f4f6;border-radius:6px;"></div>`;
+                                : `<div class="el-cart-thumb-vazio"></div>`;
 
                             return `
                                 <div class="el-cart-item" data-chave="${item.chave}">
@@ -823,10 +543,10 @@
         <img th:src="${site.logoPersonalizada} ? @{'/logo-site/' + ${site.logoArquivo}} : @{/brand/logo-el.png}" th:alt="${txt['geral.nomeCurto']}">
     </a>
 
-    <form class="search-form" id="formBusca" th:fragment="busca-loja" th:action="${paginaOutlet} ? @{/outlet} : @{/home}" method="get" data-servidor>
+    <form class="search-form busca-loja" id="formBusca" th:fragment="busca-loja" th:action="${paginaColecao} ? @{${colecaoCaminho}} : (${paginaOutlet} ? @{/outlet} : @{/home})" method="get" data-servidor>
         <input type="text" name="busca" th:value="${busca}" th:placeholder="${txt['geral.buscaPlaceholder']}" aria-label="Pesquisar produtos" autocomplete="off">
         <input type="hidden" name="ordem" th:if="${ordem != null and ordem.parametro != ''}" th:value="${ordem.parametro}">
-        <button type="submit" th:text="${txt['geral.buscaBotao']}">Buscar</button>
+        <button type="submit" th:aria-label="${txt['geral.buscaBotao']}" th:title="${txt['geral.buscaBotao']}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></button>
     </form>
 
     <div th:fragment="filtros-catalogo">
@@ -856,7 +576,7 @@
                 </select>
             </div>
 
-            <a class="filtro-limpar" th:if="${filtrosAtivos}" th:href="${paginaOutlet} ? @{/outlet} : @{/home}" th:text="${txt['geral.filtroLimpar']}">Limpar filtros</a>
+            <a class="filtro-limpar" th:if="${filtrosAtivos}" th:href="${paginaColecao} ? @{${colecaoCaminho}} : (${paginaOutlet} ? @{/outlet} : @{/home})" th:text="${txt['geral.filtroLimpar']}">Limpar filtros</a>
         </div>
 
         <p class="filtro-resultado" role="status"
@@ -864,7 +584,7 @@
 
         <p class="filtro-vazio" th:if="${#lists.isEmpty(listaProdutos)}">
             <th:block th:text="${txt['geral.filtroVazio']}">Nenhum produto encontrado com esses filtros.</th:block>
-            <a th:href="@{/home}" th:text="${txt['geral.filtroLimpar']}">Limpar filtros</a>
+            <a th:href="${paginaColecao} ? @{${colecaoCaminho}} : (${paginaOutlet} ? @{/outlet} : @{/home})" th:text="${txt['geral.filtroLimpar']}">Limpar filtros</a>
         </p>
     </div>
 
@@ -888,7 +608,7 @@
         <p class="paginacao-resumo" th:text="'Página ' + ${paginacao.paginaAtual} + ' de ' + ${paginacao.totalPaginas}">Página 1 de 2</p>
     </nav>
 
-    <!-- Rodapé da loja (vitrine, detalhes e páginas institucionais) -->
+    <!-- Rodapé da loja: todas as páginas do cliente (vitrine, detalhes, conta, checkout, pedido, login...). O admin não usa. -->
     <footer class="rodape" th:fragment="rodape">
         <div class="rodape-topo">
 

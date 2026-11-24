@@ -40,8 +40,11 @@ public class GestaoUsuarioService {
 
 	private final UsuarioRepository usuarioRepository;
 	private final PedidoRepository pedidoRepository;
+	private final ContaService contaService;
 
-	public GestaoUsuarioService(UsuarioRepository usuarioRepository, PedidoRepository pedidoRepository) {
+	public GestaoUsuarioService(UsuarioRepository usuarioRepository, PedidoRepository pedidoRepository,
+			ContaService contaService) {
+		this.contaService = contaService;
 		this.usuarioRepository = usuarioRepository;
 		this.pedidoRepository = pedidoRepository;
 	}
@@ -56,7 +59,7 @@ public class GestaoUsuarioService {
 				.forEach(g -> gastos.put(g.getUsuarioId(), g.getTotalGasto()));
 		long adminsAtivos = contarAdminsAtivos();
 
-		return usuarioRepository.findAll().stream()
+		return contaService.listar().stream()
 				.sorted(Comparator.comparing((Usuario u) -> u.getNomeExibicao() == null ? "" : u.getNomeExibicao().toLowerCase(Locale.ROOT)))
 				.map(u -> {
 					PedidoRepository.ResumoPedidosUsuario resumo = pedidos.get(u.getId());

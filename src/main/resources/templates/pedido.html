@@ -5,17 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=29)}">
-    <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
+    <!-- CSS único do site: fontes, site.css e cores do painel (ver AGENTS.md) -->
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
 
     <title th:text="${txt['pg.pedido.titulo']} + ' ' + ${pedido.codigo} + ' - ' + ${txt['geral.nomeLoja']}">Pedido - Estilo London Store</title>
-    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
-    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
-    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png}">
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico(v=2)}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png(v=2)}">
 </head>
 
 <body class="checkout-pagina pg-pedido">
@@ -28,6 +24,7 @@
     </div>
 
     <main class="checkout-container pedido-container">
+        <a class="mp-voltar mp-voltar-pedido" th:href="@{/meus-pedidos}">← Meus pedidos</a>
 
         <section class="pedido-sucesso">
             <span class="pedido-check" aria-hidden="true">
@@ -56,8 +53,8 @@
             <p class="campo-erro" th:if="${pixErro}" role="alert">Não foi possível gerar o Pix agora. Tente novamente em instantes.</p>
 
             <div class="pix-conteudo" th:if="${pedido.pixAtivo}">
-                <img class="pix-qr" th:if="${pedido.pixQrBase64 != null}"
-                     th:src="|data:image/png;base64,${pedido.pixQrBase64}|" alt="QR Code do Pix" width="220" height="220">
+                <img class="pix-qr" th:if="${pixQrImagem != null}"
+                     th:src="${pixQrImagem}" alt="QR Code do Pix" width="220" height="220">
                 <div class="pix-texto">
                     <p>Abra o app do seu banco, escolha pagar com Pix e escaneie o QR Code, ou use o código copia e cola:</p>
                     <textarea id="pix-codigo" class="pix-codigo" readonly rows="4" th:text="${pedido.pixCopiaECola}"></textarea>
@@ -75,6 +72,11 @@
                     </form>
                 </div>
             </div>
+        </section>
+
+        <section class="cadastro-form-box checkout-box" th:if="${!pixDisponivel and pedido.aguardandoPix}">
+            <h2>Pagamento Pix indisponível</h2>
+            <p>O Asaas ainda não está configurado neste ambiente. O pedido foi registrado, mas o pagamento Pix será liberado quando a integração Sandbox estiver ativada.</p>
         </section>
 
         <div class="checkout-grid">
@@ -141,11 +143,13 @@
         </div>
     </main>
 
+    <footer th:replace="~{fragments/fragmentos :: rodape}"></footer>
+
     <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
     <th:block th:replace="~{fragments/fragmentos :: carrinho-drawer}"></th:block>
     <div class="overlay" id="overlay"></div>
 
-    <script th:src="@{/jshome.js(v=10)}"></script>
+    <script th:src="@{/jshome.js(v=11)}"></script>
     <script th:if="${pedidoNovo}">
         // Compra concluída: esvazia o carrinho guardado no navegador
         window.EstiloLondonCarrinho?.limpar();
@@ -173,5 +177,6 @@
             }, 5000);
         })();
     </script>
+
 </body>
 </html>

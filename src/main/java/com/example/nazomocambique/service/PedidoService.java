@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.nazomocambique.model.Categoria;
@@ -58,6 +59,7 @@ public class PedidoService {
 	private final PedidoRepository pedidoRepository;
 	private final UsuarioRepository usuarioRepository;
 	private final FreteService freteService;
+	@Autowired(required = false) private CarteiraService carteiraService;
 
 	public PedidoService(ProdutoRepository produtoRepository, PedidoRepository pedidoRepository,
 			UsuarioRepository usuarioRepository, FreteService freteService) {
@@ -123,15 +125,18 @@ public class PedidoService {
 	 */
 	@Transactional(readOnly = true)
 	public ResumoCheckout montarResumo(List<ItemCarrinho> itens, DadosEntrega dados) {
+		// Evita falhas na tela de checkout quando a sessão/formulário ainda não foi inicializado.
+		List<ItemCarrinho> carrinho = itens == null ? List.of() : itens.stream().filter(java.util.Objects::nonNull).toList();
+		DadosEntrega entrega = dados == null ? new DadosEntrega() : dados;
 		Map<Long, Optional<Produto>> cache = new HashMap<>();
 		List<ResumoCheckout.Linha> linhas = new ArrayList<>();
-		for (ItemCarrinho item : itens) {
+		for (ItemCarrinho item : carrinho) {
 			Produto produto = cache.computeIfAbsent(item.produtoId(), produtoRepository::findById).orElse(null);
 			linhas.add(conferir(item, produto, 0));
 		}
 		Map<Long, Produto> produtos = new HashMap<>();
 		cache.forEach((id, p) -> p.ifPresent(produto -> produtos.put(id, produto)));
-		return resumir(linhas, pacoteDe(linhas, produtos), dados);
+		return resumir(linhas, pacoteDe(linhas, produtos), entrega);
 	}
 
 	// ---------------------------------------------------------------- finalizar
@@ -143,10 +148,22 @@ public class PedidoService {
 	 */
 	@Transactional
 	public Pedido finalizar(Long usuarioId, DadosEntrega dados, List<ItemCarrinho> itens) {
+		return finalizar(usuarioId, dados, itens, false);
+	}
+
+	@Transactional
+	public Pedido finalizar(Long usuarioId, DadosEntrega dados, List<ItemCarrinho> itens, boolean usarCashback) {
 		Map<String, String> errosCampos = validarEntrega(dados);
+		// O CPF é único por conta: avisa na tela em vez de estourar a restrição do banco ao gravar o pedido.
+		if (dados != null && !errosCampos.containsKey("cpf") && usuarioId != null
+				&& usuarioRepository.existsByCpfAndIdNot(digitos(dados.getCpf()), usuarioId)) {
+			errosCampos.put("cpf", "Este CPF já está cadastrado em outra conta. Use o CPF do titular desta conta ou entre na conta que já o utiliza.");
+		}
 		List<String> mensagens = new ArrayList<>();
 		if (itens == null || itens.isEmpty()) {
 			mensagens.add("Seu carrinho está vazio.");
+		} else if (itens.stream().anyMatch(java.util.Objects::isNull)) {
+			mensagens.add("O carrinho contém um item inválido. Atualize os itens e tente novamente.");
 		}
 		if (!errosCampos.isEmpty() || !mensagens.isEmpty()) {
 			throw new CheckoutException(errosCampos, mensagens);
@@ -187,9 +204,15 @@ public class PedidoService {
 		pedido.setFrete(resumo.getFrete());
 		if (resumo.getFreteEscolhido() != null) {
 			pedido.setServicoFrete(resumo.getFreteEscolhido().nome());
+			pedido.setServicoFreteCodigo(resumo.getFreteEscolhido().codigo());
 			pedido.setPrazoFreteDias(resumo.getFreteEscolhido().prazoDias());
 		}
-		pedido.setTotal(resumo.getTotal());
+		BigDecimal cashback = BigDecimal.ZERO;
+		if (usarCashback && carteiraService != null) {
+			cashback = carteiraService.saldo(usuarioId).min(resumo.getTotal()).setScale(2, RoundingMode.DOWN);
+		}
+		pedido.setCashbackUsado(cashback);
+		pedido.setTotal(resumo.getTotal().subtract(cashback));
 		pedido.setCodigo(gerarCodigoUnico());
 		pedido.setStatus(StatusPedido.AGUARDANDO_PAGAMENTO);
 		pedido.registrarAlteracao(null, StatusPedido.AGUARDANDO_PAGAMENTO, false, null, null, "Cliente",
@@ -212,13 +235,22 @@ public class PedidoService {
 			pedido.adicionarItem(item);
 		}
 		produtoRepository.saveAll(produtos.values());
-		return pedidoRepository.save(pedido);
+		Pedido salvo = pedidoRepository.save(pedido);
+		if (cashback.signum() > 0 && carteiraService != null) {
+			carteiraService.debitar(usuarioId, cashback, "USO-CHECKOUT-PEDIDO-" + salvo.getId());
+		}
+		return salvo;
 	}
 
 	/** Pedido só é mostrado para o dono. */
 	@Transactional(readOnly = true)
 	public Optional<Pedido> buscarDoUsuario(Long pedidoId, Long usuarioId) {
 		return pedidoRepository.findByIdAndUsuarioId(pedidoId, usuarioId);
+	}
+
+	/** Todos os pedidos da conta, do mais recente para o mais antigo (tela "Meus pedidos"). */
+	public List<Pedido> listarDoUsuario(Long usuarioId) {
+		return pedidoRepository.findAllByUsuarioIdOrderByCriadoEmDesc(usuarioId);
 	}
 
 	// ---------------------------------------------------------------- apoio
@@ -328,9 +360,17 @@ public class PedidoService {
 
 	private Map<String, String> validarEntrega(DadosEntrega d) {
 		Map<String, String> erros = new LinkedHashMap<>();
+		if (d == null) {
+			erros.put("entrega", "Informe os dados de entrega.");
+			return erros;
+		}
 		String nome = limpar(d.getNome());
 		if (nome.length() < 2 || nome.length() > 80) {
 			erros.put("nome", "Informe o nome de quem vai receber (2 a 80 caracteres).");
+		}
+		String cpf = digitos(d.getCpf());
+		if (!cpfValido(cpf)) {
+			erros.put("cpf", "Informe um CPF válido para emissão da cobrança Pix.");
 		}
 		String telefone = digitos(d.getTelefone());
 		if (telefone.length() < 10 || telefone.length() > 11) {
@@ -358,6 +398,21 @@ public class PedidoService {
 	private void preencherEntrega(Pedido p, DadosEntrega d) {
 		p.setNomeDestinatario(limpar(d.getNome()));
 		p.setTelefone(digitos(d.getTelefone()));
+		// Atualiza os dados reutilizáveis do cliente junto com a gravação do pedido.
+		Usuario u = p.getUsuario();
+		// O CPF é sempre mantido: o Pix do Asaas precisa dele. O restante só é guardado se o cliente marcou "salvar".
+		u.setCpf(digitos(d.getCpf()));
+		if (d.isSalvarDados()) {
+			u.setTelefone(digitos(d.getTelefone()));
+			u.setCep(digitos(d.getCep()));
+			u.setEndereco(limpar(d.getEndereco()));
+			u.setNumero(limpar(d.getNumero()));
+			u.setComplemento(limpar(d.getComplemento()).isEmpty() ? null : limpar(d.getComplemento()));
+			u.setBairro(limpar(d.getBairro()));
+			u.setCidade(limpar(d.getCidade()));
+			u.setUf(limpar(d.getUf()).toUpperCase());
+			u.setServicoFretePreferido(limpar(d.getServicoFrete()));
+		}
 		p.setCep(digitos(d.getCep()));
 		p.setEndereco(limpar(d.getEndereco()));
 		p.setNumero(limpar(d.getNumero()));
@@ -376,6 +431,19 @@ public class PedidoService {
 		} else if (v.length() > max) {
 			erros.put(campo, "Use no máximo " + max + " caracteres.");
 		}
+	}
+
+	/** Validação dos dígitos verificadores do CPF. */
+	private static boolean cpfValido(String cpf) {
+		if (cpf == null || !cpf.matches("\\d{11}") || cpf.chars().distinct().count() == 1) return false;
+		int soma = 0;
+		for (int i = 0; i < 9; i++) soma += (cpf.charAt(i) - '0') * (10 - i);
+		int dig1 = 11 - (soma % 11); if (dig1 >= 10) dig1 = 0;
+		if (dig1 != cpf.charAt(9) - '0') return false;
+		soma = 0;
+		for (int i = 0; i < 10; i++) soma += (cpf.charAt(i) - '0') * (11 - i);
+		int dig2 = 11 - (soma % 11); if (dig2 >= 10) dig2 = 0;
+		return dig2 == cpf.charAt(10) - '0';
 	}
 
 	private static String limpar(String valor) {

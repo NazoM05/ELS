@@ -24,9 +24,20 @@
         frete: raiz.querySelector('[data-info-frete]')
     };
     const estados = raiz.querySelectorAll('.mapa-estado');
+    const cartao = raiz.querySelector('.mapa-frete-info');
     let fixado = null; // estado escolhido por clique/toque/Enter
+    let exibido = null; // estado que está no cartão agora
+
+    // Reinicia a animação do cartão (classe .troca no site.css) quando o conteúdo muda de verdade
+    function animarCartao() {
+        if (!cartao) return;
+        cartao.classList.remove('troca');
+        void cartao.offsetWidth;
+        cartao.classList.add('troca');
+    }
 
     function mostrar(uf) {
+        if ((uf || null) !== exibido) { exibido = uf || null; animarCartao(); }
         estados.forEach(function (el) { el.classList.toggle('ativo', el.dataset.uf === uf); });
         raiz.querySelectorAll('.mapa-rotulo').forEach(function (el) { el.classList.toggle('ativo', el.dataset.uf === uf); });
 

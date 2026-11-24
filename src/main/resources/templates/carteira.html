@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
+    <title>Minha carteira | Estilo London Store</title>
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+    
+</head>
+<body class="admin-ui pg-carteira">
+    <div th:replace="~{fragments/fragmentos :: anuncios}"></div>
+    <div class="barrabranca">
+        <button th:replace="~{fragments/fragmentos :: botao-sidebar}"></button>
+        <a th:replace="~{fragments/fragmentos :: logo}"></a>
+        <button th:replace="~{fragments/fragmentos :: botao-carrinho}"></button>
+    </div>
+
+    <main class="cadastro-container carteira-container">
+        <header class="carteira-topo adm-topo">
+            <div>
+                <h1 class="adm-titulo">Minha carteira</h1>
+                <p class="adm-sub">Acompanhe seu saldo de cashback e consulte todas as movimentações.</p>
+            </div>
+            <a class="carteira-voltar" th:href="@{/perfil}">← Voltar ao perfil</a>
+        </header>
+
+        <section class="carteira-saldo" aria-label="Saldo disponível">
+            <p class="saldo-label">Saldo disponível para usar</p>
+            <strong class="saldo-valor" th:text="|R$ ${#numbers.formatDecimal(saldo,1,'POINT',2,'COMMA')}|">R$ 0,00</strong>
+            <p class="saldo-nota">Seu cashback é creditado após a confirmação do pagamento e pode ser utilizado em compras futuras.</p>
+        </section>
+
+        <section class="carteira-info" aria-label="Regras da carteira">
+            <article class="cadastro-form-box">
+                <h2><span aria-hidden="true">✦</span> Como funciona</h2>
+                <p>O cashback entra na carteira quando o pagamento do pedido é confirmado. Você pode aplicar o saldo disponível no checkout.</p>
+            </article>
+            <article class="cadastro-form-box">
+                <h2><span aria-hidden="true">◷</span> Prazo de validade</h2>
+                <p>Todo crédito de cashback tem validade de <strong>90 dias corridos</strong> a partir da data em que foi creditado. Após esse prazo, o valor não utilizado expira automaticamente.</p>
+            </article>
+        </section>
+
+        <section class="historico-card" aria-labelledby="historico-titulo">
+            <h2 id="historico-titulo">Histórico de movimentações</h2>
+            <div th:if="${#lists.isEmpty(movimentos)}" class="carteira-vazia">Você ainda não possui movimentações na carteira.</div>
+            <div class="tabela-wrap" th:unless="${#lists.isEmpty(movimentos)}">
+                <table class="historico-tabela">
+                    <thead><tr><th>Data</th><th>Descrição</th><th>Tipo</th><th>Valor</th></tr></thead>
+                    <tbody><tr th:each="m : ${movimentos}">
+                        <td th:text="${#temporals.format(m.criadoEm,'dd/MM/yyyy HH:mm')}"></td>
+                        <td th:text="${m.descricao}"></td>
+                        <td><span class="tipo-mov" th:text="${m.tipo}"></span></td>
+                        <td th:text="|R$ ${#numbers.formatDecimal(m.valor,1,'POINT',2,'COMMA')}|"></td>
+                    </tr></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer th:replace="~{fragments/fragmentos :: rodape}"></footer>
+    <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
+    <th:block th:replace="~{fragments/fragmentos :: carrinho-drawer}"></th:block>
+    <div class="overlay" id="overlay"></div>
+    <script th:src="@{/jshome.js(v=11)}"></script>
+</body>
+</html>

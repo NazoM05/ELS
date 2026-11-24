@@ -25,7 +25,7 @@ public class ContaAtivaFilter extends OncePerRequestFilter {
 
 	/** Arquivos estáticos não precisam da checagem (evita uma consulta por imagem/CSS). */
 	private static final List<String> PREFIXOS_ESTATICOS = List.of("/css/", "/img/", "/brand/", "/logo-site/",
-			"/jshome.js", "/mapa-frete.js", "/favicon.ico");
+			"/jshome.js", "/mapa-frete.js", "/institucional.js", "/reveal-scroll.js", "/favicon.ico");
 
 	private final UsuarioRepository usuarioRepository;
 

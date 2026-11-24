@@ -176,10 +176,10 @@ class GestaoUsuarioServiceTests {
 	}
 
 	@Test
-	void gestorPodeSerDesativado() {
-		Usuario gestor = novoUsuario("gestor2@teste.com", "ROLE_GESTOR");
+	void separadorPodeSerDesativado() {
+		Usuario separador = novoUsuario("separador2@teste.com", "ROLE_SEPARADOR");
 
-		assertTrue(gestao.alterarAtivo(gestor.getId(), false, "admin"));
+		assertTrue(gestao.alterarAtivo(separador.getId(), false, "admin"));
 	}
 
 	@Test

@@ -33,9 +33,9 @@ if (searchInput && !buscaNoServidor) {
             const tituloProduto = produto.querySelector('h3').innerText.toLowerCase();
 
             if (tituloProduto.includes(termoBusca)) {
-                produto.style.display = 'block';
+                produto.classList.remove('oculto');
             } else {
-                produto.style.display = 'none';
+                produto.classList.add('oculto');
             }
         });
     });
@@ -353,7 +353,7 @@ if (searchForm && !buscaNoServidor) {
 
         function mostrarEstado() {
             const temItens = grade.querySelector('.produto-card') !== null;
-            grade.style.display = temItens ? '' : 'none';
+            grade.classList.toggle('oculto', !temItens);
             if (vazio) vazio.hidden = temItens;
         }
 

@@ -5,17 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=29)}">
-    <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
+    <!-- CSS único do site: fontes, site.css e cores do painel (ver AGENTS.md) -->
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
 
     <title th:replace="~{fragments/fragmentos :: titulo(${txt['pg.checkout.titulo']})}">Finalizar compra - Estilo London Store</title>
-    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
-    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
-    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png}">
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico(v=2)}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png(v=2)}">
 </head>
 
 <body class="checkout-pagina pg-checkout">
@@ -76,6 +72,13 @@
                             <p class="campo-erro" th:if="${erros.containsKey('nome')}" th:text="${erros['nome']}" role="alert"></p>
                         </div>
                         <div class="cadastro-campo adm-c2">
+                            <label for="cpf">CPF (necessário para o Pix)</label>
+                            <input type="text" id="cpf" name="cpf" maxlength="14" inputmode="numeric"
+                                   placeholder="000.000.000-00" autocomplete="off" required
+                                   th:value="${dados.cpf}" th:attr="aria-invalid=${erros.containsKey('cpf')}">
+                            <p class="campo-erro" th:if="${erros.containsKey('cpf')}" th:text="${erros['cpf']}" role="alert"></p>
+                        </div>
+                        <div class="cadastro-campo adm-c2">
                             <label for="telefone">Telefone / WhatsApp</label>
                             <input type="tel" id="telefone" name="telefone" maxlength="15" inputmode="numeric"
                                    placeholder="(51) 99999-9999" autocomplete="tel" required
@@ -133,6 +136,15 @@
                             </select>
                             <p class="campo-erro" th:if="${erros.containsKey('uf')}" th:text="${erros['uf']}" role="alert"></p>
                         </div>
+                    </div>
+                    <div class="cadastro-campo checkout-salvar-dados">
+                        <!-- O campo oculto "_salvarDados" faz o Spring entender "desmarcado" como false -->
+                        <input type="hidden" name="_salvarDados" value="on">
+                        <label for="salvarDados">
+                            <input type="checkbox" id="salvarDados" name="salvarDados" value="true"
+                                   th:checked="${dados.salvarDados}">
+                            Salvar meus dados de entrega para as próximas compras
+                        </label>
                     </div>
                 </section>
 
@@ -203,6 +215,9 @@
                     <p class="checkout-frete-dica" id="freteDica"
                        th:text="${resumo.faltaParaFreteGratis != null} ? |Faltam R$ ${#numbers.formatDecimal(resumo.faltaParaFreteGratis, 1, 'POINT', 2, 'COMMA')} para ganhar frete grátis.| : (${resumo.freteDefinido} ? '' : |Frete grátis a partir de R$ ${#numbers.formatDecimal(freteGratisSul, 1, 'POINT', 2, 'COMMA')} no Sul e de R$ ${#numbers.formatDecimal(freteGratisDemais, 1, 'POINT', 2, 'COMMA')} nas demais regiões.|)"
                        th:hidden="${resumo.faltaParaFreteGratis == null and resumo.freteDefinido}">Faltam R$ 10,00</p>
+                    <div class="checkout-cashback checkout-cashback-pad" th:if="${saldoCarteira != null and saldoCarteira.signum() > 0}">
+                        <label><input type="checkbox" id="usarCashback" name="usarCashback" value="true" th:attr="data-saldo=${saldoCarteira},data-total=${resumo.total}"> Usar meu cashback (saldo: <strong th:text="|R$ ${#numbers.formatDecimal(saldoCarteira,1,'POINT',2,'COMMA')}|"></strong>). O desconto será aplicado ao confirmar o pedido.</label>
+                    </div>
                     <div class="checkout-total">
                         <dt>Total</dt>
                         <dd id="totalValor" th:text="${'R$ ' + #numbers.formatDecimal(resumo.total, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</dd>
@@ -220,11 +235,13 @@
         </form>
     </main>
 
+    <footer th:replace="~{fragments/fragmentos :: rodape}"></footer>
+
     <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
     <th:block th:replace="~{fragments/fragmentos :: carrinho-drawer}"></th:block>
     <div class="overlay" id="overlay"></div>
 
-    <script th:src="@{/jshome.js(v=10)}"></script>
+    <script th:src="@{/jshome.js(v=11)}"></script>
     <script>
         (() => {
             const pagina = document.getElementById('checkoutPagina');
@@ -264,7 +281,9 @@
                     const gratis = subtotal === 0 || subtotal >= minimo;
                     const frete = gratis ? 0 : num('valorFrete');
                     document.getElementById('freteValor').textContent = gratis ? 'Grátis' : brl(frete);
-                    document.getElementById('totalValor').textContent = brl(subtotal + frete);
+                    const cb = document.getElementById('usarCashback');
+                    const desconto = cb && cb.checked ? Math.min(Number(cb.dataset.saldo || 0), subtotal + frete) : 0;
+                    document.getElementById('totalValor').textContent = brl(subtotal + frete - desconto);
                     const dica = document.getElementById('freteDica');
                     dica.hidden = gratis;
                     dica.textContent = gratis ? '' : `Faltam ${brl(minimo - subtotal)} para ganhar frete grátis.`;
@@ -282,7 +301,10 @@
                 const aplicarOpcao = (dados, opcao) => {
                     campoServico.value = opcao.codigo;
                     document.getElementById('freteValor').textContent = opcao.valor === 0 ? 'Grátis' : brl(opcao.valor);
-                    document.getElementById('totalValor').textContent = brl(dados.subtotal + opcao.valor);
+                    const cb = document.getElementById('usarCashback');
+                    const base = dados.subtotal + opcao.valor;
+                    const desconto = cb && cb.checked ? Math.min(Number(cb.dataset.saldo || 0), base) : 0;
+                    document.getElementById('totalValor').textContent = brl(base - desconto);
                     const dica = document.getElementById('freteDica');
                     const falta = dados.faltaParaFreteGratis;
                     dica.hidden = !falta;
@@ -389,6 +411,41 @@
                 return d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5)}` : d;
             });
 
+            mascara(document.getElementById('cpf'), (d) => {
+                d = d.slice(0, 11);
+                if (d.length > 9) return `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6,9)}-${d.slice(9)}`;
+                if (d.length > 6) return `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6)}`;
+                if (d.length > 3) return `${d.slice(0,3)}.${d.slice(3)}`;
+                return d;
+            });
+
+            // Consulta CEP (ViaCEP); campos continuam editáveis caso o serviço esteja indisponível.
+            const cepCampo = document.getElementById('cep');
+            cepCampo?.addEventListener('blur', async () => {
+                const cep = cepCampo.value.replace(/\\D/g, '');
+                if (cep.length !== 8) return;
+                try {
+                    const resposta = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                    if (!resposta.ok) return;
+                    const endereco = await resposta.json();
+                    if (endereco.erro) return;
+                    const preencher = (id, valor) => {
+                        const campo = document.getElementById(id);
+                        if (campo && valor && !campo.value.trim()) campo.value = valor;
+                    };
+                    preencher('endereco', endereco.logradouro);
+                    preencher('bairro', endereco.bairro);
+                    preencher('cidade', endereco.localidade);
+                    const ufCampo = document.getElementById('uf');
+                    if (ufCampo && endereco.uf) {
+                        ufCampo.value = endereco.uf;
+                        ufCampo.dispatchEvent(new Event('change'));
+                    }
+                } catch (_) {
+                    // O preenchimento manual continua disponível.
+                }
+            });
+
             // Evita pedido duplicado com clique duplo
             const form = pagina.querySelector('form.checkout-grid');
             form?.addEventListener('submit', () => {
@@ -398,6 +455,16 @@
                 }
             });
         })();
-    </script>
+    document.getElementById('usarCashback')?.addEventListener('change', () => {
+                    const uf = document.getElementById('uf');
+                    if (uf) uf.dispatchEvent(new Event('change'));
+                    else {
+                        const total = Number(document.getElementById('usarCashback').dataset.total || 0);
+                        const saldo = Number(document.getElementById('usarCashback').dataset.saldo || 0);
+                        const desconto = document.getElementById('usarCashback').checked ? Math.min(total, saldo) : 0;
+                        document.getElementById('totalValor').textContent = new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(total-desconto);
+                    }
+                });
+                </script>
 </body>
 </html>

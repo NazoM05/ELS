@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,6 +50,47 @@ public class PageController {
 		return "home";
 	}
 
+	@GetMapping("/colecao/vice-city")
+	public String colecaoViceCity(@RequestParam(required = false) String busca,
+			@RequestParam(required = false) String categoria,
+			@RequestParam(required = false) String genero,
+			@RequestParam(required = false) String ordem,
+			@RequestParam(required = false) String pagina, Model model) {
+		return colecao(model, "/colecao/vice-city", "Coleção Vice City", Produto.COLECAO_VICE_CITY,
+				busca, categoria, genero, ordem, pagina);
+	}
+
+	@GetMapping("/colecao/tricolor")
+	public String colecaoTricolor(@RequestParam(required = false) String busca,
+			@RequestParam(required = false) String categoria,
+			@RequestParam(required = false) String genero,
+			@RequestParam(required = false) String ordem,
+			@RequestParam(required = false) String pagina, Model model) {
+		return colecao(model, "/colecao/tricolor", "Imortal Tricolor", Produto.COLECAO_TRICOLOR,
+				busca, categoria, genero, ordem, pagina);
+	}
+
+	@GetMapping("/colecao/urban-culture")
+	public String colecaoUrbanCulture(@RequestParam(required = false) String busca,
+			@RequestParam(required = false) String categoria,
+			@RequestParam(required = false) String genero,
+			@RequestParam(required = false) String ordem,
+			@RequestParam(required = false) String pagina, Model model) {
+		return colecao(model, "/colecao/urban-culture", "Nazo · Urban Culture Oversized",
+				Produto.COLECAO_URBAN_CULTURE, busca, categoria, genero, ordem, pagina);
+	}
+
+	/** Página de uma coleção especial: mesma vitrine, só com os produtos da coleção (acesso público). */
+	private String colecao(Model model, String caminho, String titulo, String colecao, String busca,
+			String categoria, String genero, String ordem, String pagina) {
+		carregarCatalogo(model, caminho, busca, categoria, genero, ordem, pagina, false, colecao);
+		model.addAttribute("paginaColecao", true);
+		model.addAttribute("colecaoTitulo", titulo);
+		model.addAttribute("colecaoCaminho", caminho);
+		model.addAttribute("colecaoTema", colecao.equals(Produto.COLECAO_TRICOLOR) ? "tricolor" : "padrao");
+		return "berzerk";
+	}
+
 	@GetMapping("/outlet")
 	public String outlet(@RequestParam(required = false) String busca,
 			@RequestParam(required = false) String categoria,
@@ -77,11 +119,16 @@ public class PageController {
 
 	private void carregarCatalogo(Model model, String caminho, String busca, String categoriaTexto,
 			String generoTexto, String ordemTexto, String paginaTexto, boolean outlet) {
+		carregarCatalogo(model, caminho, busca, categoriaTexto, generoTexto, ordemTexto, paginaTexto, outlet, null);
+	}
+
+	private void carregarCatalogo(Model model, String caminho, String busca, String categoriaTexto,
+			String generoTexto, String ordemTexto, String paginaTexto, boolean outlet, String colecao) {
 		String termo = busca == null ? "" : busca.trim();
 		Categoria categoria = Categoria.deTexto(categoriaTexto);
 		Genero genero = Genero.deTexto(generoTexto);
 		Ordenacao ordem = Ordenacao.deTexto(ordemTexto);
-		Page<Produto> pagina = produtoService.filtrar(termo, categoria, genero, ordem, numeroDaPagina(paginaTexto) - 1, outlet);
+		Page<Produto> pagina = produtoService.filtrar(termo, categoria, genero, ordem, numeroDaPagina(paginaTexto) - 1, outlet, colecao);
 
 		Map<String, String> filtros = new LinkedHashMap<>();
 		filtros.put("busca", termo);
@@ -128,13 +175,18 @@ public class PageController {
 		try {
 			Produto produto = produtoService.registrarVisualizacao(id);
 			model.addAttribute("produto", produto);
+			model.addAttribute("siteBaseUrl", ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString());
 			
 			if (produto != null && produto.getCategoria() != null) {
+				// Produto de coleção especial recomenda peças da mesma coleção; os demais, o catálogo normal.
 				List<Produto> recomendados = produtoService.filtrar(
 					"", 
 					produto.getCategoria(), 
 					null, 
-					0
+					Ordenacao.PADRAO,
+					0,
+					false,
+					produto.getColecao()
 				).getContent()
 				.stream()
 				.filter(p -> !p.getId().equals(id))

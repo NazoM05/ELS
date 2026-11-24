@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 
 import jakarta.persistence.LockModeType;
 
+import com.example.nazomocambique.model.FormaPagamento;
 import com.example.nazomocambique.model.Pedido;
 import com.example.nazomocambique.model.StatusPedido;
 
@@ -26,12 +27,16 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
 	boolean existsByCodigo(String codigo);
 
-	/** Trava o pedido para dois avisos do Mercado Pago ao mesmo tempo não o confirmarem duas vezes. */
+	/** Trava o pedido para dois avisos do Asaas ao mesmo tempo não o confirmarem duas vezes. */
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("select p from Pedido p where p.codigo = :codigo")
 	Optional<Pedido> buscarParaAtualizar(@Param("codigo") String codigo);
 
 	List<Pedido> findAllByOrderByCriadoEmDescIdDesc();
+
+	/** Pedidos Pix que já têm cobrança no Asaas e ainda esperam pagamento (tarefa de sincronização). */
+	List<Pedido> findAllByStatusAndFormaPagamentoAndAsaasPaymentIdIsNotNullAndCriadoEmAfter(StatusPedido status,
+			FormaPagamento formaPagamento, LocalDateTime desde);
 
 	// ---- Gestão de usuários (admin): totais por cliente numa consulta só, sem carregar os pedidos
 

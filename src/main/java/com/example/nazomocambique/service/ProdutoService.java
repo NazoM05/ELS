@@ -71,18 +71,27 @@ public class ProdutoService {
 		return filtrar(termo, categoria, genero, ordenacao, pagina, false);
 	}
 
-	/** Catálogo segmentado: por padrão exclui Outlet; true retorna somente produtos Outlet. */
+	/** Catálogo segmentado: por padrão exclui Outlet; true retorna somente produtos Outlet. Nunca inclui coleções especiais. */
 	public Page<Produto> filtrar(String termo, Categoria categoria, Genero genero, Ordenacao ordenacao, int pagina, boolean outlet) {
+		return filtrar(termo, categoria, genero, ordenacao, pagina, outlet, null);
+	}
+
+	/**
+	 * Catálogo de uma coleção especial (ex.: {@link Produto#COLECAO_VICE_CITY}): mesmos filtros da vitrine,
+	 * mas só com produtos da coleção. Com colecao nulo é o catálogo normal, sem produtos de coleção.
+	 */
+	public Page<Produto> filtrar(String termo, Categoria categoria, Genero genero, Ordenacao ordenacao, int pagina,
+			boolean outlet, String colecao) {
 		Ordenacao ordem = ordenacao == null ? Ordenacao.PADRAO : ordenacao;
 		String termoLimpo = (termo == null || termo.isBlank()) ? null : termo.trim();
 		Genero g1 = genero;
 		Genero g2 = genero == null ? null : Genero.UNISSEX;
 		int indice = Math.max(pagina, 0);
 		Page<Produto> resultado = produtoRepository.filtrar(termoLimpo, categoria, g1, g2,
-				outlet, PageRequest.of(indice, PRODUTOS_POR_PAGINA, ordem.getSort()));
+				outlet, colecao, PageRequest.of(indice, PRODUTOS_POR_PAGINA, ordem.getSort()));
 		if (resultado.getTotalPages() > 0 && indice >= resultado.getTotalPages()) {
 			resultado = produtoRepository.filtrar(termoLimpo, categoria, g1, g2,
-					outlet, PageRequest.of(resultado.getTotalPages() - 1, PRODUTOS_POR_PAGINA, ordem.getSort()));
+					outlet, colecao, PageRequest.of(resultado.getTotalPages() - 1, PRODUTOS_POR_PAGINA, ordem.getSort()));
 		}
 		return resultado;
 	}

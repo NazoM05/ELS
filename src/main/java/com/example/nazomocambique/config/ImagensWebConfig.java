@@ -30,7 +30,13 @@ public class ImagensWebConfig implements WebMvcConfigurer {
 			uploads += "/"; // a pasta pode ainda não existir; o Spring exige a barra final
 		}
 		registry.addResourceHandler("/img/**")
-				.addResourceLocations(uploads, "classpath:/static/img/");
+				.addResourceLocations(uploads, "classpath:/static/img/")
+				.setCacheControl(CacheControl.maxAge(Duration.ofDays(30)).cachePublic());
+
+		// Fontes locais, caso sejam adicionadas ao projeto, também podem ficar em cache longo.
+		registry.addResourceHandler("/fonts/**")
+				.addResourceLocations("classpath:/static/fonts/")
+				.setCacheControl(CacheControl.maxAge(Duration.ofDays(30)).cachePublic());
 
 		// Logo enviada na tela Configurações (uploads/logo). Os nomes são UUID, então o cache longo é seguro.
 		String logos = AparenciaService.PASTA_LOGO.toAbsolutePath().toUri().toString();

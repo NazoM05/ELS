@@ -54,6 +54,20 @@ public class FreteService {
 		return opcaoPadrao(subtotal, uf).map(List::of).orElse(List.of());
 	}
 
+	/** Código do serviço dos Correios a partir do nome gravado no pedido (pedidos antigos não guardavam o código). */
+	public static Optional<String> codigoCorreios(String nome) {
+		if (nome == null) {
+			return Optional.empty();
+		}
+		return NOMES.entrySet().stream().filter(e -> e.getValue().equalsIgnoreCase(nome.trim())).map(Map.Entry::getKey)
+				.findFirst();
+	}
+
+	/** Nome do serviço (PAC, SEDEX) pelo código; código desconhecido volta como "Correios {código}". */
+	public static String nomeServico(String codigo) {
+		return NOMES.getOrDefault(codigo, "Correios " + codigo);
+	}
+
 	/** A opção escolhida pelo código; sem código (ou código desconhecido) vale a mais barata. */
 	public static Optional<OpcaoFrete> escolher(List<OpcaoFrete> opcoes, String codigo) {
 		if (opcoes == null || opcoes.isEmpty()) {

@@ -21,9 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.nazomocambique.model.Usuario;
 import com.example.nazomocambique.repository.UsuarioRepository;
-import com.example.nazomocambique.service.AcessoUsuarioService;
+import com.example.nazomocambique.service.ContaService;
 
-/** Regra: a separação de pedidos (tela e dados) é só para ADMIN e GESTOR; todo o resto é bloqueado. */
+/** Regra: a separação de pedidos (tela e dados) é só para ADMIN e SEPARADOR; todo o resto é bloqueado. */
 // Banco próprio: o data.sql roda de novo neste contexto e duplicaria os usuários do banco "nmb"
 @SpringBootTest(properties = "spring.datasource.url=jdbc:h2:mem:separacao-acesso")
 @AutoConfigureMockMvc
@@ -36,7 +36,7 @@ class SeparacaoAcessoTests {
 	UsuarioRepository usuarioRepository;
 
 	@Autowired
-	AcessoUsuarioService acessoUsuarioService;
+	ContaService contaService;
 
 	// ------------------------------------------------------------ sem login
 
@@ -80,33 +80,33 @@ class SeparacaoAcessoTests {
 				.andExpect(status().isForbidden());
 	}
 
-	// ------------------------------------------------------------ gestor
+	// ------------------------------------------------------------ separador
 
 	@Test
-	@WithMockUser(roles = "GESTOR")
-	void gestorAbreATelaDeSeparacao() throws Exception {
+	@WithMockUser(roles = "SEPARADOR")
+	void separadorAbreATelaDeSeparacao() throws Exception {
 		mvc.perform(get("/admin/separacao")).andExpect(status().isOk())
 				.andExpect(view().name("admin/pedido/separacao"));
 	}
 
 	@Test
-	@WithMockUser(roles = "GESTOR")
-	void gestorLeOsPedidosDaSeparacao() throws Exception {
+	@WithMockUser(roles = "SEPARADOR")
+	void separadorLeOsPedidosDaSeparacao() throws Exception {
 		mvc.perform(get("/admin/separacao/pedidos").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 
 	@Test
-	@WithMockUser(roles = "GESTOR")
-	void gestorPassaPelaSegurancaAoMudarEtapa() throws Exception {
+	@WithMockUser(roles = "SEPARADOR")
+	void separadorPassaPelaSegurancaAoMudarEtapa() throws Exception {
 		// Etapa inexistente: chega no controller (400) em vez de ser barrado (403)
 		mvc.perform(post("/admin/separacao/EL-1/status").param("status", "INVALIDA").with(csrf()))
 				.andExpect(status().isBadRequest());
 	}
 
 	@Test
-	@WithMockUser(roles = "GESTOR")
-	void gestorNaoEntraNasOutrasAreasDoAdmin() throws Exception {
+	@WithMockUser(roles = "SEPARADOR")
+	void separadorNaoEntraNasOutrasAreasDoAdmin() throws Exception {
 		mvc.perform(get("/admin/pedidos")).andExpect(redirectedUrl("/acesso-negado"));
 		mvc.perform(get("/admin/produto/listar")).andExpect(redirectedUrl("/acesso-negado"));
 		mvc.perform(get("/admin/configuracoes")).andExpect(redirectedUrl("/acesso-negado"));
@@ -139,21 +139,21 @@ class SeparacaoAcessoTests {
 	// ------------------------------------------------------------ contas
 
 	@Test
-	void dadosIniciaisTemUmGestorComPerfilProprio() {
-		Usuario gestor = usuarioRepository.findByUsername("gestor").orElseThrow();
-		assertEquals("ROLE_GESTOR", gestor.getRole());
-		assertTrue(acessoUsuarioService.loadUserByUsername("gestor").isEnabled());
+	void dadosIniciaisTemUmSeparadorComPerfilProprio() {
+		Usuario separador = usuarioRepository.findByUsername("separador").orElseThrow();
+		assertEquals("ROLE_SEPARADOR", separador.getRole());
+		assertTrue(contaService.loadUserByUsername("separador").isEnabled());
 	}
 
 	@Test
 	@Transactional
 	void contaDesativadaNaoConsegueEntrar() {
 		Usuario u = new Usuario();
-		u.setUsername("gestor-inativo@teste.com");
-		u.setRole("ROLE_GESTOR");
+		u.setUsername("separador-inativo@teste.com");
+		u.setRole("ROLE_SEPARADOR");
 		u.setAtivo(false);
 		usuarioRepository.save(u);
-		assertFalse(acessoUsuarioService.loadUserByUsername("gestor-inativo@teste.com").isEnabled());
+		assertFalse(contaService.loadUserByUsername("separador-inativo@teste.com").isEnabled());
 	}
 
 	// ------------------------------------------------------------ histórico de alterações (só admin)
@@ -170,8 +170,8 @@ class SeparacaoAcessoTests {
 	}
 
 	@Test
-	@WithMockUser(roles = "GESTOR")
-	void gestorNaoVeOHistorico() throws Exception {
+	@WithMockUser(roles = "SEPARADOR")
+	void separadorNaoVeOHistorico() throws Exception {
 		mvc.perform(get("/admin/historico")).andExpect(redirectedUrl("/acesso-negado"));
 	}
 

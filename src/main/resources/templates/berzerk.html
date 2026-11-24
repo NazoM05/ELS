@@ -5,18 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=31)}">
-    <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
-
+    <!-- CSS único do site: fontes, site.css e cores do painel (ver AGENTS.md) -->
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
 
     <title th:replace="~{fragments/fragmentos :: titulo(${txt['pg.inicio.titulo']})}">Estilo London Store</title>
-    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
-    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
-    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png}">
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico(v=2)}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png(v=2)}">
 </head>
 
 <body class="pg-inicio">
@@ -35,14 +30,18 @@
     
 	</div>
 	
-    <!-- Banner promocional: somente na primeira página da Home (nunca no Outlet). -->
-    <th:block th:if="${paginacao != null and paginacao.paginaAtual == 1 and (paginaOutlet == null or !paginaOutlet)}">
+    <!-- Banner promocional: somente na primeira página da Home (nunca no Outlet nem na coleção Vice City). -->
+    <th:block th:if="${paginacao != null and paginacao.paginaAtual == 1 and (paginaOutlet == null or !paginaOutlet) and (paginaColecao == null or !paginaColecao)}">
         <section th:replace="~{fragments/fragmentos :: banner-novidades}"></section>
     </th:block>
 	
     <main class="container-produtos">
 
-        <h2 class="secao-titulo" th:text="${paginaOutlet} ? 'Outlet' : (${ordem != null} ? ${ordem.titulo} : ${txt['pg.inicio.tituloSecao']})">Produtos</h2>
+        <h2 class="secao-titulo" th:text="${paginaColecao} ? ${colecaoTitulo} : (${paginaOutlet} ? 'Outlet' : (${ordem != null} ? ${ordem.titulo} : ${txt['pg.inicio.tituloSecao']}))">Produtos</h2>
+
+        <!-- Subtítulo da coleção especial (gradiente no estilo GTA 6: classe colecao-subtitulo no site.css) -->
+        <p class="colecao-subtitulo colecao-subtitulo-tricolor" th:if="${colecaoTema == 'tricolor'}"><span class="tri-azul">Azul,</span> <span class="tri-preto">preto</span> <span class="tri-branco">e branco:</span> <span class="tri-azul">o manto</span> <span class="tri-preto">que</span> <span class="tri-branco">não morre.</span></p>
+        <p class="colecao-subtitulo" th:if="${paginaColecao != null and colecaoTema != 'tricolor'}">Coleção especial, enquanto durarem os estoques: corre pra não ficar sem!</p>
 
         <!-- Filtros combináveis: gênero + categoria + termo de busca -->
         <div th:replace="~{fragments/fragmentos :: filtros-catalogo}"></div>
@@ -76,19 +75,26 @@
                 <h3><a class="produto-titulo" th:href="@{'/detalhes/' + ${produto.id}}" th:text="${produto.nome}"></a></h3>
 
                 <p class="preco">
-                    <del th:if="${produto.outlet}" style="display:block; font-size:.82em; opacity:.65;"
-                         th:text="${'R$ ' + #numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')}"></del>
+                    <del class="preco-outlet-antigo" th:if="${produto.outlet}"
+                         th:text="${'R$ ' + #numbers.formatDecimal(produto.precoComDescontoOutlet, 1, 'POINT', 2, 'COMMA')}"></del>
                     <span th:text="${'R$ ' + #numbers.formatDecimal(produto.precoComDescontoOutlet, 1, 'POINT', 2, 'COMMA')}"></span>
                 </p>
 
                 <!-- Parcelamento calculado só quando o preço é numérico (BigDecimal, Double...) -->
                 <p class="parcelamento" th:if="${produto.preco instanceof T(java.lang.Number)}"
-                   th:text="${txt['geral.cardParcelamento']} + ' R$ ' + ${#numbers.formatDecimal(produto.precoComDescontoOutlet / 12, 1, 'POINT', 2, 'COMMA')}"></p>
+                   th:text="${txt['geral.cardParcelamento']} + ' R$ ' + ${#numbers.formatDecimal((produto.precoComDescontoOutlet) / 12, 1, 'POINT', 2, 'COMMA')}"></p>
 
-                <!-- OPCIONAL: <span class="tag-promo">Black November</span> -->
+                
             </div>
 
         </div>
+
+        <section class="catalogo-sem-resultados" th:if="${#lists.isEmpty(listaProdutos)}" aria-live="polite">
+            <h2 th:text="${filtrosAtivos} ? 'Nenhum produto encontrado' : 'Nenhum produto disponível'">Nenhum produto encontrado</h2>
+            <p th:text="${filtrosAtivos} ? 'Não encontramos itens com os filtros ou a busca informada.' : 'No momento não há produtos para exibir.'">Não encontramos itens com os filtros ou a busca informada.</p>
+            <a class="btn-comprar" th:href="${paginaColecao} ? @{${colecaoCaminho}} : (${paginaOutlet} ? @{/outlet} : @{/home})"
+               th:text="${filtrosAtivos} ? 'Limpar filtros' : 'Ver todos os produtos'">Limpar filtros</a>
+        </section>
 
         <!-- Paginação: aparece só com mais de uma página (mantém os filtros ativos) -->
         <nav th:replace="~{fragments/fragmentos :: paginacao}"></nav>
@@ -103,7 +109,7 @@
 
     <div class="overlay" id="overlay"></div>
 
-    <script th:src="@{/jshome.js(v=10)}"></script>
+    <script th:src="@{/jshome.js(v=11)}"></script>
 
 </body>
 </html>

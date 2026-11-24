@@ -3,25 +3,31 @@ package com.example.nazomocambique.service;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.nazomocambique.model.Usuario;
 import com.example.nazomocambique.repository.UsuarioRepository;
+import com.example.nazomocambique.securityconfig.AcessoUsuario;
 
 /**
- * Regras da conta do cliente: criar conta, alterar e-mail e alterar senha.
+ * Regras da conta do usuário: entrar (login), criar conta, alterar e-mail, senha e dados pessoais.
+ * Também é o UserDetailsService do Spring Security: o login do formulário e a sessão usam {@link #loadUserByUsername}.
  * O e-mail é guardado no campo "username" (é o que o formulário de login usa), sempre em minúsculas.
  * Os métodos de gravação devolvem um mapa campo -> mensagem; mapa vazio significa que deu certo.
  */
 @Service
-public class ContaService {
+public class ContaService implements UserDetailsService {
 
 	private static final Pattern FORMATO_EMAIL = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$");
 	private static final int EMAIL_MAX = 150;
@@ -42,8 +48,46 @@ public class ContaService {
 		this.passwordEncoder = passwordEncoder;
 	}
 
+	// ---------------------------------------------------------------- login
+
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		// E-mails são gravados em minúsculas: quem digita "Maria@Email.com" no login também entra
+		Usuario usuario = usuarioRepository.findByUsername(username)
+				.or(() -> usuarioRepository.findByUsername(username == null ? "" : username.trim().toLowerCase(Locale.ROOT)))
+				.orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + username));
+		return new AcessoUsuario(usuario);
+	}
+
+	// ---------------------------------------------------------------- consulta
+
 	public Optional<Usuario> buscarPorUsername(String username) {
 		return usuarioRepository.findByUsername(username);
+	}
+
+	public List<Usuario> listar() {
+		return usuarioRepository.findAll();
+	}
+
+	/**
+	 * Grava o usuário: sem perfil vira ROLE_USUARIO; a senha recebida em texto é criptografada e, ao editar
+	 * um usuário existente com senha em branco, a senha atual é mantida.
+	 */
+	public Long salvar(Usuario usuario) {
+		if (usuario.getRole() == null || usuario.getRole().trim().isEmpty()) {
+			usuario.setRole("ROLE_USUARIO");
+		}
+		if (usuario.getId() != null) {
+			Usuario usuarioBanco = buscarPorId(usuario.getId());
+			if (usuario.getSenha() == null || usuario.getSenha().trim().isEmpty()) {
+				usuario.setSenha(usuarioBanco.getSenha());
+			} else {
+				usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
+			}
+		} else if (usuario.getSenha() != null && !usuario.getSenha().trim().isEmpty()) {
+			usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
+		}
+		return usuarioRepository.save(usuario).getId();
 	}
 
 	public Usuario buscarPorId(Long id) {
@@ -84,11 +128,12 @@ public class ContaService {
 		Usuario usuario = new Usuario();
 		usuario.setNome(nomeLimpo);
 		usuario.setUsername(emailLimpo);
-		usuario.setSenha(passwordEncoder.encode(senha));
+		usuario.setEmail(emailLimpo);
+		usuario.setSenha(senha); // salvar() criptografa
 		usuario.setRole("ROLE_USUARIO");
 		usuario.setAtivo(true);
 		try {
-			usuarioRepository.save(usuario);
+			salvar(usuario);
 		} catch (DataIntegrityViolationException e) {
 			// duas pessoas cadastrando o mesmo e-mail ao mesmo tempo (a coluna é única)
 			erros.put("email", MSG_EMAIL_EM_USO);
@@ -121,6 +166,7 @@ public class ContaService {
 		}
 
 		usuario.setUsername(emailLimpo);
+		usuario.setEmail(emailLimpo);
 		try {
 			usuarioRepository.save(usuario);
 		} catch (DataIntegrityViolationException e) {

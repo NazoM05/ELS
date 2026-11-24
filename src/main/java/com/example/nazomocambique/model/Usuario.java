@@ -23,9 +23,12 @@ public class Usuario {
 	@Column(unique = true)
 	private String username;
 
+	@Column(length = 150)
+	private String email;
+
 	private String senha; // hash BCrypt, quando existir login
 
-	private String role; // "ROLE_ADMIN", "ROLE_GESTOR" (só a separação de pedidos), "ROLE_USUARIO"
+	private String role; // "ROLE_ADMIN", "ROLE_SEPARADOR" (só a separação de pedidos), "ROLE_USUARIO"
 
 	private String nome;
 
@@ -34,6 +37,34 @@ public class Usuario {
 	private String cpf;
 
 	private LocalDate dataNascimento;
+
+	// Endereço padrão salvo no checkout para reutilização nas próximas compras.
+	@Column(length = 80)
+	private String telefone;
+
+	@Column(length = 9)
+	private String cep;
+
+	@Column(length = 150)
+	private String endereco;
+
+	@Column(length = 20)
+	private String numero;
+
+	@Column(length = 60)
+	private String complemento;
+
+	@Column(length = 80)
+	private String bairro;
+
+	@Column(length = 80)
+	private String cidade;
+
+	@Column(length = 2)
+	private String uf;
+
+	@Column(length = 40)
+	private String servicoFretePreferido;
 
 	@Column(nullable = false)
 	private boolean ativo = true;
@@ -52,6 +83,14 @@ public class Usuario {
 	
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 	
 	public String getSenha() {
@@ -118,14 +157,14 @@ public class Usuario {
 		return nome != null && !nome.isBlank() ? nome : username;
 	}
 
-	/** Perfil em português: Administrador, Gestor ou Cliente. */
+	/** Perfil em português: Administrador, Separador ou Cliente. */
 	@Transient
 	public String getRotuloPerfil() {
 		if ("ROLE_ADMIN".equals(role)) {
 			return "Administrador";
 		}
-		if ("ROLE_GESTOR".equals(role)) {
-			return "Gestor";
+		if ("ROLE_SEPARADOR".equals(role)) {
+			return "Separador";
 		}
 		return "Cliente";
 	}
@@ -135,6 +174,26 @@ public class Usuario {
 	public String getDataNascimentoFormatada() {
 		return dataNascimento == null ? null : dataNascimento.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 	}
+
+
+	public String getTelefone() { return telefone; }
+	public void setTelefone(String telefone) { this.telefone = telefone; }
+	public String getCep() { return cep; }
+	public void setCep(String cep) { this.cep = cep; }
+	public String getEndereco() { return endereco; }
+	public void setEndereco(String endereco) { this.endereco = endereco; }
+	public String getNumero() { return numero; }
+	public void setNumero(String numero) { this.numero = numero; }
+	public String getComplemento() { return complemento; }
+	public void setComplemento(String complemento) { this.complemento = complemento; }
+	public String getBairro() { return bairro; }
+	public void setBairro(String bairro) { this.bairro = bairro; }
+	public String getCidade() { return cidade; }
+	public void setCidade(String cidade) { this.cidade = cidade; }
+	public String getUf() { return uf; }
+	public void setUf(String uf) { this.uf = uf; }
+	public String getServicoFretePreferido() { return servicoFretePreferido; }
+	public void setServicoFretePreferido(String servicoFretePreferido) { this.servicoFretePreferido = servicoFretePreferido; }
 
 	public boolean getAtivo() {
 		return ativo;

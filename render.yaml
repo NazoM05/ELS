@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: nazo-mo-ambique
+    runtime: docker
+    plan: free
+    healthCheckPath: /login
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+      - key: ASAAS_ENABLED
+        value: "true"
+      - key: ASAAS_BASE_URL
+        value: https://api-sandbox.asaas.com/v3
+      # Os dois valores abaixo o Render pede na tela ao criar pelo Blueprint (não ficam no Git)
+      - key: KEY_ASAAS
+        sync: false
+      - key: ASAAS_WEBHOOK_TOKEN
+        sync: false

@@ -6,17 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Como trocar ou devolver peças compradas na Estilo London Store: prazos, condições e reembolso.">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=29)}">
-    <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
+    <!-- CSS único do site: fontes, site.css e cores do painel (ver AGENTS.md) -->
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
 
     <title th:replace="~{fragments/fragmentos :: titulo(${txt['pg.trocas.titulo']})}">Trocas e Devoluções - Estilo London Store</title>
-    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
-    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
-    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png}">
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico(v=2)}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png(v=2)}">
 </head>
 
 <body class="institucional-pagina pg-trocas">
@@ -37,52 +33,16 @@
         </nav>
 
         <article class="institucional-texto">
-            <p class="institucional-kicker" th:unless="${#strings.isEmpty(txt['pg.trocas.kicker'])}" th:text="${txt['pg.trocas.kicker']}">Atendimento</p>
-            <h1 class="adm-titulo" th:text="${txt['pg.trocas.h1']}">Trocas e Devoluções</h1>
-            <p class="institucional-lead" th:text="${txt['pg.trocas.lead']}">Não serviu ou não gostou? Você tem até 30 dias, a partir do recebimento, para trocar a peça.</p>
+            <div class="inst-topic-mark inst-topic-trocas" aria-label="TROCA E DEVOLUÇÃO SIMPLIFICADAS"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h12l-3-3M20 17H8l3 3"/><path d="M16 4l3 3-3 3M8 14l-3 3 3 3"/><path d="M7 7v4M17 13v4"/></svg></span><strong>TROCA E DEVOLUÇÃO SIMPLIFICADAS</strong><i aria-hidden="true"></i></div>
 
-            <div class="institucional-destaques">
-                <div>
-                    <span>Troca</span>
-                    <strong>até 30 dias</strong>
-                </div>
-                <div>
-                    <span>Desistência</span>
-                    <strong>até 7 dias</strong>
-                </div>
-                <div>
-                    <span>Defeito</span>
-                    <strong>até 90 dias</strong>
-                </div>
-            </div>
+            <header class="inst-page-head"><p class="institucional-kicker" th:unless="${#strings.isEmpty(txt['pg.trocas.kicker'])}" th:text="${txt['pg.trocas.kicker']}">Atendimento</p><h1 class="adm-titulo" th:text="${txt['pg.trocas.h1']}">Trocas e Devoluções</h1><p class="institucional-lead" th:text="${txt['pg.trocas.lead']}">Não serviu ou não gostou? Você tem até 30 dias, a partir do recebimento, para trocar a peça.</p></header>
+            <div class="inst-shipping-summary inst-policy-summary"><div class="inst-summary-card"><span class="inst-summary-label">TROCA</span><strong>30 dias</strong><small>Após o recebimento</small></div><div class="inst-summary-card"><span class="inst-summary-label">DESISTÊNCIA</span><strong>7 dias</strong><small>Após o recebimento</small></div><div class="inst-summary-card"><span class="inst-summary-label">DEFEITO</span><strong>90 dias</strong><small>Após o recebimento</small></div></div>
+            <section class="inst-section"><div class="inst-section-heading"><span class="inst-index">01 / ENTENDA SEU PRAZO</span><h2>Qual solicitação se aplica?</h2><p>Confira o prazo correspondente ao motivo do contato.</p></div><div class="inst-policy-grid"><div class="inst-policy-card"><span class="inst-policy-tag">TROCA</span><h3>Tamanho ou modelo</h3><strong>Até 30 dias corridos</strong><p>Você pode escolher outro tamanho, outra cor ou outro produto. Se houver diferença de valor, ela será paga ou devolvida.</p></div><div class="inst-policy-card"><span class="inst-policy-tag">DIREITO DE ARREPENDIMENTO</span><h3>Desistência da compra</h3><strong>Até 7 dias corridos</strong><p>Para compras pela internet, o cancelamento pode ser solicitado sem necessidade de justificar o motivo. O valor integral, incluindo o frete pago, é devolvido.</p></div><div class="inst-policy-card"><span class="inst-policy-tag">DEFEITO</span><h3>Produto com defeito</h3><strong>Até 90 dias</strong><p>Avise dentro do prazo contado do recebimento. O produto será analisado e faremos a troca por uma peça igual ou o reembolso, se ela não estiver mais disponível.</p></div></div></section>
+            <section class="inst-section"><div class="inst-section-heading"><span class="inst-index">02 / CONDIÇÕES</span><h2>Como preparar a peça</h2><p>Para que a solicitação seja analisada, observe estes cuidados.</p></div><div class="inst-check-grid"><div><span class="inst-check-symbol">✓</span><h3>Sem uso ou lavagem</h3><p>A peça não pode ter sido usada nem lavada e deve estar com a etiqueta.</p></div><div><span class="inst-check-symbol">✓</span><h3>Embalagem protegida</h3><p>Envie na embalagem original ou em outra embalagem que proteja o produto durante o transporte.</p></div></div></section>
+            <section class="inst-section"><div class="inst-section-heading"><span class="inst-index">03 / PASSO A PASSO</span><h2>Como solicitar sua troca ou devolução</h2><p>O atendimento orienta você em cada etapa.</p></div><div class="inst-step-grid inst-step-grid-vertical"><div class="inst-step"><span>01</span><h3>Envie sua solicitação</h3><p>Escreva para <a href="mailto:contato@seudominio.com.br">contato@seudominio.com.br</a> com o número do pedido, a peça e o motivo.</p></div><div class="inst-step"><span>02</span><h3>Receba as instruções</h3><p>Enviaremos as orientações para realizar a postagem do produto.</p></div><div class="inst-step"><span>03</span><h3>Aguarde a conferência</h3><p>Quando a peça chegar e for conferida, enviaremos a nova peça ou realizaremos o reembolso.</p></div></div></section>
+            <section class="inst-section"><div class="inst-section-heading"><span class="inst-index">04 / DEVOLUÇÃO DE VALORES</span><h2>Como funciona o reembolso</h2><p>A forma de devolução depende do meio de pagamento utilizado.</p></div><div class="inst-refund-grid"><div><span class="inst-refund-icon">▣</span><h3>Cartão de crédito</h3><p>O estorno é realizado na fatura, conforme o prazo da operadora.</p></div><div><span class="inst-refund-icon">⇄</span><h3>Pix ou boleto</h3><p>Transferência para uma conta em nome de quem fez a compra, em até 10 dias úteis após a conferência.</p></div></div></section>
+            <div class="inst-bottom-note"><strong>Não sabe qual opção escolher?</strong><span>Envie o número do pedido e conte o que aconteceu.</span><a href="mailto:contato@seudominio.com.br">Solicitar atendimento ↗</a></div>
 
-            <h2>Troca de tamanho ou modelo</h2>
-            <p>Você pode trocar por outro tamanho, outra cor ou outro produto em até 30 dias corridos após o recebimento. Se a nova escolha tiver valor diferente, a diferença é paga ou devolvida.</p>
-
-            <h2>Desistência da compra</h2>
-            <p>Pelo Código de Defesa do Consumidor, compras feitas pela internet podem ser canceladas em até 7 dias corridos após o recebimento, sem precisar explicar o motivo. Nesse caso, devolvemos o valor integral, incluindo o frete pago.</p>
-
-            <h2>Produto com defeito</h2>
-            <p>Se a peça apresentar defeito de fabricação, avise em até 90 dias após o recebimento. Analisamos o produto e fazemos a troca por uma peça igual ou o reembolso, se ela não estiver mais disponível.</p>
-
-            <h2>Condições para troca ou devolução</h2>
-            <ul>
-                <li>A peça não pode ter sido usada nem lavada, e deve estar com a etiqueta.</li>
-                <li>Envie na embalagem original ou em uma embalagem que proteja o produto.</li>
-            </ul>
-
-            <h2>Como solicitar</h2>
-            <ol>
-                <li>Escreva para <a href="mailto:contato@seudominio.com.br">contato@seudominio.com.br</a> com o número do pedido, a peça e o motivo.</li>
-                <li>Enviamos as instruções de postagem.</li>
-                <li>Quando a peça chega e é conferida, enviamos a nova peça ou fazemos o reembolso.</li>
-            </ol>
-
-            <h2>Reembolso</h2>
-            <ul>
-                <li><strong>Cartão de crédito:</strong> estorno na fatura, conforme o prazo da operadora.</li>
-                <li><strong>Pix ou boleto:</strong> transferência para uma conta em nome de quem fez a compra, em até 10 dias úteis após a conferência.</li>
-            </ul>
         </article>
     </main>
 
@@ -92,6 +52,7 @@
     <th:block th:replace="~{fragments/fragmentos :: carrinho-drawer}"></th:block>
     <div class="overlay" id="overlay"></div>
 
-    <script th:src="@{/jshome.js(v=10)}"></script>
+    <script th:src="@{/jshome.js(v=11)}"></script>
+    <script th:src="@{/institucional.js(v=3)}"></script>
 </body>
 </html>

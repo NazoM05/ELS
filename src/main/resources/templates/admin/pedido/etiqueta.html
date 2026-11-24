@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <!-- CSS único do site: as regras da etiqueta (.pg-etiqueta) e do papel de impressão ficam no site.css -->
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
+    <title th:text="'Etiqueta ' + ${pedido.codigo}">Etiqueta de envio</title>
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+</head>
+<body class="pg-etiqueta" th:classappend="${formato == 'a4'} ? 'pg-etiqueta-a4' : 'pg-etiqueta-termica'">
+    <div class="etq-barra">
+        <strong th:text="'Pedido ' + ${pedido.codigo}">Pedido</strong>
+        <a th:href="@{/admin/separacao/pedido/{c}/etiqueta(c=${pedido.codigo},formato='termica')}" th:classappend="${formato == 'termica'} ? 'etq-ativo'">Térmica 10x15 cm</a>
+        <a th:href="@{/admin/separacao/pedido/{c}/etiqueta(c=${pedido.codigo},formato='a4')}" th:classappend="${formato == 'a4'} ? 'etq-ativo'">Folha A4</a>
+        <button type="button" id="imprimir">Imprimir</button>
+        <a th:href="@{/admin/separacao/pedido/{c}(c=${pedido.codigo})}">Voltar ao pedido</a>
+        <span class="etq-dica" th:text="${formato == 'termica'} ? 'Na janela de impressão: papel 100 x 150 mm, sem margens, escala 100%.' : 'Na janela de impressão: papel A4, escala 100%. A etiqueta (10 x 15 cm) sai no canto superior esquerdo; recorte pelo contorno.'">Dica</span>
+    </div>
+
+    <div class="etq-folha">
+        <div class="etq" role="group" aria-label="Etiqueta de envio">
+            <div class="etq-topo">
+                <div class="etq-servico"><span th:text="${servicoNome}">PAC</span>
+                    <small th:if="${!#strings.isEmpty(servicoCodigo)}" th:text="'Serviço ' + ${servicoCodigo}">Serviço 03298</small>
+                </div>
+                <div class="etq-pedido">
+                    Pedido <strong th:text="${pedido.codigo}">EL-000000-AAAA</strong><br>
+                    <span th:text="${pedido.etiquetaGeradaEmFormatado}">01/01/2026 às 10:00</span>
+                </div>
+            </div>
+
+            <div class="etq-objeto" role="group" aria-label="Código de rastreamento">
+                <!-- O código e as barras vêm da pré-postagem dos Correios; sem código válido, nada é desenhado -->
+                <div th:if="${!#strings.isEmpty(barrasObjeto)}" class="etq-barras-objeto" th:utext="${barrasObjeto}"></div>
+                <div class="etq-cod" th:text="${pedido.correiosCodigoObjeto}">AA123456789BR</div>
+            </div>
+
+            <div class="etq-dest" role="group" aria-label="Destinatário">
+                <div class="etq-rot">Destinatário</div>
+                <div class="etq-nome" th:text="${pedido.nomeDestinatario}">Nome do cliente</div>
+                <div class="etq-linha" th:text="${pedido.endereco + ', ' + pedido.numero}">Rua das Flores, 123</div>
+                <div class="etq-linha" th:if="${pedido.complemento != null and !#strings.isEmpty(pedido.complemento)}" th:text="${pedido.complemento}">Apto 4</div>
+                <div class="etq-linha" th:text="${pedido.bairro}">Centro</div>
+                <div class="etq-linha" th:text="${pedido.cidade + ' / ' + pedido.uf}">Porto Alegre / RS</div>
+                <div class="etq-tel" th:if="${pedido.telefone != null and !#strings.isEmpty(pedido.telefone)}" th:text="'Tel.: ' + ${pedido.telefoneFormatado}">Tel.: (51) 99999-9999</div>
+                <div class="etq-cep">
+                    <span class="etq-cep-num" th:text="'CEP ' + ${pedido.cepFormatado}">CEP 90000-000</span>
+                    <div class="etq-barras-cep" th:if="${!#strings.isEmpty(barrasCep)}" th:utext="${barrasCep}"></div>
+                </div>
+            </div>
+
+            <div class="etq-rem" role="group" aria-label="Remetente">
+                <div class="etq-rot">Remetente</div>
+                <div class="etq-rem-nome" th:text="${remetente.nome}">Loja</div>
+                <div th:text="${remetente.logradouro + ', ' + remetente.numero + (#strings.isEmpty(remetente.complemento) ? '' : ' - ' + remetente.complemento)}">Rua da Loja, 100</div>
+                <div th:text="${remetente.bairro + ' - ' + remetente.cidade + '/' + remetente.uf + ' - CEP ' + cepOrigem}">Centro - Porto Alegre/RS - CEP 90000-000</div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById('imprimir').addEventListener('click', function () { window.print(); });
+    </script>
+</body>
+</html>

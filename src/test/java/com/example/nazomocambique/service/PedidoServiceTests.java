@@ -155,4 +155,40 @@ class PedidoServiceTests {
 		assertEquals(new BigDecimal("19.90"), PedidoService.calcularFrete(new BigDecimal("249.99"), "RJ"));
 		assertEquals(0, PedidoService.calcularFrete(new BigDecimal("250.00"), "RJ").signum());
 	}
+
+	@Test
+	void salvar_dados_marcado_guarda_endereco_no_cadastro() {
+		pedidoService.finalizar(usuarioId, entrega(), List.of(new ItemCarrinho(produtoId, "M", 1)));
+		Usuario u = usuarioRepository.findById(usuarioId).orElseThrow();
+		assertEquals("Rua das Flores", u.getEndereco());
+		assertEquals("90000000", u.getCep());
+	}
+
+	@Test
+	void salvar_dados_desmarcado_nao_altera_o_cadastro() {
+		DadosEntrega d = entrega();
+		d.setSalvarDados(false);
+		pedidoService.finalizar(usuarioId, d, List.of(new ItemCarrinho(produtoId, "M", 1)));
+		Usuario u = usuarioRepository.findById(usuarioId).orElseThrow();
+		assertEquals(null, u.getEndereco());
+		assertEquals(null, u.getCep());
+	}
+
+	@Test
+	void cpf_de_outra_conta_e_recusado_com_erro_no_campo() {
+		// O CPF é único no banco: só cria o "outro" cliente se ainda não existir (o banco de testes pode ser reaproveitado).
+		if (!usuarioRepository.existsByCpfAndIdNot("85369144087", -1L)) {
+			Usuario outro = new Usuario();
+			outro.setUsername("outro" + System.nanoTime() + "@teste.com");
+			outro.setNome("Outro Cliente");
+			outro.setRole("ROLE_USUARIO");
+			outro.setCpf("85369144087");
+			usuarioRepository.save(outro);
+		}
+		DadosEntrega d = entrega();
+		d.setCpf("853.691.440-87");
+		CheckoutException e = assertThrows(CheckoutException.class,
+				() -> pedidoService.finalizar(usuarioId, d, List.of(new ItemCarrinho(produtoId, "M", 1))));
+		assertEquals(true, e.getErrosCampos().containsKey("cpf"));
+	}
 }

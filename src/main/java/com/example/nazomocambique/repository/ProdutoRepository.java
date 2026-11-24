@@ -25,6 +25,7 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
 	/**
 	 * Catálogo da loja com filtros combináveis: cada parâmetro nulo significa "sem esse filtro".
+	 * Produtos de coleção especial só aparecem quando a coleção é pedida (colecao nulo = catálogo sem coleções).
 	 * Gênero usa dois valores (g1 ou g2) para o Unissex aparecer tanto em Masculino quanto em Feminino.
 	 * Paginado: a ordem vem do Sort do Pageable (sempre termina em id, para as páginas não se embaralharem).
 	 */
@@ -34,15 +35,18 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 			  and (:categoria is null or p.categoria = :categoria)
 			  and (:g1 is null or p.genero = :g1 or p.genero = :g2)
 			  and p.outlet = :outlet
+			  and ((:colecao is null and p.colecao is null) or p.colecao = :colecao)
 			""", countQuery = """
 			select count(p) from Produto p
 			where (:termo is null or lower(p.nome) like lower(concat('%', :termo, '%')))
 			  and (:categoria is null or p.categoria = :categoria)
 			  and (:g1 is null or p.genero = :g1 or p.genero = :g2)
 			  and p.outlet = :outlet
+			  and ((:colecao is null and p.colecao is null) or p.colecao = :colecao)
 			""")
 	Page<Produto> filtrar(@Param("termo") String termo, @Param("categoria") Categoria categoria,
-			@Param("g1") Genero g1, @Param("g2") Genero g2, @Param("outlet") boolean outlet, Pageable pageable);
+			@Param("g1") Genero g1, @Param("g2") Genero g2, @Param("outlet") boolean outlet,
+			@Param("colecao") String colecao, Pageable pageable);
 
 	// UPDATE direto: não dispara @PreUpdate, então "atualizadoEm" não muda a cada visita à página.
 	@Modifying(clearAutomatically = true)

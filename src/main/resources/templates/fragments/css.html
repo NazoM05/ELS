@@ -1,9 +1,24 @@
 <!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
-<body>
-    <!-- Folha de estilos única compartilhada por todas as páginas -->
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+    CSS único do site (ver AGENTS.md). Toda página chama, dentro do <head>:
+        <th:block th:replace="~{fragments/css :: css}"></th:block>
+
+    Ao alterar static/css/site.css, aumente o número de v= abaixo para os navegadores
+    não usarem a versão antiga em cache.
+
+    Os dois <style th:utext> ficam DEPOIS do site.css de propósito: as escolhas feitas em
+    Admin > Configurações (cor do tema e cores personalizadas) sobrescrevem o padrão.
+-->
+<head>
     <th:block th:fragment="css">
-        <link rel="stylesheet" th:href="@{/css/site.css(v=1)}">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Montserrat:wght@400;500;600;700;800;900&amp;display=swap">
+        <link rel="stylesheet" th:href="@{/css/site.css(v=20261124-meus-pedidos)}">
+        <script th:src="@{/reveal-scroll.js(v=20261124-7)}" defer></script>
+        <style th:utext="${site.cssTema}"></style>
+        <style th:utext="${personalizacaoCss}"></style>
     </th:block>
-</body>
+</head>
 </html>

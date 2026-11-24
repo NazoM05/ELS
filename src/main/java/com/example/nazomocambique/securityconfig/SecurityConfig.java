@@ -1,6 +1,5 @@
 package com.example.nazomocambique.securityconfig;
 
-import org.springframework.boot.security.autoconfigure.web.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -22,7 +21,7 @@ import org.springframework.security.web.servlet.util.matcher.PathPatternRequestM
 import org.springframework.security.web.util.matcher.RequestMatchers;
 
 import com.example.nazomocambique.repository.UsuarioRepository;
-import com.example.nazomocambique.service.AcessoUsuarioService;
+import com.example.nazomocambique.service.ContaService;
 
 @Configuration
 @EnableWebSecurity
@@ -30,7 +29,7 @@ import com.example.nazomocambique.service.AcessoUsuarioService;
 public class SecurityConfig {
 
 	/** Perfis (sem o prefixo ROLE_) que podem abrir a tela de separação e ler/alterar os dados dela. */
-	public static final String[] PERFIS_SEPARACAO = { "ADMIN", "GESTOR" };
+	public static final String[] PERFIS_SEPARACAO = { "ADMIN", "SEPARADOR" };
 
 	/**
 	 * Quem está logado mas não tem o perfil certo: páginas vão para /acesso-negado; chamadas de dados
@@ -52,16 +51,16 @@ public class SecurityConfig {
 	}
 	
 	/**
-	 * Depois do login: o gestor (que não é admin) vai direto para a separação de pedidos, a única área dele;
+	 * Depois do login: o separador (que não é admin) vai direto para a separação de pedidos, a única área dele;
 	 * os demais seguem para a página que tentaram abrir ou, se não houve, para o início.
 	 */
 	static AuthenticationSuccessHandler aposLogin() {
 		SavedRequestAwareAuthenticationSuccessHandler padrao = new SavedRequestAwareAuthenticationSuccessHandler();
 		padrao.setDefaultTargetUrl("/");
 		return (request, response, authentication) -> {
-			boolean gestor = authentication.getAuthorities().stream().anyMatch(a -> "ROLE_GESTOR".equals(a.getAuthority()));
+			boolean separador = authentication.getAuthorities().stream().anyMatch(a -> "ROLE_SEPARADOR".equals(a.getAuthority()));
 			boolean admin = authentication.getAuthorities().stream().anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
-			if (gestor && !admin) {
+			if (separador && !admin) {
 				response.sendRedirect(request.getContextPath() + "/admin/separacao");
 				return;
 			}
@@ -82,16 +81,21 @@ public class SecurityConfig {
 		.addFilterBefore(new ContaAtivaFilter(usuarioRepository), AuthorizationFilter.class)
 		.authorizeHttpRequests(auth -> auth 
 				// Públicas: login/cadastro, a vitrine (home, busca e detalhes do produto) e os arquivos que ela usa
-				.requestMatchers("/login", "/criar-conta", "/acesso-negado").permitAll()
+				.requestMatchers("/login", "/criar-conta", "/acesso-negado", "/error").permitAll()
 				.requestMatchers("/", "/home", "/london", "/outlet", "/pesquisa", "/detalhes/**", "/favoritos").permitAll()
+				// Coleções (Vice City, Tricolor, Urban Culture): públicas; o login só é pedido ao adicionar ao carrinho/comprar
+				.requestMatchers("/colecao/**").permitAll()
 				.requestMatchers("/sobre", "/frete-e-entrega", "/trocas-e-devolucoes", "/politica-de-privacidade").permitAll()
-				.requestMatchers("/css/**", "/jshome.js", "/mapa-frete.js", "/img/**", "/brand/**", "/logo-site/**", "/favicon.ico").permitAll()
-				// Webhook do Mercado Pago: sem login (quem chama é o Mercado Pago); a assinatura é conferida no controller
-				.requestMatchers(HttpMethod.POST, "/webhooks/mercadopago").permitAll()
-				.requestMatchers(PathRequest.toH2Console()).hasRole("ADMIN")
-				// Separação de pedidos: somente ADMIN e GESTOR (precisa vir antes da regra geral de /admin/**)
+				.requestMatchers("/css/**", "/jshome.js", "/mapa-frete.js", "/institucional.js", "/reveal-scroll.js", "/img/**", "/brand/**", "/logo-site/**", "/favicon.ico").permitAll()
+				// Webhook do Asaas: sem login; o token de autenticação é conferido no controller
+				.requestMatchers(HttpMethod.POST, "/webhooks/asaas").permitAll()
+				// Console H2 (só existe nos perfis em que está ligado; PathRequest.toH2Console() exigia o bean e quebrava no Render)
+				.requestMatchers("/h2-console", "/h2-console/**").hasRole("ADMIN")
+				// Separação de pedidos: somente ADMIN e SEPARADOR (precisa vir antes da regra geral de /admin/**)
 				.requestMatchers("/admin/separacao", "/admin/separacao/**").hasAnyRole(PERFIS_SEPARACAO)
 				.requestMatchers("/admin/**").hasRole("ADMIN")
+				// Carteira, meus pedidos, checkout e pedidos do cliente: o SEPARADOR (que só trabalha na separação) não entra
+				.requestMatchers("/carteira", "/carteira/**", "/meus-pedidos", "/meus-pedidos/**", "/checkout", "/checkout/**", "/pedido/**").hasAnyRole("ADMIN", "USUARIO")
 				.requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
 				.anyRequest().authenticated()
 				
@@ -124,7 +128,7 @@ public class SecurityConfig {
 	}
 	
 	@Bean
-	AuthenticationManager authenticationManager(AcessoUsuarioService userDetailsService, PasswordEncoder passwordEncoder) {
+	AuthenticationManager authenticationManager(ContaService userDetailsService, PasswordEncoder passwordEncoder) {
 		DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
 		provider.setPasswordEncoder(passwordEncoder);
 		return new ProviderManager(provider);

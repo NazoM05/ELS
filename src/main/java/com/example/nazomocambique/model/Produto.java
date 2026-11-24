@@ -38,6 +38,13 @@ import lombok.Setter;
 @Setter
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Produto {
+	/** Identificador da coleção especial Vice City (coluna colecao). */
+	public static final String COLECAO_VICE_CITY = "VICE_CITY";
+	/** Coleção Tricolor (camisas do time). */
+	public static final String COLECAO_TRICOLOR = "TRICOLOR";
+	/** Coleção de oversizeds da Urban Culture. */
+	public static final String COLECAO_URBAN_CULTURE = "URBAN_CULTURE";
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -60,6 +67,11 @@ public class Produto {
 
 	@Column(name = "desconto_outlet")
 	private Integer descontoOutlet;
+
+	// Coleção especial do produto (ex.: "VICE_CITY"). Produto de coleção só aparece na página da coleção;
+	// null = catálogo normal (Início e Outlet).
+	@Column(length = 40)
+	private String colecao;
 	private String tipo;
 
 	// Classificação da peça (obrigatória nas telas de cadastro e edição). Gravadas pelo nome da constante.

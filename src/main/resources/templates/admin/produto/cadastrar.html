@@ -4,17 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@500;600;800&display=swap" rel="stylesheet">
+    <!-- CSS único do site: fontes, site.css e cores do painel (ver AGENTS.md) -->
+    <th:block th:replace="~{fragments/css :: css}"></th:block>
 
-    <link rel="stylesheet" th:href="@{/css/berzerk.css(v=29)}">
-    <th:block th:replace="~{fragments/fragmentos :: tema}"></th:block>
- 
     <title th:replace="~{fragments/fragmentos :: titulo(${txt['pg.adminCadastrar.titulo']})}">Cadastro de Produtos - Estilo London Store</title>
-    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png}">
-    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
-    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png}">
+    <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico(v=2)}">
+    <link rel="apple-touch-icon" th:href="@{/brand/apple-touch-icon.png(v=2)}">
 </head>
  
 <body class="admin-ui pg-adminCadastrar">
@@ -120,7 +116,7 @@
     <div th:replace="~{fragments/fragmentos :: sidebar}" ></div>
     <div class="overlay" id="overlay"></div>
  
-    <script th:src="@{/jshome.js(v=10)}"></script>
+    <script th:src="@{/jshome.js(v=11)}"></script>
     <script>
         // Filtra os cards já cadastrados pela barra de pesquisa
         const filtro = document.getElementById('filtro');
@@ -134,11 +130,7 @@
         // Aviso de sucesso some sozinho
         const ok = document.querySelector('.cadastro-alerta-ok');
         if (ok) {
-            setTimeout(() => {
-                ok.style.transition = 'opacity .4s';
-                ok.style.opacity = '0';
-                setTimeout(() => ok.remove(), 400);
-            }, 5000);
+            setTimeout(() => ok.remove(), 5000);
         }
     </script>
 </body>

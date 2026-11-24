@@ -101,18 +101,36 @@ public class Pedido {
 
 	private Integer prazoFreteDias;
 
+	/** Código do serviço dos Correios escolhido no checkout (ex.: 03298), ou "PADRAO" para o frete fixo da loja. */
+	@Column(length = 10)
+	private String servicoFreteCodigo;
+
+	// Etiqueta de envio: dados devolvidos pelos Correios na pré-postagem (nunca preenchidos pela loja)
+	@Column(length = 40)
+	private String correiosIdPrePostagem;
+
+	/** Código de rastreamento gerado pelos Correios (ex.: AA123456789BR). Só vai para o rastreio do cliente no envio. */
+	@Column(length = 13)
+	private String correiosCodigoObjeto;
+
+	private LocalDateTime etiquetaGeradaEm;
+
 	@Column(precision = 10, scale = 2, nullable = false)
 	private BigDecimal total;
+
+	@Column(precision = 10, scale = 2, nullable = false)
+	private BigDecimal cashbackUsado = BigDecimal.ZERO;
 
 	private LocalDateTime criadoEm;
 
 	private LocalDateTime atualizadoEm;
 
-	// Pagamento pelo Mercado Pago (Pix): id e status do pagamento no gateway e o Pix em uso
-	private Long mpPaymentId;
+	// Pagamento pelo Asaas (Pix): identificador textual da cobrança e status no gateway.
+	@Column(length = 80)
+	private String asaasPaymentId;
 
-	@Column(length = 30)
-	private String mpStatus;
+	@Column(length = 40)
+	private String asaasStatus;
 
 	/** Código "copia e cola" do Pix. */
 	@Column(length = 1024)
@@ -218,6 +236,23 @@ public class Pedido {
 		return "(" + telefone.substring(0, 2) + ") " + telefone.substring(2, corte) + "-" + telefone.substring(corte);
 	}
 
+	/** A pré-postagem já foi criada nos Correios e o pedido tem código de objeto. */
+	@Transient
+	public boolean isEtiquetaGerada() {
+		return correiosCodigoObjeto != null && !correiosCodigoObjeto.isBlank();
+	}
+
+	/** CEP com máscara: 90000-000. */
+	@Transient
+	public String getCepFormatado() {
+		return cep != null && cep.length() == 8 ? cep.substring(0, 5) + "-" + cep.substring(5) : cep;
+	}
+
+	@Transient
+	public String getEtiquetaGeradaEmFormatado() {
+		return etiquetaGeradaEm == null ? null : etiquetaGeradaEm.format(FORMATO_DATA);
+	}
+
 	/** Pedido feito com Pix que ainda espera o pagamento. */
 	@Transient
 	public boolean isAguardandoPix() {
@@ -238,5 +273,29 @@ public class Pedido {
 	@Transient
 	public boolean isFreteGratis() {
 		return frete != null && frete.signum() == 0;
+	}
+
+	/** Situação do pagamento em palavras simples, para a conferência da separação. */
+	@Transient
+	public String getPagamentoRotulo() {
+		if (status == StatusPedido.CANCELADO) {
+			return "Cancelado";
+		}
+		return status == StatusPedido.AGUARDANDO_PAGAMENTO ? "Aguardando pagamento" : "Pago";
+	}
+
+	/** Sufixo da classe CSS da etiqueta de pagamento (reaproveita as cores das etapas). */
+	@Transient
+	public String getPagamentoClasse() {
+		if (status == StatusPedido.CANCELADO) {
+			return "cancelado";
+		}
+		return status == StatusPedido.AGUARDANDO_PAGAMENTO ? "aguardando" : "pago";
+	}
+
+	/** Pagamento confirmado (pedido liberado para separar). */
+	@Transient
+	public boolean isPagamentoConfirmado() {
+		return status != StatusPedido.AGUARDANDO_PAGAMENTO && status != StatusPedido.CANCELADO;
 	}
 }
