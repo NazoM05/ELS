@@ -2,7 +2,6 @@
 /target/
 /build/
 /dist/
-.mvn/
 
 # Runtime database and logs
 /dados/*.db
