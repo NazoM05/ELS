@@ -204,14 +204,13 @@ VALUES
     ('Saia Midi Hibisco Noite', 'PP,P,M,G,GG,XG', 61.90, 'Viscose', 'saia-midi-hibisco-noite.svg', 'saia-midi-hibisco-noite-costas.svg', FALSE, 'Roxo e Rosa', 'SAIA', 'UNISSEX', 'VICE_CITY'),
     ('Camiseta Retrô 86', 'PP,P,M,G,GG,XG', 44.90, 'Algodão', 'camiseta-retro-86.svg', 'camiseta-retro-86-costas.svg', TRUE, 'Branco Off-White', 'CAMISETA', 'UNISSEX', 'VICE_CITY');
 
-    -- MERGE por username: data.sql roda em todo startup no ambiente dev (spring.sql.init.mode=always)
-    -- e o banco H2 é persistente. Assim, os usuários de teste podem existir sem gerar
-    -- violação da restrição UNIQUE de USUARIO.username.
-    -- O CPF é único: se outra conta já o usa, libera antes para o admin não derrubar o startup.
-    UPDATE USUARIO SET cpf = NULL WHERE cpf = '55537960087' AND username <> 'admin';
+    -- Desenvolvimento (H2): remove CPFs antigos do banco persistente local.
+    -- IDs internos e username continuam identificando contas; CPF nao e necessario aqui.
+    UPDATE USUARIO SET cpf = NULL WHERE cpf IS NOT NULL;
 
+    -- MERGE por username: data.sql roda em todo startup dev e preserva a conta de teste.
     MERGE INTO USUARIO (username, senha, role, ativo, email, cpf) KEY (username)
-    VALUES ('admin', '$2a$10$oz8mJWjsca2yd5hdU5pvzO123repm3JNyZ9fxbFzMs5wVaaccsiZG', 'ROLE_ADMIN', TRUE, 'thiagomfreitas05@gmail.com', '55537960087');
+    VALUES ('admin', '$2a$10$oz8mJWjsca2yd5hdU5pvzO123repm3JNyZ9fxbFzMs5wVaaccsiZG', 'ROLE_ADMIN', TRUE, 'thiagomfreitas05@gmail.com', NULL);
 
     -- Cliente de teste (login: user). Mesma senha do admin.
     MERGE INTO USUARIO (nome, username, senha, role, ativo) KEY (username)

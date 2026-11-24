@@ -415,3 +415,23 @@ Validação: revisão estática das alterações; testes automatizados não exec
 - A animação ocorre uma única vez por elemento, com pequeno escalonamento nos cards em grade.
 - Respeita `prefers-reduced-motion` e mantém o conteúdo visível caso `IntersectionObserver` não esteja disponível.
 - Cache do CSS/JS versionado no fragmento global.
+
+
+## Registro de correções visuais
+
+### 2026-11-24 — Revelação ao rolar a página
+Status: `🟡 IMPLEMENTADO — VALIDAÇÃO PENDENTE`
+
+- Alterado `src/main/resources/static/reveal-scroll.js` para revelar cada elemento uma única vez, na primeira entrada na área visível.
+- Removida a reinicialização da classe de visibilidade quando o elemento sai da tela; a animação não é mais reaplicada ao subir ou descer a página.
+- Atualizada a versão do script em `src/main/resources/templates/fragments/css.html` para invalidar o cache.
+- Validação: sintaxe JavaScript e integridade do ZIP; teste visual em navegadores/dispositivos reais ainda pendente.
+
+
+## CPFs de teste e Asaas Sandbox (2026-11-24)
+- Perfil `dev` (H2) limpa CPFs antigos do banco local em cada inicializacao; CPF fica `NULL`. IDs internos/username identificam usuarios.
+- A conta administrativa seed nao recebe CPF fixo.
+- Perfil `dev` fixa Asaas Sandbox (`https://api-sandbox.asaas.com/v3`). Configure somente chave Sandbox via `KEY_ASAAS`/`secrets-local.properties`; nunca use chave de producao nesse perfil.
+- CPF ficticio/invalido nao deve ser enviado ao gateway. Para testar transacoes no Sandbox, use dados de teste aceitos pelo Sandbox; checkout continua validando CPF para o Pix.
+- Perfil `prod` nao limpa CPFs automaticamente (`spring.sql.init.mode=never`). Para limpeza, script manual `sql/limpar-cpfs-postgresql.sql`, com backup, revisao e COMMIT explicitamente habilitado. Preserva usuarios/pedidos e deixa CPF nulo.
+- Nunca automatizar limpeza de dados pessoais em deploy/startup.

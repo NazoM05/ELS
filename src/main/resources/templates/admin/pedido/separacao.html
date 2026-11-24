@@ -49,9 +49,11 @@
     <script th:inline="javascript">
     (function () {
         var base = /*[[@{/admin/separacao}]]*/ '/admin/separacao';
-        var detalhe = /*[[@{/admin/pedidos/}]]*/ '/admin/pedidos/';
-        // Só o admin abre a ficha completa do pedido; para o separador o código aparece sem link
-        var verDetalhe = document.querySelector('main.sep').dataset.verDetalhe === 'true';
+        var detalheAdmin = /*[[@{/admin/pedidos/}]]*/ '/admin/pedidos/';
+        var detalheSeparador = /*[[@{/admin/separacao/pedido/}]]*/ '/admin/separacao/pedido/';
+        // ADMIN abre a ficha administrativa; SEPARADOR abre a conferência restrita à separação.
+        var verDetalheAdmin = document.querySelector('main.sep').dataset.verDetalhe === 'true';
+        var detalhe = verDetalheAdmin ? detalheAdmin : detalheSeparador;
         var csrfToken = document.querySelector('meta[name="_csrf"]').content;
         var csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
         var INTERVALO = 3000;
@@ -81,11 +83,9 @@
                 var botoes = acoes[c].map(function (a) {
                     return '<button type="button" class="sep-btn' + (a[2] ? ' sep-btn-principal' : '') + '" data-codigo="' + esc(p.codigo) + '" data-para="' + a[0] + '"' + (ocupado[p.codigo] ? ' disabled' : '') + '>' + a[1] + '</button>';
                 }).join('');
-                html[c] += '<article class="sep-cartao' + (p.novo ? ' sep-cartao-novo' : '') + '">' +
-                    '<div class="sep-cartao-topo">' + (verDetalhe
-                        ? '<a class="sep-codigo" href="' + detalhe + encodeURIComponent(p.codigo) + '">' + esc(p.codigo) + '</a>'
-                        : '<span class="sep-codigo">' + esc(p.codigo) + '</span>') +
-                    '<span class="status-pedido status-pedido-' + esc(p.statusClasse) + '">' + esc(p.statusRotulo) + '</span></div>' +
+                html[c] += '<article class="sep-cartao' + (p.novo ? ' sep-cartao-novo' : '') + '\">' +
+                    '<div class="sep-cartao-topo"><a class="sep-codigo" href="' + detalhe + encodeURIComponent(p.codigo) + '\">' + esc(p.codigo) + '</a>' +
+                    '<span class="status-pedido status-pedido-' + esc(p.statusClasse) + '\">' + esc(p.statusRotulo) + '</span></div>' +
                     '<p class="sep-cliente">' + esc(p.cliente) + '</p>' +
                     '<p class="sep-meta"><span>📍 ' + esc(p.destino || '—') + '</span><span>🕒 ' + esc(p.confirmadoEmTexto || '—') + '</span><span>' + p.itens + (p.itens === 1 ? ' item' : ' itens') + '</span></p>' +
                     '<div class="sep-acoes">' + botoes + '</div></article>';

@@ -53,3 +53,7 @@ A API do Asaas exige que a conta tenha condições de receber Pix. A disponibili
 - [FAQ do Sandbox](https://docs.asaas.com/docs/faq-sandbox-1)
 
 O Sandbox pode ter restrições em alguns fluxos de QR Code Pix, conforme a FAQ oficial. Se o QR Code não puder ser pago no Sandbox, isso não significa necessariamente que o endpoint de produção terá o mesmo comportamento; valide as limitações antes da apresentação final.
+
+
+## CPFs e dados ficticios
+O perfil local `dev` limpa CPFs do H2 em cada inicializacao e fixa a URL Sandbox. A conta admin seed nao possui CPF. CPF ficticio/invalido nao deve ser enviado ao gateway; para transacoes de teste, utilize dados aceitos pelo Sandbox. O checkout continua validando CPF para o Pix.

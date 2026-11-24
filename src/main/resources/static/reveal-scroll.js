@@ -1,4 +1,4 @@
-/* Revelação progressiva e repetida dos blocos conforme entram/saem da área visível. */
+/* Revelação única dos blocos na primeira entrada na área visível. */
 (function () {
     'use strict';
 
@@ -53,19 +53,15 @@
             elemento.style.setProperty('--reveal-delay', Math.min((indice % 6) * 55, 275) + 'ms');
         });
 
-        var observador = new IntersectionObserver(function (entradas) {
+        var observador = new IntersectionObserver(function (entradas, observer) {
             entradas.forEach(function (entrada) {
-                var elemento = entrada.target;
+                if (!entrada.isIntersecting) return;
 
-                if (entrada.isIntersecting) {
-                    /* Entrando na viewport: revela. */
-                    elemento.classList.add('reveal-visivel');
-                } else {
-                    /* Saindo da viewport: prepara novamente.
-                       Assim, ao voltar a rolar para o elemento, a animação
-                       acontece outra vez na mesma página. */
-                    elemento.classList.remove('reveal-visivel');
-                }
+                /* A animação acontece somente na primeira entrada.
+                   O elemento deixa de ser observado para não reiniciar ao
+                   rolar a página para cima ou para baixo. */
+                entrada.target.classList.add('reveal-visivel');
+                observer.unobserve(entrada.target);
             });
         }, {
             root: null,
