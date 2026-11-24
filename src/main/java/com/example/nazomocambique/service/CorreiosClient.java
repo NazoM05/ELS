@@ -7,6 +7,9 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -23,6 +26,8 @@ import org.springframework.web.client.RestClientException;
 import com.example.nazomocambique.config.CorreiosProperties;
 import com.example.nazomocambique.model.Cotacao;
 import com.example.nazomocambique.model.Pacote;
+import com.example.nazomocambique.model.PrePostagem;
+import com.example.nazomocambique.model.SolicitacaoPostagem;
 
 /**
  * Cliente da API REST dos Correios (CWS): gera o token com o cartão de postagem e consulta preço e prazo.
@@ -31,9 +36,14 @@ import com.example.nazomocambique.model.Pacote;
  * -> GET /preco/v1/nacional/{serviço} e GET /prazo/v1/nacional/{serviço} com "Bearer token".
  * As APIs de preço (serviço 38202) e prazo (38210) precisam estar liberadas no contrato.
  * Confira nome de campos e versão dos endpoints no manual do CWS se algo vier diferente.
+ *
+ * Pré-postagem (etiqueta): POST /prepostagem/v1/prepostagens com o remetente, o destinatário, o serviço, o peso, as
+ * medidas e a declaração de conteúdo. A resposta traz o código do objeto (rastreamento), que a loja só repassa.
+ * ATENÇÃO: os nomes e tipos dos campos do corpo (montarCorpoPrePostagem) vêm da documentação pública e não foram
+ * testados contra o ambiente real; valide no Swagger do CWS antes de usar em produção.
  */
 @Service
-public class CorreiosClient implements CotacaoCorreios {
+public class CorreiosClient implements CotacaoCorreios, PostagemCorreios {
 
 	private static final Logger log = LoggerFactory.getLogger(CorreiosClient.class);
 	private static final ParameterizedTypeReference<Map<String, Object>> MAPA = new ParameterizedTypeReference<>() {
@@ -83,6 +93,105 @@ public class CorreiosClient implements CotacaoCorreios {
 		} catch (RestClientException | IllegalArgumentException e) {
 			throw new CorreiosIndisponivelException("Falha ao consultar os Correios (serviço " + codigoServico + ")", e);
 		}
+	}
+
+	// ---------------------------------------------------------------- pré-postagem
+
+	@Override
+	public PrePostagem criarPrePostagem(SolicitacaoPostagem solicitacao) {
+		Map<String, Object> corpo = montarCorpoPrePostagem(props.cepOrigem(), props.remetente(), solicitacao);
+		try {
+			Map<String, Object> resp = comToken(t -> http.post()
+					.uri("/prepostagem/v1/prepostagens")
+					.headers(h -> h.setBearerAuth(t))
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(corpo)
+					.retrieve().body(MAPA));
+			String id = texto(resp, "id");
+			String codigoObjeto = texto(resp, "codigoObjeto");
+			if (id.isEmpty() || codigoObjeto.isEmpty()) {
+				throw new CorreiosIndisponivelException("A resposta dos Correios não trouxe o id e o código do objeto.");
+			}
+			log.info("Pré-postagem {} criada (objeto {}).", id, codigoObjeto);
+			return new PrePostagem(id, codigoObjeto.toUpperCase(java.util.Locale.ROOT));
+		} catch (CorreiosIndisponivelException e) {
+			throw e;
+		} catch (HttpClientErrorException e) {
+			String detalhe = e.getResponseBodyAsString();
+			throw new CorreiosIndisponivelException("Os Correios recusaram a pré-postagem (HTTP " + e.getStatusCode().value()
+					+ "): " + (detalhe.length() > 300 ? detalhe.substring(0, 300) : detalhe), e);
+		} catch (RestClientException e) {
+			throw new CorreiosIndisponivelException("Falha ao criar a pré-postagem nos Correios.", e);
+		}
+	}
+
+	/** Corpo do POST de pré-postagem. Estático e sem rede para poder ser conferido nos testes. */
+	static Map<String, Object> montarCorpoPrePostagem(String cepOrigem, CorreiosProperties.Remetente r,
+			SolicitacaoPostagem s) {
+		Map<String, Object> remetente = new LinkedHashMap<>();
+		remetente.put("nome", r.nome());
+		remetente.put("cpfCnpj", r.cpfCnpj());
+		if (!r.email().isEmpty()) {
+			remetente.put("email", r.email());
+		}
+		String telR = r.telefone();
+		if (telR.length() >= 10) {
+			remetente.put("dddTelefone", telR.substring(0, 2));
+			remetente.put("telefone", telR.substring(2));
+		}
+		remetente.put("endereco", endereco(cepOrigem, r.logradouro(), r.numero(), r.complemento(), r.bairro(), r.cidade(), r.uf()));
+
+		SolicitacaoPostagem.Destino d = s.destino();
+		Map<String, Object> destinatario = new LinkedHashMap<>();
+		destinatario.put("nome", d.nome());
+		if (!d.telefone().isEmpty()) {
+			destinatario.put("dddTelefone", d.ddd());
+			destinatario.put("telefone", d.telefone());
+		}
+		destinatario.put("endereco", endereco(d.cep(), d.logradouro(), d.numero(), d.complemento(), d.bairro(), d.cidade(), d.uf()));
+
+		List<Map<String, Object>> itens = new ArrayList<>();
+		for (SolicitacaoPostagem.Item i : s.itens()) {
+			Map<String, Object> item = new LinkedHashMap<>();
+			item.put("conteudo", i.conteudo().length() > 60 ? i.conteudo().substring(0, 60) : i.conteudo());
+			item.put("quantidade", String.valueOf(i.quantidade()));
+			item.put("valor", i.valor().setScale(2, java.math.RoundingMode.HALF_UP).toPlainString());
+			itens.add(item);
+		}
+
+		Pacote p = s.pacote();
+		Map<String, Object> corpo = new LinkedHashMap<>();
+		corpo.put("remetente", remetente);
+		corpo.put("destinatario", destinatario);
+		corpo.put("codigoServico", s.codigoServico());
+		corpo.put("pesoInformado", String.valueOf(p.pesoGramas()));
+		corpo.put("codigoFormatoObjetoInformado", "2"); // 2 = caixa/pacote (o mesmo tpObjeto da cotação)
+		corpo.put("comprimentoInformado", String.valueOf(p.comprimentoCm()));
+		corpo.put("larguraInformada", String.valueOf(p.larguraCm()));
+		corpo.put("alturaInformada", String.valueOf(p.alturaCm()));
+		corpo.put("cienteObjetoNaoProibido", 1);
+		corpo.put("itensDeclaracaoConteudo", itens);
+		return corpo;
+	}
+
+	private static Map<String, Object> endereco(String cep, String logradouro, String numero, String complemento,
+			String bairro, String cidade, String uf) {
+		Map<String, Object> e = new LinkedHashMap<>();
+		e.put("cep", cep);
+		e.put("logradouro", logradouro);
+		e.put("numero", numero);
+		if (complemento != null && !complemento.isBlank()) {
+			e.put("complemento", complemento);
+		}
+		e.put("bairro", bairro);
+		e.put("cidade", cidade);
+		e.put("uf", uf);
+		return e;
+	}
+
+	private static String texto(Map<String, Object> mapa, String chave) {
+		Object v = mapa == null ? null : mapa.get(chave);
+		return v == null ? "" : v.toString().trim();
 	}
 
 	// ---------------------------------------------------------------- chamadas

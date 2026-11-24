@@ -6,32 +6,7 @@
     <th:block th:replace="~{fragments/css :: css}"></th:block>
     <title>Minha carteira | Estilo London Store</title>
     <link rel="icon" type="image/png" sizes="256x256" th:href="@{/brand/favicon.png(v=2)}">
-    <style>
-        .carteira-container { max-width: 1080px; }
-        .carteira-topo { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:24px; }
-        .carteira-topo .adm-sub { max-width:620px; }
-        .carteira-voltar { color:var(--ink); font:700 12px var(--font-body); letter-spacing:.06em; text-transform:uppercase; text-decoration:none; border-bottom:1px solid var(--line); padding-bottom:5px; }
-        .carteira-saldo { position:relative; isolation:isolate; overflow:hidden; padding:clamp(24px,4vw,38px); margin-bottom:18px; color:var(--ink); background:linear-gradient(135deg,#f2f2f0 0%,#e5e5e5 100%); border:1px solid var(--line); border-radius:8px; }
-        .carteira-saldo:after { content:""; position:absolute; z-index:-1; width:260px; height:260px; right:-70px; top:-135px; border:1px solid #ffffff35; border-radius:50%; box-shadow:0 0 0 28px #ffffff0d,0 0 0 58px #ffffff08; }
-        .saldo-label { margin:0 0 10px; color:var(--muted); font:700 11px var(--font-body); letter-spacing:.14em; text-transform:uppercase; }
-        .saldo-valor { color:var(--ink) !important; display:block; font:400 clamp(38px,7vw,58px)/1 var(--font-display); letter-spacing:.01em; font-variant-numeric:tabular-nums; }
-        .saldo-nota { max-width:650px; margin:14px 0 0; color:var(--muted); font:500 13px/1.65 var(--font-body); }
-        .carteira-info { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin:18px 0 28px; }
-        .carteira-info .cadastro-form-box { margin:0; min-width:0; }
-        .carteira-info h2 { display:flex; align-items:center; gap:9px; }
-        .carteira-info p { margin:0; color:var(--muted); font:500 14px/1.7 var(--font-body); }
-        .historico-card { padding:clamp(18px,3vw,28px); background:var(--tile); border:1px solid var(--line); border-radius:6px; }
-        .historico-card h2 { margin:0 0 18px; font:400 25px/1.1 var(--font-display); text-transform:uppercase; }
-        .tabela-wrap { width:100%; overflow-x:auto; }
-        .historico-tabela { width:100%; min-width:580px; border-collapse:collapse; }
-        .historico-tabela th,.historico-tabela td { padding:14px 12px; border-bottom:1px solid var(--line); text-align:left; font:500 13px/1.5 var(--font-body); }
-        .historico-tabela th { color:var(--muted); font-size:10px; letter-spacing:.1em; text-transform:uppercase; }
-        .historico-tabela td:last-child,.historico-tabela th:last-child { text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
-        .tipo-mov { display:inline-block; padding:5px 9px; border:1px solid var(--line); border-radius:3px; color:var(--ink); font-size:10px; font-weight:800; letter-spacing:.04em; }
-        .carteira-vazia { padding:26px 16px; text-align:center; color:var(--muted); background:var(--soft); border:1px dashed var(--line); font:500 13px/1.6 var(--font-body); }
-        @media(max-width:700px) { .carteira-info { grid-template-columns:1fr; } .carteira-topo { align-items:flex-start; } .carteira-saldo { border-radius:5px; } }
-        @media(max-width:480px) { .historico-card { padding:14px; } .historico-tabela th,.historico-tabela td { padding:11px 9px; } }
-    </style>
+    
 </head>
 <body class="admin-ui pg-carteira">
     <div th:replace="~{fragments/fragmentos :: anuncios}"></div>

@@ -215,7 +215,7 @@
                     <p class="checkout-frete-dica" id="freteDica"
                        th:text="${resumo.faltaParaFreteGratis != null} ? |Faltam R$ ${#numbers.formatDecimal(resumo.faltaParaFreteGratis, 1, 'POINT', 2, 'COMMA')} para ganhar frete grátis.| : (${resumo.freteDefinido} ? '' : |Frete grátis a partir de R$ ${#numbers.formatDecimal(freteGratisSul, 1, 'POINT', 2, 'COMMA')} no Sul e de R$ ${#numbers.formatDecimal(freteGratisDemais, 1, 'POINT', 2, 'COMMA')} nas demais regiões.|)"
                        th:hidden="${resumo.faltaParaFreteGratis == null and resumo.freteDefinido}">Faltam R$ 10,00</p>
-                    <div class="checkout-cashback" th:if="${saldoCarteira != null and saldoCarteira.signum() > 0}" style="padding: .8rem 0">
+                    <div class="checkout-cashback checkout-cashback-pad" th:if="${saldoCarteira != null and saldoCarteira.signum() > 0}">
                         <label><input type="checkbox" id="usarCashback" name="usarCashback" value="true" th:attr="data-saldo=${saldoCarteira},data-total=${resumo.total}"> Usar meu cashback (saldo: <strong th:text="|R$ ${#numbers.formatDecimal(saldoCarteira,1,'POINT',2,'COMMA')}|"></strong>). O desconto será aplicado ao confirmar o pedido.</label>
                     </div>
                     <div class="checkout-total">
@@ -234,6 +234,8 @@
             </aside>
         </form>
     </main>
+
+    <footer th:replace="~{fragments/fragmentos :: rodape}"></footer>
 
     <div th:replace="~{fragments/fragmentos :: sidebar}"></div>
     <th:block th:replace="~{fragments/fragmentos :: carrinho-drawer}"></th:block>

@@ -28,7 +28,7 @@ public class Usuario {
 
 	private String senha; // hash BCrypt, quando existir login
 
-	private String role; // "ROLE_ADMIN", "ROLE_GESTOR" (só a separação de pedidos), "ROLE_USUARIO"
+	private String role; // "ROLE_ADMIN", "ROLE_SEPARADOR" (só a separação de pedidos), "ROLE_USUARIO"
 
 	private String nome;
 
@@ -157,14 +157,14 @@ public class Usuario {
 		return nome != null && !nome.isBlank() ? nome : username;
 	}
 
-	/** Perfil em português: Administrador, Gestor ou Cliente. */
+	/** Perfil em português: Administrador, Separador ou Cliente. */
 	@Transient
 	public String getRotuloPerfil() {
 		if ("ROLE_ADMIN".equals(role)) {
 			return "Administrador";
 		}
-		if ("ROLE_GESTOR".equals(role)) {
-			return "Gestor";
+		if ("ROLE_SEPARADOR".equals(role)) {
+			return "Separador";
 		}
 		return "Cliente";
 	}

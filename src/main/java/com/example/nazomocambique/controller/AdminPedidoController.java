@@ -35,6 +35,8 @@ import com.example.nazomocambique.model.StatusPedido;
 import com.example.nazomocambique.repository.HistoricoPedidoRepository;
 import com.example.nazomocambique.service.CodigoPedido;
 import com.example.nazomocambique.service.ContaService;
+import com.example.nazomocambique.service.EtiquetaEnvioService;
+import com.example.nazomocambique.service.FreteService;
 import com.example.nazomocambique.service.GestaoPedidoService;
 import com.example.nazomocambique.service.GestaoPedidoService.AtualizacaoPedidoException;
 
@@ -42,13 +44,13 @@ import com.example.nazomocambique.service.GestaoPedidoService.AtualizacaoPedidoE
  * Telas do administrador sobre pedidos, todas no mesmo controller:
  * <ul>
  * <li>/admin/pedidos: lista, busca pelo código e acompanhamento (etapa, rastreio e anotações);</li>
- * <li>/admin/separacao: quadro Kanban de separação (Picking &amp; Packing), para ADMIN e GESTOR. A página consulta
+ * <li>/admin/separacao: quadro Kanban de separação (Picking &amp; Packing), para ADMIN e SEPARADOR. A página consulta
  * /admin/separacao/pedidos a cada poucos segundos, então cada compra nova aparece sozinha. Entregues e
  * cancelados ficam fora do quadro (continuam na aba "Pedidos");</li>
  * <li>/admin/historico: histórico de alterações (quem mudou cada etapa, quando, valores anterior e novo), só
  * leitura e só ADMIN.</li>
  * </ul>
- * O acesso é decidido no SecurityConfig por URL (/admin/separacao/** para ADMIN e GESTOR, o resto de /admin/**
+ * O acesso é decidido no SecurityConfig por URL (/admin/separacao/** para ADMIN e SEPARADOR, o resto de /admin/**
  * só ADMIN) e repetido aqui, por método, na separação e no histórico, para que continuem protegidos mesmo se a
  * regra de URL for alterada por engano.
  */
@@ -66,12 +68,14 @@ public class AdminPedidoController {
 	private final GestaoPedidoService gestaoPedidoService;
 	private final ContaService contaService;
 	private final HistoricoPedidoRepository historicoRepository;
+	private final EtiquetaEnvioService etiquetaService;
 
 	public AdminPedidoController(GestaoPedidoService gestaoPedidoService, ContaService contaService,
-			HistoricoPedidoRepository historicoRepository) {
+			HistoricoPedidoRepository historicoRepository, EtiquetaEnvioService etiquetaService) {
 		this.gestaoPedidoService = gestaoPedidoService;
 		this.contaService = contaService;
 		this.historicoRepository = historicoRepository;
+		this.etiquetaService = etiquetaService;
 	}
 
 	public record CartaoPedido(String codigo, String cliente, String destino, String confirmadoEm, String confirmadoEmTexto,
@@ -130,14 +134,32 @@ public class AdminPedidoController {
 	// ================================================================ /admin/separacao
 
 	@GetMapping("/admin/separacao")
-	@PreAuthorize("hasAnyRole('ADMIN', 'GESTOR')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'SEPARADOR')")
 	public String telaSeparacao() {
 		return "admin/pedido/separacao";
 	}
 
+	/**
+	 * Conferência de um pedido antes do envio: dados completos, só leitura. Aberta pelo código do pedido na tela de
+	 * separação, para ADMIN e SEPARADOR. Não traz CPF, dados do Pix nem o histórico de alterações (isso fica na ficha
+	 * do admin).
+	 */
+	@GetMapping("/admin/separacao/pedido/{codigo}")
+	@PreAuthorize("hasAnyRole('ADMIN', 'SEPARADOR')")
+	public String detalhesSeparacao(@PathVariable String codigo, Model model) {
+		Pedido pedido = gestaoPedidoService.buscarPorCodigo(codigo)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pedido não encontrado."));
+		model.addAttribute("pedido", pedido);
+		model.addAttribute("whatsappUrl", montarWhatsappUrl(pedido));
+		model.addAttribute("etiquetaBloqueio", etiquetaService.motivoBloqueio(pedido));
+		String servico = EtiquetaEnvioService.codigoServico(pedido);
+		model.addAttribute("servicoCorreios", servico.isEmpty() ? pedido.getServicoFrete() : FreteService.nomeServico(servico));
+		return "admin/pedido/separacao-detalhes";
+	}
+
 	@GetMapping("/admin/separacao/pedidos")
 	@ResponseBody
-	@PreAuthorize("hasAnyRole('ADMIN', 'GESTOR')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'SEPARADOR')")
 	public List<CartaoPedido> pedidosSeparacao() {
 		return gestaoPedidoService.listarTodos().stream()
 				.filter(p -> p.getStatus() != StatusPedido.ENTREGUE && p.getStatus() != StatusPedido.CANCELADO)
@@ -147,7 +169,7 @@ public class AdminPedidoController {
 
 	@PostMapping("/admin/separacao/{codigo}/status")
 	@ResponseBody
-	@PreAuthorize("hasAnyRole('ADMIN', 'GESTOR')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'SEPARADOR')")
 	public ResponseEntity<Map<String, String>> mudarStatusSeparacao(@PathVariable String codigo,
 			@RequestParam String status, Principal principal) {
 		StatusPedido novo = StatusPedido.deTexto(status);
@@ -159,7 +181,11 @@ public class AdminPedidoController {
 			if (atual == null) {
 				return ResponseEntity.status(404).body(Map.of("erro", "Pedido não encontrado."));
 			}
-			gestaoPedidoService.atualizar(codigo, novo, atual.getCodigoRastreio(), "Alterado na tela de separação.",
+			String rastreio = atual.getCodigoRastreio();
+			if (novo == StatusPedido.ENVIADO && (rastreio == null || rastreio.isBlank()) && atual.isEtiquetaGerada()) {
+				rastreio = atual.getCorreiosCodigoObjeto(); // o cliente só vê o rastreio quando o pedido sai
+			}
+			gestaoPedidoService.atualizar(codigo, novo, rastreio, "Alterado na tela de separação.",
 					responsavel(principal), principal.getName());
 			return ResponseEntity.ok(Map.of("status", novo.name()));
 		} catch (AtualizacaoPedidoException e) {

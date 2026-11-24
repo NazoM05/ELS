@@ -23,7 +23,7 @@ import com.example.nazomocambique.model.Usuario;
 import com.example.nazomocambique.repository.UsuarioRepository;
 
 /** Regra: a gestão de usuários é só do ADMIN; desativar exige token CSRF e derruba a sessão de quem foi desativado. */
-// Banco próprio: o data.sql roda de novo neste contexto (usuários "admin", "gestor" e "user")
+// Banco próprio: o data.sql roda de novo neste contexto (usuários "admin", "separador" e "user")
 @SpringBootTest(properties = "spring.datasource.url=jdbc:h2:mem:usuarios-acesso")
 @AutoConfigureMockMvc
 class AdminUsuarioAcessoTests {
@@ -48,8 +48,8 @@ class AdminUsuarioAcessoTests {
 	}
 
 	@Test
-	@WithMockUser(roles = "GESTOR")
-	void gestorVaiParaAcessoNegado() throws Exception {
+	@WithMockUser(roles = "SEPARADOR")
+	void separadorVaiParaAcessoNegado() throws Exception {
 		mvc.perform(get("/admin/usuarios")).andExpect(redirectedUrl("/acesso-negado"));
 	}
 

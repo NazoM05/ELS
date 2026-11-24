@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.nazomocambique.model.Usuario;
 import com.example.nazomocambique.repository.UsuarioRepository;
 
-/** Depois do login o gestor vai direto para a separação de pedidos; os outros perfis seguem para o início. */
+/** Depois do login o separador vai direto para a separação de pedidos; os outros perfis seguem para o início. */
 @SpringBootTest(properties = "spring.datasource.url=jdbc:h2:mem:login-redirect")
 @AutoConfigureMockMvc
 @Transactional
@@ -39,9 +39,9 @@ class LoginRedirecionamentoTests {
 	}
 
 	@Test
-	void gestorEntraDiretoNaSeparacao() throws Exception {
-		criar("gestor-login@teste.com", "ROLE_GESTOR");
-		mvc.perform(formLogin("/perform_login").user("gestor-login@teste.com").password("Senha123"))
+	void separadorEntraDiretoNaSeparacao() throws Exception {
+		criar("separador-login@teste.com", "ROLE_SEPARADOR");
+		mvc.perform(formLogin("/perform_login").user("separador-login@teste.com").password("Senha123"))
 				.andExpect(redirectedUrl("/admin/separacao"));
 	}
 

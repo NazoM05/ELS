@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import com.example.nazomocambique.service.*;
 import com.example.nazomocambique.model.Usuario;
 @Controller
+@org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'USUARIO')")
 public class CarteiraController {
  private final CarteiraService carteira; private final ContaService conta;
  public CarteiraController(CarteiraService c, ContaService a){carteira=c;conta=a;}

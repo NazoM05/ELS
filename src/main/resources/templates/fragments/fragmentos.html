@@ -163,12 +163,12 @@
             <img th:src="${site.logoPersonalizada} ? @{'/logo-site/' + ${site.logoArquivo}} : @{/brand/logo-el-branca.png}" th:alt="${txt['geral.nomeCurto']}">
         </a>
         <nav>
-            <a th:href="@{/home}" sec:authorize="!(hasRole('GESTOR') and !hasRole('ADMIN'))" th:text="${txt['geral.menuInicio']}">Início</a>
-            <a class="sidebar-vice" th:href="@{/colecao/vice-city}" sec:authorize="!(hasRole('GESTOR') and !hasRole('ADMIN'))"><span class="sidebar-vice-texto">Coleção Vice City</span></a>
-            <a th:href="@{/colecao/tricolor}" sec:authorize="!(hasRole('GESTOR') and !hasRole('ADMIN'))">Imortal Tricolor</a>
-            <a th:href="@{/colecao/urban-culture}" sec:authorize="!(hasRole('GESTOR') and !hasRole('ADMIN'))">Nazo · Urban Culture</a>
-            <a th:href="@{/outlet}" sec:authorize="!(hasRole('GESTOR') and !hasRole('ADMIN'))">Outlet</a>
-            <hr class="sidebar-divisor" sec:authorize="!(hasRole('GESTOR') and !hasRole('ADMIN'))">
+            <a th:href="@{/home}" sec:authorize="!(hasRole('SEPARADOR') and !hasRole('ADMIN'))" th:text="${txt['geral.menuInicio']}">Início</a>
+            <a class="sidebar-vice" th:href="@{/colecao/vice-city}" sec:authorize="!(hasRole('SEPARADOR') and !hasRole('ADMIN'))"><span class="sidebar-vice-texto">Coleção Vice City</span></a>
+            <a th:href="@{/colecao/tricolor}" sec:authorize="!(hasRole('SEPARADOR') and !hasRole('ADMIN'))">Imortal Tricolor</a>
+            <a th:href="@{/colecao/urban-culture}" sec:authorize="!(hasRole('SEPARADOR') and !hasRole('ADMIN'))">Nazo · Urban Culture</a>
+            <a th:href="@{/outlet}" sec:authorize="!(hasRole('SEPARADOR') and !hasRole('ADMIN'))">Outlet</a>
+            <hr class="sidebar-divisor" sec:authorize="!(hasRole('SEPARADOR') and !hasRole('ADMIN'))">
 
             <div class="sidebar-admin" sec:authorize="hasRole('ADMIN')">
                 <p class="sidebar-admin-titulo" th:text="${txt['geral.menuAdminTitulo']}">Opções de administrador</p>
@@ -185,8 +185,8 @@
                 <a th:href="@{/admin/separacao}">Separação de pedidos</a>
             </div>
 
-            <div class="sidebar-admin" sec:authorize="hasRole('GESTOR') and !hasRole('ADMIN')">
-                <p class="sidebar-admin-titulo">Área do gestor</p>
+            <div class="sidebar-admin" sec:authorize="hasRole('SEPARADOR') and !hasRole('ADMIN')">
+                <p class="sidebar-admin-titulo">Área do separador</p>
                 <a th:href="@{/admin/separacao}">Separação de pedidos</a>
             </div>
 
@@ -194,7 +194,7 @@
             <a th:href="@{/criar-conta}" sec:authorize="isAnonymous()" th:text="${txt['geral.menuCriarConta']}">Criar conta</a>
 
             <div class="sidebar-conta" sec:authorize="isAuthenticated()">
-                <a class="sidebar-conta-link" th:href="@{/carteira}">Minha carteira</a>
+                <a class="sidebar-conta-link" th:href="@{/carteira}" sec:authorize="hasAnyRole('ADMIN', 'USUARIO')">Minha carteira</a>
                 <a class="sidebar-conta-link" th:href="@{/perfil}" th:text="${txt['geral.menuPerfil']}">Perfil</a>
                 <a class="sidebar-conta-link sidebar-sair" th:href="@{/logout}" th:text="${txt['geral.menuSair']}">Sair</a>
             </div>
@@ -605,7 +605,7 @@
         <p class="paginacao-resumo" th:text="'Página ' + ${paginacao.paginaAtual} + ' de ' + ${paginacao.totalPaginas}">Página 1 de 2</p>
     </nav>
 
-    <!-- Rodapé da loja (vitrine, detalhes e páginas institucionais) -->
+    <!-- Rodapé da loja: todas as páginas do cliente (vitrine, detalhes, conta, checkout, pedido, login...). O admin não usa. -->
     <footer class="rodape" th:fragment="rodape">
         <div class="rodape-topo">
 
