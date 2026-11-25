@@ -3791,6 +3791,8 @@ input, select, textarea { min-width: 0; }
 
 /* --- Sidebar: título e item ativo da área do usuário --- */
 .sidebar-conta-titulo { margin: 0 0 4px; padding: 0 28px; color: var(--primary-faint); font: 800 10px var(--font-body); letter-spacing: .22em; text-transform: uppercase; }
+/* --- Sidebar: grupo "Geral" (primeiro grupo do menu: sem linha de topo) --- */
+.sidebar-geral { margin-top: 0; padding-top: 0; border-top: 0; }
 .sidebar nav .sidebar-conta a.sidebar-conta-link.sidebar-conta-ativo { color: var(--primary-contrast); }
 @media (max-width: 640px) {
     .sidebar-conta-titulo { padding-inline: 22px; font-size: 9px; }
