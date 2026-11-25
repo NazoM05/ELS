@@ -158,11 +158,6 @@ public class PageController {
 		}
 	}
   
-	@GetMapping({"/cadastroprod"})
-	public String cadastrar(Model model) {
-		model.addAttribute("listaProdutos", produtoService.listarTodos());
-		return "cadastroprod";
-	}
 	
   @GetMapping({"/pesquisa"})
   public String pesquisa(@RequestParam Optional<String> p, RedirectAttributes redirect) {

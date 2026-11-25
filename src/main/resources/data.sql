@@ -98,7 +98,7 @@ VALUES
 -- =====================================================================
 -- OUTLET: peças de fim de estoque (máx. 16), com desconto e poucas unidades por tamanho.
 -- outlet = TRUE faz o produto aparecer só na página Outlet; desconto_outlet é a porcentagem.
--- O estoque baixo (1 a 5 por tamanho) é aplicado logo depois do cálculo geral de estoque, mais abaixo.
+-- O estoque baixo (1 a 5 por tamanho) é definido na mesma carga de estoque, mais abaixo.
 -- =====================================================================
 MERGE INTO produto (nome, tamanho, preco, tipo, imagem_frente, imagem_costas, status, cor, categoria, genero, outlet, desconto_outlet) KEY (nome)
 VALUES
@@ -127,11 +127,17 @@ UPDATE produto SET colecao = 'TRICOLOR' WHERE nome = 'Manto Imortal Tricolor';
 -- oferece (coluna tamanho, separada por vírgula). Sem quantidade fixa: o valor é
 -- calculado a partir do id e da posição do tamanho, então cada peça tem estoques
 -- diferentes (alguns baixos, para a tela de visualização mostrar o alerta).
--- MERGE ... KEY (produto_id, tamanho): pode rodar mais de uma vez sem duplicar.
+-- Pode rodar mais de uma vez: só cria o que falta, sem alterar quantidades existentes.
 -- Rodar depois do MERGE dos produtos.
 -- =====================================================================
-MERGE INTO produto_estoque (produto_id, tamanho, quantidade) KEY (produto_id, tamanho)
-SELECT p.id, t.tamanho, MOD(p.id * 7 + t.ordem * 5, 24) + 2
+-- Só INSERE as linhas que ainda não existem: nunca sobrescreve quantidade já gravada, então
+-- baixas de vendas e ajustes feitos pelo admin sobrevivem a reinícios (dev e render).
+-- Outlet: de 1 a 5 unidades por tamanho (<= 5 aparece como "poucas unidades"); demais: valor calculado.
+INSERT INTO produto_estoque (produto_id, tamanho, quantidade)
+SELECT p.id, t.tamanho,
+       CASE WHEN p.outlet = TRUE
+            THEN MOD(p.id * 3 + LENGTH(t.tamanho) * 2 + ASCII(t.tamanho), 5) + 1
+            ELSE MOD(p.id * 7 + t.ordem * 5, 24) + 2 END
   FROM produto p
  CROSS JOIN (SELECT 'PP' AS tamanho, 1 AS ordem
              UNION ALL SELECT 'P', 2
@@ -146,13 +152,8 @@ SELECT p.id, t.tamanho, MOD(p.id * 7 + t.ordem * 5, 24) + 2
              UNION ALL SELECT '44', 11
              UNION ALL SELECT '46', 12
              UNION ALL SELECT 'Único', 13) t
- WHERE ',' || REPLACE(p.tamanho, ' ', '') || ',' LIKE '%,' || t.tamanho || ',%';
-
--- Estoque do Outlet: de 1 a 5 unidades por tamanho (<= 5 aparece como "poucas unidades").
--- Roda depois do cálculo geral acima e é determinístico, então pode rodar várias vezes.
-UPDATE produto_estoque
-   SET quantidade = MOD(produto_id * 3 + LENGTH(tamanho) * 2 + ASCII(tamanho), 5) + 1
- WHERE produto_id IN (SELECT id FROM produto WHERE outlet = TRUE);
+ WHERE ',' || REPLACE(p.tamanho, ' ', '') || ',' LIKE '%,' || t.tamanho || ',%'
+   AND NOT EXISTS (SELECT 1 FROM produto_estoque e WHERE e.produto_id = p.id AND e.tamanho = t.tamanho);
 
 -- =====================================================================
 -- GUIA DE TAMANHOS = 4ª posição da galeria (Frente, Verso, Modelo, Guia).
