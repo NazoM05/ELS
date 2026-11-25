@@ -163,7 +163,7 @@
             <img th:src="${site.logoPersonalizada} ? @{'/logo-site/' + ${site.logoArquivo}} : @{/brand/logo-el-branca.png}" th:alt="${txt['geral.nomeCurto']}">
         </a>
         <nav>
-            <!-- Geral: abas públicas da loja + Entrar/Criar conta (visitante), no mesmo formato da "Área do usuário" -->
+            <!-- Geral: abas públicas da loja + Login (visitante), no mesmo formato da "Área do usuário" -->
             <div class="sidebar-conta sidebar-geral" sec:authorize="!(hasRole('SEPARADOR') and !hasRole('ADMIN'))">
                 <p class="sidebar-conta-titulo">Geral</p>
                 <a class="sidebar-conta-link" th:href="@{/home}" th:text="${txt['geral.menuInicio']}">Início</a>
@@ -171,8 +171,7 @@
                 <a class="sidebar-conta-link" th:href="@{/colecao/tricolor}">Imortal Tricolor</a>
                 <a class="sidebar-conta-link" th:href="@{/colecao/urban-culture}">Nazo · Urban Culture</a>
                 <a class="sidebar-conta-link" th:href="@{/outlet}">Outlet</a>
-                <a class="sidebar-conta-link" th:href="@{/login}" sec:authorize="isAnonymous()" th:text="${txt['geral.menuEntrar']}">Entrar</a>
-                <a class="sidebar-conta-link" th:href="@{/criar-conta}" sec:authorize="isAnonymous()" th:text="${txt['geral.menuCriarConta']}">Criar conta</a>
+                <a class="sidebar-conta-link" th:href="@{/login}" sec:authorize="isAnonymous()" th:text="${txt['geral.menuEntrar']}">Login</a>
             </div>
 
             <div class="sidebar-admin" sec:authorize="hasRole('ADMIN')">
