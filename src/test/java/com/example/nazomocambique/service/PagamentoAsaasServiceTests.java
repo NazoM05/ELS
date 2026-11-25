@@ -82,7 +82,7 @@ class PagamentoAsaasServiceTests {
 	void preparar() {
 		gateway = new GatewayFalso();
 		AsaasProperties props = new AsaasProperties(true, null, "TOKEN", "01234567890123456789012345678901", 60, null);
-		servico = new PagamentoAsaasService(props, gateway, pedidoRepository, transactionManager);
+		servico = new PagamentoAsaasService(props, gateway, pedidoRepository, transactionManager, null);
 
 		Produto p = new Produto();
 		p.setNome("Produto pix " + System.nanoTime());
