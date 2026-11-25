@@ -122,72 +122,6 @@ VALUES
 -- O primeiro manto (azul, preto e branco) passa a fazer parte da coleção Tricolor.
 UPDATE produto SET colecao = 'TRICOLOR' WHERE nome = 'Manto Imortal Tricolor';
 
--- =====================================================================
--- ESTOQUE POR TAMANHO. Uma linha em PRODUTO_ESTOQUE para cada tamanho que o produto
--- oferece (coluna tamanho, separada por vírgula). Sem quantidade fixa: o valor é
--- calculado a partir do id e da posição do tamanho, então cada peça tem estoques
--- diferentes (alguns baixos, para a tela de visualização mostrar o alerta).
--- Pode rodar mais de uma vez: só cria o que falta, sem alterar quantidades existentes.
--- Rodar depois do MERGE dos produtos.
--- =====================================================================
--- Estoque v2 (2026-11-25): aplicado UMA vez por banco. O marcador fica em SEED_CONTROLE; depois dele,
--- o seed só INSERE tamanhos ausentes e nunca sobrescreve quantidades (baixas de vendas e ajustes do admin
--- sobrevivem a reinícios). Regras da carga:
---   * Linha: MOD(id*7 + ordem*5, 24) + 2 (2 a 25 unidades); Outlet: 1 a 5 unidades.
---   * Alguns tamanhos ficam ESGOTADOS (0): MOD(id*5 + ordem*3, 7) = 0 -> no máximo um tamanho por produto
---     (os tamanhos de uma mesma grade têm ordens consecutivas); tamanho 'Único' nunca zera.
-CREATE TABLE IF NOT EXISTS seed_controle (chave VARCHAR(80) PRIMARY KEY);
-
-DELETE FROM produto_estoque
- WHERE NOT EXISTS (SELECT 1 FROM seed_controle WHERE chave = 'estoque-v2');
-
-INSERT INTO produto_estoque (produto_id, tamanho, quantidade)
-SELECT p.id, t.tamanho,
-       CASE WHEN t.tamanho <> 'Único' AND MOD(p.id * 5 + t.ordem * 3, 7) = 0 THEN 0
-            WHEN p.outlet = TRUE THEN MOD(p.id * 3 + LENGTH(t.tamanho) * 2 + ASCII(t.tamanho), 5) + 1
-            ELSE MOD(p.id * 7 + t.ordem * 5, 24) + 2 END
-  FROM produto p
- CROSS JOIN (SELECT 'PP' AS tamanho, 1 AS ordem
-             UNION ALL SELECT 'P', 2
-             UNION ALL SELECT 'M', 3
-             UNION ALL SELECT 'G', 4
-             UNION ALL SELECT 'GG', 5
-             UNION ALL SELECT 'XG', 6
-             UNION ALL SELECT '36', 7
-             UNION ALL SELECT '38', 8
-             UNION ALL SELECT '40', 9
-             UNION ALL SELECT '42', 10
-             UNION ALL SELECT '44', 11
-             UNION ALL SELECT '46', 12
-             UNION ALL SELECT 'Único', 13) t
- WHERE ',' || REPLACE(p.tamanho, ' ', '') || ',' LIKE '%,' || t.tamanho || ',%'
-   AND NOT EXISTS (SELECT 1 FROM produto_estoque e WHERE e.produto_id = p.id AND e.tamanho = t.tamanho);
-
-MERGE INTO seed_controle (chave) KEY (chave) VALUES ('estoque-v2');
-
--- =====================================================================
--- GUIA DE TAMANHOS = 4ª posição da galeria (Frente, Verso, Modelo, Guia).
--- Neste projeto a galeria NÃO tem tabela de mídias: são 4 colunas da tabela
--- PRODUTO e a ordem vem de Produto.getGaleria(). Logo, "ordem = 4" é a coluna
--- imagem_guia_tamanhos. Arquivos em static/img (ou uploads/img, que tem prioridade).
--- Escolha por CATEGORIA (enum Categoria):
---   CAMISETA, CAMISA, BLUSA, MOLETOM, JAQUETA -> guia-tamanhos-superior.svg    (tórax / cintura / comprimento / manga)
---   CALCA, BERMUDA                            -> guia-tamanhos-inferior.svg    (cintura / quadril / comprimento / gancho)
---   VESTIDO, SAIA                             -> guia-tamanhos-vestido-saia.svg (busto / cintura / quadril)
--- Só preenche quando o produto ainda não tem guia (o que o admin enviou pelo formulário é mantido).
--- Rodar depois do MERGE (os produtos precisam existir). Pode rodar várias vezes.
--- =====================================================================
-UPDATE produto SET imagem_guia_tamanhos = 'guia-tamanhos-superior.svg'
- WHERE categoria IN ('CAMISETA', 'CAMISA', 'BLUSA', 'MOLETOM', 'JAQUETA')
-   AND (imagem_guia_tamanhos IS NULL OR TRIM(imagem_guia_tamanhos) = '');
-
-UPDATE produto SET imagem_guia_tamanhos = 'guia-tamanhos-inferior.svg'
- WHERE categoria IN ('CALCA', 'BERMUDA')
-   AND (imagem_guia_tamanhos IS NULL OR TRIM(imagem_guia_tamanhos) = '');
-
-UPDATE produto SET imagem_guia_tamanhos = 'guia-tamanhos-vestido-saia.svg'
- WHERE categoria IN ('VESTIDO', 'SAIA')
-   AND (imagem_guia_tamanhos IS NULL OR TRIM(imagem_guia_tamanhos) = '');
 -- ACESSORIOS fica sem guia (a galeria simplesmente não mostra a 4ª miniatura).
     
 
@@ -237,3 +171,75 @@ VALUES
     -- Mesma senha de teste do admin: troque antes de colocar a loja no ar.
     MERGE INTO USUARIO (nome, username, senha, role, ativo) KEY (username)
     VALUES ('Separador', 'separador', '$2a$10$oz8mJWjsca2yd5hdU5pvzO123repm3JNyZ9fxbFzMs5wVaaccsiZG', 'ROLE_SEPARADOR', TRUE);
+
+-- =====================================================================
+-- ESTOQUE E GUIA DE TAMANHOS: ficam NO FIM do arquivo, depois de TODOS os MERGE de produtos
+-- (inclusive os da coleção Vice City). Antes ficavam no meio e os produtos criados depois
+-- deles nasciam sem estoque e sem guia de tamanhos num banco novo.
+-- =====================================================================
+-- =====================================================================
+-- ESTOQUE POR TAMANHO. Uma linha em PRODUTO_ESTOQUE para cada tamanho que o produto
+-- oferece (coluna tamanho, separada por vírgula). Sem quantidade fixa: o valor é
+-- calculado a partir do id e da posição do tamanho, então cada peça tem estoques
+-- diferentes (alguns baixos, para a tela de visualização mostrar o alerta).
+-- Pode rodar mais de uma vez: só cria o que falta, sem alterar quantidades existentes.
+-- Rodar depois do MERGE dos produtos.
+-- =====================================================================
+-- Estoque v3 (2026-11-25): aplicado UMA vez por banco. O marcador fica em SEED_CONTROLE; depois dele,
+-- o seed só INSERE tamanhos ausentes e nunca sobrescreve quantidades (baixas de vendas e ajustes do admin
+-- sobrevivem a reinícios). Regras da carga:
+--   * Linha: MOD(id*7 + ordem*5, 24) + 2 (2 a 25 unidades); Outlet: 1 a 5 unidades.
+--   * Alguns tamanhos ficam ESGOTADOS (0): MOD(id*5 + ordem*3, 7) = 0 -> no máximo um tamanho por produto
+--     (os tamanhos de uma mesma grade têm ordens consecutivas); tamanho 'Único' nunca zera.
+CREATE TABLE IF NOT EXISTS seed_controle (chave VARCHAR(80) PRIMARY KEY);
+
+DELETE FROM produto_estoque
+ WHERE NOT EXISTS (SELECT 1 FROM seed_controle WHERE chave = 'estoque-v3');
+
+INSERT INTO produto_estoque (produto_id, tamanho, quantidade)
+SELECT p.id, t.tamanho,
+       CASE WHEN t.tamanho <> 'Único' AND MOD(p.id * 5 + t.ordem * 3, 7) = 0 THEN 0
+            WHEN p.outlet = TRUE THEN MOD(p.id * 3 + LENGTH(t.tamanho) * 2 + ASCII(t.tamanho), 5) + 1
+            ELSE MOD(p.id * 7 + t.ordem * 5, 24) + 2 END
+  FROM produto p
+ CROSS JOIN (SELECT 'PP' AS tamanho, 1 AS ordem
+             UNION ALL SELECT 'P', 2
+             UNION ALL SELECT 'M', 3
+             UNION ALL SELECT 'G', 4
+             UNION ALL SELECT 'GG', 5
+             UNION ALL SELECT 'XG', 6
+             UNION ALL SELECT '36', 7
+             UNION ALL SELECT '38', 8
+             UNION ALL SELECT '40', 9
+             UNION ALL SELECT '42', 10
+             UNION ALL SELECT '44', 11
+             UNION ALL SELECT '46', 12
+             UNION ALL SELECT 'Único', 13) t
+ WHERE ',' || REPLACE(p.tamanho, ' ', '') || ',' LIKE '%,' || t.tamanho || ',%'
+   AND NOT EXISTS (SELECT 1 FROM produto_estoque e WHERE e.produto_id = p.id AND e.tamanho = t.tamanho);
+
+MERGE INTO seed_controle (chave) KEY (chave) VALUES ('estoque-v3');
+
+-- =====================================================================
+-- GUIA DE TAMANHOS = 4ª posição da galeria (Frente, Verso, Modelo, Guia).
+-- Neste projeto a galeria NÃO tem tabela de mídias: são 4 colunas da tabela
+-- PRODUTO e a ordem vem de Produto.getGaleria(). Logo, "ordem = 4" é a coluna
+-- imagem_guia_tamanhos. Arquivos em static/img (ou uploads/img, que tem prioridade).
+-- Escolha por CATEGORIA (enum Categoria):
+--   CAMISETA, CAMISA, BLUSA, MOLETOM, JAQUETA -> guia-tamanhos-superior.svg    (tórax / cintura / comprimento / manga)
+--   CALCA, BERMUDA                            -> guia-tamanhos-inferior.svg    (cintura / quadril / comprimento / gancho)
+--   VESTIDO, SAIA                             -> guia-tamanhos-vestido-saia.svg (busto / cintura / quadril)
+-- Só preenche quando o produto ainda não tem guia (o que o admin enviou pelo formulário é mantido).
+-- Rodar depois do MERGE (os produtos precisam existir). Pode rodar várias vezes.
+-- =====================================================================
+UPDATE produto SET imagem_guia_tamanhos = 'guia-tamanhos-superior.svg'
+ WHERE categoria IN ('CAMISETA', 'CAMISA', 'BLUSA', 'MOLETOM', 'JAQUETA')
+   AND (imagem_guia_tamanhos IS NULL OR TRIM(imagem_guia_tamanhos) = '');
+
+UPDATE produto SET imagem_guia_tamanhos = 'guia-tamanhos-inferior.svg'
+ WHERE categoria IN ('CALCA', 'BERMUDA')
+   AND (imagem_guia_tamanhos IS NULL OR TRIM(imagem_guia_tamanhos) = '');
+
+UPDATE produto SET imagem_guia_tamanhos = 'guia-tamanhos-vestido-saia.svg'
+ WHERE categoria IN ('VESTIDO', 'SAIA')
+   AND (imagem_guia_tamanhos IS NULL OR TRIM(imagem_guia_tamanhos) = '');

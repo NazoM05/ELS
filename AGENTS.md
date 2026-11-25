@@ -448,3 +448,8 @@ Status: `🟡 IMPLEMENTADO — VALIDAÇÃO PENDENTE`
 
 ## Produtos inativos fora da vitrine (2026-11-25)
 - `ProdutoRepository.filtrar` passou a exigir `status = true` (home, busca, Outlet, coleções e recomendados). O admin segue listando todos via `listarTodos()`. Teste: `CatalogoProdutosInativosTests`. Status: `🟡 IMPLEMENTADO — VALIDAÇÃO PENDENTE` (sem JDK 25/Maven no ambiente).
+
+## Estoque das coleções e menu lateral "Geral" (2026-11-25)
+- `data.sql`: o bloco de estoque e o de guia de tamanhos foram movidos para o FIM do arquivo (depois de todos os `MERGE INTO produto`, inclusive Vice City); antes, produtos criados depois dele nasciam sem estoque e sem guia num banco novo. Marcador do estoque subiu para `estoque-v3` (a carga se reaplica uma vez por banco, substituindo as quantidades atuais).
+- Sidebar (`fragments/fragmentos.html`): grupo "Geral" no formato da "Área do usuário" (`sidebar-conta`), reunindo Início, Coleção Vice City, Imortal Tricolor, Nazo · Urban Culture, Outlet e, só para visitante, Entrar e Criar conta. Classe nova `.sidebar-geral` em `site.css`; versão `v=` do CSS aumentada para `20261125-geral`.
+- Status: `🟡 IMPLEMENTADO — VALIDAÇÃO PENDENTE` (sem JDK 25/Maven; sem inspeção visual).
