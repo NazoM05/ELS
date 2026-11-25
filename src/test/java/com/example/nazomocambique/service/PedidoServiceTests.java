@@ -116,6 +116,18 @@ class PedidoServiceTests {
 	}
 
 	@Test
+	void tamanho_sem_estoque_nao_vai_para_o_checkout() {
+		// P tem 1 unidade: a primeira compra esgota o tamanho; a segunda tentativa (do carrinho velho) é barrada.
+		pedidoService.finalizar(usuarioId, entrega(), List.of(new ItemCarrinho(produtoId, "P", 1)));
+		assertEquals(0, recarregar().getEstoque().get("P"));
+
+		assertThrows(CheckoutException.class, () -> pedidoService.finalizar(usuarioId, entrega(),
+				List.of(new ItemCarrinho(produtoId, "P", 1))));
+		assertEquals(0, recarregar().getEstoque().get("P"));
+		assertEquals(1, recarregar().getVendidasTotal());
+	}
+
+	@Test
 	void preco_vem_do_banco_e_sul_tem_frete_gratis_a_partir_de_99() {
 		Pedido pedido = pedidoService.finalizar(usuarioId, entregaEm("RS"), List.of(new ItemCarrinho(produtoId, "M", 2)));
 

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.env.MockEnvironment;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.example.nazomocambique.config.AsaasProperties;
@@ -82,7 +83,8 @@ class PagamentoAsaasServiceTests {
 	void preparar() {
 		gateway = new GatewayFalso();
 		AsaasProperties props = new AsaasProperties(true, null, "TOKEN", "01234567890123456789012345678901", 60, null);
-		servico = new PagamentoAsaasService(props, gateway, pedidoRepository, transactionManager, null);
+		servico = new PagamentoAsaasService(props, gateway, pedidoRepository, transactionManager,
+				new MockEnvironment());
 
 		Produto p = new Produto();
 		p.setNome("Produto pix " + System.nanoTime());

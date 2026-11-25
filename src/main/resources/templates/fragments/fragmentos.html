@@ -357,20 +357,37 @@
                     return true;
                 }
 
-                function adicionarItem({ id, nome, preco, tamanho, imagem, quantidade = 1 }) {
-                    if (exigirLogin()) return;
+                function adicionarItem({ id, nome, preco, tamanho, imagem, quantidade = 1, estoque = null }) {
+                    if (exigirLogin()) return null;
                     const precoNum = Number(String(preco).replace(",", "."));
                     const qtdAdd = Math.max(1, parseInt(quantidade, 10) || 1);
                     const tamNorm = String(tamanho || "UNICO").trim().toUpperCase();
 
-                    if (!id || !nome || Number.isNaN(precoNum)) return;
+                    if (!id || !nome || Number.isNaN(precoNum)) return null;
+
+                    // Estoque do tamanho (vem da página do produto): tamanho esgotado não entra no carrinho.
+                    const estoqueNum = estoque === null || estoque === "" || Number.isNaN(Number(estoque)) ? null : Number(estoque);
+                    if (estoqueNum !== null && estoqueNum <= 0) {
+                        mostrarToast("Tamanho esgotado");
+                        return false;
+                    }
 
                     const chave = construirChave(id, tamNorm);
                     const itens = lerCarrinho();
                     const existente = itens.find((item) => item.chave === chave);
 
+                    if (estoqueNum !== null) {
+                        const jaNoCarrinho = existente ? existente.quantidade : 0;
+                        if (jaNoCarrinho >= estoqueNum) {
+                            mostrarToast("Você já tem todas as unidades deste tamanho no carrinho");
+                            return false;
+                        }
+                    }
+                    const limite = estoqueNum === null ? Infinity : estoqueNum;
+
                     if (existente) {
-                        existente.quantidade += qtdAdd;
+                        existente.quantidade = Math.min(existente.quantidade + qtdAdd, limite);
+                        if (estoqueNum !== null) existente.estoque = estoqueNum;
                     } else {
                         itens.push({
                             chave,
@@ -379,7 +396,8 @@
                             preco: precoNum,
                             tamanho: tamNorm,
                             imagem: imagem || "",
-                            quantidade: qtdAdd,
+                            quantidade: Math.min(qtdAdd, limite),
+                            estoque: estoqueNum,
                         });
                     }
 
@@ -395,6 +413,11 @@
                     if (idx === -1) return;
 
                     const novaQtd = itens[idx].quantidade + delta;
+                    const maximo = Number(itens[idx].estoque);
+                    if (delta > 0 && Number.isFinite(maximo) && itens[idx].estoque !== null && novaQtd > maximo) {
+                        mostrarToast("Só temos " + maximo + (maximo === 1 ? " unidade" : " unidades") + " neste tamanho");
+                        return;
+                    }
                     if (novaQtd <= 0) {
                         itens.splice(idx, 1);
                     } else {
@@ -510,17 +533,20 @@
 
                     const inputQtd = container.querySelector(".js-qtd-input");
                     const quantidade = inputQtd ? parseInt(inputQtd.value, 10) || 1 : 1;
+                    const estoqueTam = tamanhoAtivoBtn ? tamanhoAtivoBtn.getAttribute("data-estoque") : null;
 
-                    adicionarItem({
+                    const resultado = adicionarItem({
                         id: container.getAttribute("data-produto-id"),
                         nome: container.getAttribute("data-produto-nome"),
                         preco: container.getAttribute("data-produto-preco"),
                         imagem: container.getAttribute("data-produto-imagem"),
                         tamanho,
                         quantidade,
+                        estoque: estoqueTam,
                     });
 
-                    if (btn.hasAttribute("data-ir-checkout")) {
+                    // false = bloqueado por estoque: não segue para o checkout
+                    if (resultado !== false && btn.hasAttribute("data-ir-checkout")) {
                         window.location.href = urlCheckout();
                     }
                 });
