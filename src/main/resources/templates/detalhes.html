@@ -132,7 +132,7 @@
                             th:classappend="${ativo} ? 'ativo'"
                             th:disabled="${esgotado}"
                             th:title="${esgotado} ? 'Esgotado' : (${linha.situacao == 'BAIXO'} ? |Últimas ${linha.quantidade} unidades| : null)"
-                            th:attr="data-tamanho=${linha.tamanho},aria-checked=${ativo ? 'true' : 'false'}">M</button>
+                            th:attr="data-tamanho=${linha.tamanho},data-estoque=${linha.quantidade == null ? 0 : linha.quantidade},aria-checked=${ativo ? 'true' : 'false'}">M</button>
                 </div>
                 <p class="detalhes-sem-tamanho" th:if="${produto.tamanhoInicial == null}">Nenhum tamanho disponível no momento.</p>
 

@@ -84,11 +84,11 @@ Há também um teste automático que quebra o build se a regra for violada:
 
 ## Padrão obrigatório de entrega e estrutura do projeto
 
-- Todo arquivo ZIP de entrega deste projeto deve se chamar exatamente `Nazo-Mo-ambique.zip`.
-- A pasta raiz dentro do ZIP deve se chamar exatamente `Nazo-Mo-ambique/` sempre que tecnicamente possível.
+- Todo arquivo ZIP de entrega deste projeto deve se chamar exatamente `ELS.zip`.
+- A pasta raiz dentro do ZIP deve se chamar exatamente `ELS/` sempre que tecnicamente possível.
 - Não use sufixos como `-final`, `-implementado`, números de versão ou datas no nome do ZIP.
 - Preserve estas regras e este arquivo `AGENTS.md` em todas as próximas versões. Só altere o padrão mediante solicitação explícita do responsável pelo projeto.
-- Antes de entregar, valide o nome do ZIP e confirme que os arquivos do projeto estão dentro de `Nazo-Mo-ambique/`.
+- Antes de entregar, valide o nome do ZIP e confirme que os arquivos do projeto estão dentro de `ELS/`.
 
 ---
 
@@ -123,8 +123,8 @@ de começar e atualizá-la ao concluir qualquer etapa.
    no código, nos testes, neste arquivo ou no ZIP. Usar variáveis de ambiente e dados fictícios.
 9. **Persistência do progresso:** preservar este arquivo em todos os ZIPs e branches. Todo agente
    deve atualizar o mesmo checklist; não criar um segundo plano concorrente.
-10. **Entrega:** manter o nome do ZIP `Nazo-Mo-ambique.zip` e a pasta raiz interna
-    `Nazo-Mo-ambique/`.
+10. **Entrega:** manter o nome do ZIP `ELS.zip` e a pasta raiz interna
+    `ELS/`.
 
 ### Legenda única de status
 
@@ -387,7 +387,7 @@ e resultado. Arquivos principais: caminhos. Responsável/agente: identificador, 
 - [ ] Atualizar este plano: status, histórico, evidências e arquivos afetados.
 - [ ] Atualizar documentação técnica relacionada.
 - [ ] Confirmar que `AGENTS.md` foi preservado.
-- [ ] Empacotar como `Nazo-Mo-ambique.zip`, com raiz `Nazo-Mo-ambique/`, se houver entrega ZIP.
+- [ ] Empacotar como `ELS.zip`, com raiz `ELS/`, se houver entrega ZIP.
 
 ### Regra de encerramento da tarefa
 A resposta final do agente deve informar: o que foi feito, quais itens do plano mudaram de
@@ -439,3 +439,12 @@ Status: `🟡 IMPLEMENTADO — VALIDAÇÃO PENDENTE`
 ## Estoque do seed e limpeza (2026-11-25)
 - `data.sql` deixou de sobrescrever `produto_estoque`: agora só insere tamanhos ausentes (antes, cada reinício em `dev`/`render` zerava baixas de vendas e ajustes). Status: `🟡 IMPLEMENTADO — VALIDAÇÃO PENDENTE` (build/testes não executados, sem JDK 25/Maven).
 - Removidos: rota `/cadastroprod` (view inexistente), regra `/api/user/**`, `geraSenha()`, `templates/trash.html` e o teste duplicado do pacote `com.example.nm`.
+
+## Estoque, bloqueio de tamanho esgotado e padrão de entrega (2026-11-25)
+- Padrão de entrega alterado a pedido do responsável: ZIP `ELS.zip` com pasta raiz `ELS/`.
+- `data.sql`: estoque calculado para todos os tamanhos, com alguns tamanhos zerados (no máximo um por produto), aplicado uma única vez por banco (marcador `estoque-v2` em `seed_controle`); depois disso o seed só insere tamanhos ausentes e nunca sobrescreve quantidades.
+- Carrinho (`fragments/fragmentos.html`): tamanho esgotado não entra no carrinho e a quantidade não passa do estoque do tamanho; o servidor (`PedidoService.conferir`) continua sendo a barreira final do checkout.
+- Status: `🟡 IMPLEMENTADO — VALIDAÇÃO PENDENTE` (build/testes não executados: sem JDK 25/Maven no ambiente de trabalho).
+
+## Produtos inativos fora da vitrine (2026-11-25)
+- `ProdutoRepository.filtrar` passou a exigir `status = true` (home, busca, Outlet, coleções e recomendados). O admin segue listando todos via `listarTodos()`. Teste: `CatalogoProdutosInativosTests`. Status: `🟡 IMPLEMENTADO — VALIDAÇÃO PENDENTE` (sem JDK 25/Maven no ambiente).

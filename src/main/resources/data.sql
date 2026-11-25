@@ -130,13 +130,21 @@ UPDATE produto SET colecao = 'TRICOLOR' WHERE nome = 'Manto Imortal Tricolor';
 -- Pode rodar mais de uma vez: só cria o que falta, sem alterar quantidades existentes.
 -- Rodar depois do MERGE dos produtos.
 -- =====================================================================
--- Só INSERE as linhas que ainda não existem: nunca sobrescreve quantidade já gravada, então
--- baixas de vendas e ajustes feitos pelo admin sobrevivem a reinícios (dev e render).
--- Outlet: de 1 a 5 unidades por tamanho (<= 5 aparece como "poucas unidades"); demais: valor calculado.
+-- Estoque v2 (2026-11-25): aplicado UMA vez por banco. O marcador fica em SEED_CONTROLE; depois dele,
+-- o seed só INSERE tamanhos ausentes e nunca sobrescreve quantidades (baixas de vendas e ajustes do admin
+-- sobrevivem a reinícios). Regras da carga:
+--   * Linha: MOD(id*7 + ordem*5, 24) + 2 (2 a 25 unidades); Outlet: 1 a 5 unidades.
+--   * Alguns tamanhos ficam ESGOTADOS (0): MOD(id*5 + ordem*3, 7) = 0 -> no máximo um tamanho por produto
+--     (os tamanhos de uma mesma grade têm ordens consecutivas); tamanho 'Único' nunca zera.
+CREATE TABLE IF NOT EXISTS seed_controle (chave VARCHAR(80) PRIMARY KEY);
+
+DELETE FROM produto_estoque
+ WHERE NOT EXISTS (SELECT 1 FROM seed_controle WHERE chave = 'estoque-v2');
+
 INSERT INTO produto_estoque (produto_id, tamanho, quantidade)
 SELECT p.id, t.tamanho,
-       CASE WHEN p.outlet = TRUE
-            THEN MOD(p.id * 3 + LENGTH(t.tamanho) * 2 + ASCII(t.tamanho), 5) + 1
+       CASE WHEN t.tamanho <> 'Único' AND MOD(p.id * 5 + t.ordem * 3, 7) = 0 THEN 0
+            WHEN p.outlet = TRUE THEN MOD(p.id * 3 + LENGTH(t.tamanho) * 2 + ASCII(t.tamanho), 5) + 1
             ELSE MOD(p.id * 7 + t.ordem * 5, 24) + 2 END
   FROM produto p
  CROSS JOIN (SELECT 'PP' AS tamanho, 1 AS ordem
@@ -154,6 +162,8 @@ SELECT p.id, t.tamanho,
              UNION ALL SELECT 'Único', 13) t
  WHERE ',' || REPLACE(p.tamanho, ' ', '') || ',' LIKE '%,' || t.tamanho || ',%'
    AND NOT EXISTS (SELECT 1 FROM produto_estoque e WHERE e.produto_id = p.id AND e.tamanho = t.tamanho);
+
+MERGE INTO seed_controle (chave) KEY (chave) VALUES ('estoque-v2');
 
 -- =====================================================================
 -- GUIA DE TAMANHOS = 4ª posição da galeria (Frente, Verso, Modelo, Guia).

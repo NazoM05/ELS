@@ -25,6 +25,7 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
 	/**
 	 * Catálogo da loja com filtros combináveis: cada parâmetro nulo significa "sem esse filtro".
+	 * Só produtos ativos (status = true) aparecem na vitrine; inativos ficam só no admin.
 	 * Produtos de coleção especial só aparecem quando a coleção é pedida (colecao nulo = catálogo sem coleções).
 	 * Gênero usa dois valores (g1 ou g2) para o Unissex aparecer tanto em Masculino quanto em Feminino.
 	 * Paginado: a ordem vem do Sort do Pageable (sempre termina em id, para as páginas não se embaralharem).
@@ -34,6 +35,7 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 			where (:termo is null or lower(p.nome) like lower(concat('%', :termo, '%')))
 			  and (:categoria is null or p.categoria = :categoria)
 			  and (:g1 is null or p.genero = :g1 or p.genero = :g2)
+			  and p.status = true
 			  and p.outlet = :outlet
 			  and ((:colecao is null and p.colecao is null) or p.colecao = :colecao)
 			""", countQuery = """
@@ -41,6 +43,7 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 			where (:termo is null or lower(p.nome) like lower(concat('%', :termo, '%')))
 			  and (:categoria is null or p.categoria = :categoria)
 			  and (:g1 is null or p.genero = :g1 or p.genero = :g2)
+			  and p.status = true
 			  and p.outlet = :outlet
 			  and ((:colecao is null and p.colecao is null) or p.colecao = :colecao)
 			""")
