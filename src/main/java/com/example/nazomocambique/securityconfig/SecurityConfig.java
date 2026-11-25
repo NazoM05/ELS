@@ -76,12 +76,14 @@ public class SecurityConfig {
 		// O resto do site continua sem CSRF, como antes (fora do escopo desta correção).
 		.csrf(csrf -> csrf.requireCsrfProtectionMatcher(RequestMatchers.anyOf(
 				PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/admin/separacao/**"),
-				PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/admin/usuarios/**"))))
+				PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/admin/usuarios/**"),
+				PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/esqueci-senha"),
+				PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/redefinir-senha"))))
 		// Conta desativada pelo admin perde a sessão aberta (antes da checagem de permissões)
 		.addFilterBefore(new ContaAtivaFilter(usuarioRepository), AuthorizationFilter.class)
 		.authorizeHttpRequests(auth -> auth 
 				// Públicas: login/cadastro, a vitrine (home, busca e detalhes do produto) e os arquivos que ela usa
-				.requestMatchers("/login", "/criar-conta", "/acesso-negado", "/error").permitAll()
+				.requestMatchers("/login", "/criar-conta", "/esqueci-senha", "/redefinir-senha", "/acesso-negado", "/error").permitAll()
 				.requestMatchers("/", "/home", "/london", "/outlet", "/pesquisa", "/detalhes/**", "/favoritos").permitAll()
 				// Coleções (Vice City, Tricolor, Urban Culture): públicas; o login só é pedido ao adicionar ao carrinho/comprar
 				.requestMatchers("/colecao/**").permitAll()
