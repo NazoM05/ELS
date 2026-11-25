@@ -49,7 +49,7 @@ public class RedefinicaoSenhaService {
     public void solicitar(String email) {
         String normalizado = email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
         if (!EMAIL.matcher(normalizado).matches()) return;
-        Usuario usuario = usuarios.findByUsername(normalizado).orElse(null);
+        Usuario usuario = usuarios.findByUsernameIgnoreCase(normalizado).orElse(null);
         // Resposta sempre genérica para não revelar se a conta existe.
         if (usuario == null || !usuario.getAtivo()) return;
 
@@ -81,7 +81,7 @@ public class RedefinicaoSenhaService {
     @Transactional
     public boolean redefinir(String email, String codigo, String novaSenha, String confirmacao) {
         String normalizado = email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
-        Usuario usuario = usuarios.findByUsername(normalizado).orElse(null);
+        Usuario usuario = usuarios.findByUsernameIgnoreCase(normalizado).orElse(null);
         if (usuario == null) return false;
         CodigoRedefinicaoSenha registro = codigos.findByUsuario(usuario).orElse(null);
         if (registro == null || registro.isUtilizado() || registro.estaExpirado(LocalDateTime.now())

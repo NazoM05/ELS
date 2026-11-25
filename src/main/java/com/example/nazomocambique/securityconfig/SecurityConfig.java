@@ -76,7 +76,9 @@ public class SecurityConfig {
 		// O resto do site continua sem CSRF, como antes (fora do escopo desta correção).
 		.csrf(csrf -> csrf.requireCsrfProtectionMatcher(RequestMatchers.anyOf(
 				PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/admin/separacao/**"),
-				PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/admin/usuarios/**"))))
+				PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/admin/usuarios/**"),
+				PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/esqueci-senha"),
+				PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/redefinir-senha"))))
 		// Conta desativada pelo admin perde a sessão aberta (antes da checagem de permissões)
 		.addFilterBefore(new ContaAtivaFilter(usuarioRepository), AuthorizationFilter.class)
 		.authorizeHttpRequests(auth -> auth 
