@@ -98,7 +98,6 @@ public class SecurityConfig {
 				.requestMatchers("/admin/**").hasRole("ADMIN")
 				// Carteira, meus pedidos, checkout e pedidos do cliente: o SEPARADOR (que só trabalha na separação) não entra
 				.requestMatchers("/carteira", "/carteira/**", "/meus-pedidos", "/meus-pedidos/**", "/checkout", "/checkout/**", "/pedido/**").hasAnyRole("ADMIN", "USUARIO")
-				.requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
 				.anyRequest().authenticated()
 				
 		  )
@@ -134,11 +133,5 @@ public class SecurityConfig {
 		DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
 		provider.setPasswordEncoder(passwordEncoder);
 		return new ProviderManager(provider);
-	}
-	
-	
-	void geraSenha() {
-		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-		IO.println(encoder.encode("senha"));
 	}
 } 

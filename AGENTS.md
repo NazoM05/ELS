@@ -435,3 +435,7 @@ Status: `🟡 IMPLEMENTADO — VALIDAÇÃO PENDENTE`
 - CPF ficticio/invalido nao deve ser enviado ao gateway. Para testar transacoes no Sandbox, use dados de teste aceitos pelo Sandbox; checkout continua validando CPF para o Pix.
 - Perfil `prod` nao limpa CPFs automaticamente (`spring.sql.init.mode=never`). Para limpeza, script manual `sql/limpar-cpfs-postgresql.sql`, com backup, revisao e COMMIT explicitamente habilitado. Preserva usuarios/pedidos e deixa CPF nulo.
 - Nunca automatizar limpeza de dados pessoais em deploy/startup.
+
+## Estoque do seed e limpeza (2026-11-25)
+- `data.sql` deixou de sobrescrever `produto_estoque`: agora só insere tamanhos ausentes (antes, cada reinício em `dev`/`render` zerava baixas de vendas e ajustes). Status: `🟡 IMPLEMENTADO — VALIDAÇÃO PENDENTE` (build/testes não executados, sem JDK 25/Maven).
+- Removidos: rota `/cadastroprod` (view inexistente), regra `/api/user/**`, `geraSenha()`, `templates/trash.html` e o teste duplicado do pacote `com.example.nm`.
